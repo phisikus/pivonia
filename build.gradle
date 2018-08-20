@@ -20,8 +20,8 @@ dependencies {
     // This dependency is found on compile classpath of this component and consumers.
     compile 'com.google.guava:guava:23.0'
 
-    // https://mvnrepository.com/artifact/org.mongodb/bson
-    compile group: 'org.mongodb', name: 'bson', version: '3.8.0'
+    // POJO -> BSON converter
+    compile group: 'de.undercouch', name: 'bson4jackson', version: '2.9.2'
 
     // Use the latest Groovy version for Spock testing
     testCompile 'org.codehaus.groovy:groovy-all:2.5.1'
