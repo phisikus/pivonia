@@ -8,8 +8,7 @@ import java.io.IOException;
 public class App {
 
     public static void main(String[] args) throws IOException, InterruptedException {
-        TCPServer tcpServer = new TCPServer(8080);
+        //TCPServer tcpServer = new TCPServer(8080, messageHandler);
         Thread.sleep(100_000L);
-
     }
 }

@@ -11,24 +11,22 @@ import java.nio.channels.AsynchronousChannelGroup;
 import java.nio.channels.AsynchronousServerSocketChannel;
 import java.nio.channels.AsynchronousSocketChannel;
 import java.nio.channels.CompletionHandler;
-import java.util.Queue;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Executors;
+import java.util.function.Consumer;
 
 public class TCPServer implements AutoCloseable {
     private static final String ALL_INTERFACES_ADDRESS = "0.0.0.0";
     private AsynchronousServerSocketChannel serverSocket;
     private AsynchronousChannelGroup serverThreads;
-    private Queue<Message> messageQueue = new ConcurrentLinkedQueue<>();
 
-    public TCPServer(int port) throws IOException {
-        this(ALL_INTERFACES_ADDRESS, port);
+    public TCPServer(int port, Consumer<Message> messageHandler) throws IOException {
+        this(ALL_INTERFACES_ADDRESS, port, messageHandler);
     }
 
 
-    public TCPServer(String address, int port) throws IOException {
+    public TCPServer(String address, int port, Consumer<Message> messageHandler) throws IOException {
         serverSocket = createAndBindServerSocket(address, port);
-        serverSocket.accept(messageQueue, new AcceptHandler(serverSocket));
+        serverSocket.accept(messageHandler, new AcceptHandler(serverSocket));
     }
 
     private AsynchronousServerSocketChannel createAndBindServerSocket(String address, int port) throws IOException {
@@ -48,7 +46,7 @@ public class TCPServer implements AutoCloseable {
         serverThreads.shutdownNow();
     }
 
-    class AcceptHandler implements CompletionHandler<AsynchronousSocketChannel, Queue<Message>> {
+    class AcceptHandler implements CompletionHandler<AsynchronousSocketChannel, Consumer<Message>> {
         static final int COMMUNICATION_BUFFER_SIZE = 1024000;
         private AsynchronousServerSocketChannel serverSocket;
 
@@ -57,19 +55,19 @@ public class TCPServer implements AutoCloseable {
         }
 
         @Override
-        public void completed(AsynchronousSocketChannel clientChannel, Queue<Message> messageQueue) {
+        public void completed(AsynchronousSocketChannel clientChannel, Consumer<Message> messageHandler) {
             serverSocket.accept(null, this);
             var communicationBuffer = ByteBuffer.allocate(COMMUNICATION_BUFFER_SIZE);
-            clientChannel.read(communicationBuffer, messageQueue, new ReadHandler(clientChannel, communicationBuffer));
+            clientChannel.read(communicationBuffer, messageHandler, new ReadHandler(clientChannel, communicationBuffer));
         }
 
         @Override
-        public void failed(Throwable exc, Queue<Message> attachment) {
+        public void failed(Throwable exc, Consumer<Message> messageHandler) {
             System.out.println(exc);
         }
     }
 
-    class ReadHandler implements CompletionHandler<Integer, Queue<Message>> {
+    class ReadHandler implements CompletionHandler<Integer, Consumer<Message>> {
 
         private final AsynchronousSocketChannel clientChannel;
         private final ByteBuffer communicationBuffer;
@@ -81,21 +79,17 @@ public class TCPServer implements AutoCloseable {
         }
 
         @Override
-        public void completed(Integer bytesReceived, Queue<Message> messageQueue) {
-            if (bytesReceived == -1) {
-                System.out.println("Client disconnected. Current queue:");
-                messageQueue.forEach(System.out::println);
-            }
+        public void completed(Integer bytesReceived, Consumer<Message> messageHandler) {
             if (bytesReceived > 0) {
                 communicationBuffer.rewind();
                 Try.of(() -> mapper.readValue(communicationBuffer.array(), Message.class))
-                        .map(messageQueue::add);
-                clientChannel.read(communicationBuffer, messageQueue, this);
+                        .forEach(messageHandler::accept);
+                clientChannel.read(communicationBuffer, messageHandler, this);
             }
         }
 
         @Override
-        public void failed(Throwable exc, Queue<Message> messageQueue) {
+        public void failed(Throwable exc, Consumer<Message> messageQueue) {
             System.out.println(exc);
         }
     }
