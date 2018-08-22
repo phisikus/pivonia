@@ -1,6 +1,6 @@
-import eu.phisikus.pivonia.Client
-import eu.phisikus.pivonia.Message
-import eu.phisikus.pivonia.MessageHandler
+import eu.phisikus.pivonia.api.Client
+import eu.phisikus.pivonia.api.Message
+import eu.phisikus.pivonia.api.MessageHandler
 import eu.phisikus.pivonia.tcp.TCPClient
 import eu.phisikus.pivonia.tcp.TCPServer
 import spock.lang.Specification

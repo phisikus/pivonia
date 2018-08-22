@@ -1,4 +1,4 @@
-package eu.phisikus.pivonia;
+package eu.phisikus.pivonia.api;
 
 import lombok.*;
 

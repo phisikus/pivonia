@@ -1,6 +1,6 @@
 import com.fasterxml.jackson.databind.ObjectMapper
 import de.undercouch.bson4jackson.BsonFactory
-import eu.phisikus.pivonia.Message
+import eu.phisikus.pivonia.api.Message
 import spock.lang.Specification
 
 class BsonSerializationTest extends Specification {

@@ -2,8 +2,8 @@ package eu.phisikus.pivonia.tcp;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.undercouch.bson4jackson.BsonFactory;
-import eu.phisikus.pivonia.Client;
-import eu.phisikus.pivonia.Message;
+import eu.phisikus.pivonia.api.Client;
+import eu.phisikus.pivonia.api.Message;
 import io.vavr.control.Try;
 
 import java.io.ByteArrayOutputStream;
