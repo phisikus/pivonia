@@ -2,6 +2,7 @@ package eu.phisikus.pivonia;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.undercouch.bson4jackson.BsonFactory;
+import io.vavr.control.Try;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -9,7 +10,7 @@ import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 
-public class TCPClient implements AutoCloseable {
+public class TCPClient implements AutoCloseable, Client {
 
     private final ObjectMapper mapper = new ObjectMapper(new BsonFactory());
     private SocketChannel clientChannel;
@@ -21,12 +22,18 @@ public class TCPClient implements AutoCloseable {
         waitForReadyConnection();
     }
 
-    public void send(Message message) throws IOException {
+    public Try<Integer> send(Message message) {
+        return Try.of(() -> sendMessage(message));
+    }
+
+    private Integer sendMessage(Message message) throws IOException {
         waitForReadyConnection();
         ByteBuffer serializedMessageBuffered = getSerializedMessageAsBuffer(message);
+        int bytesSent = 0;
         while (serializedMessageBuffered.hasRemaining()) {
-            clientChannel.write(serializedMessageBuffered);
+            bytesSent += clientChannel.write(serializedMessageBuffered);
         }
+        return bytesSent;
     }
 
     private void waitForReadyConnection() throws IOException {
