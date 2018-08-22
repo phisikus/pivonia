@@ -1,5 +1,6 @@
 import com.fasterxml.jackson.databind.ObjectMapper
 import de.undercouch.bson4jackson.BsonFactory
+import eu.phisikus.pivonia.Message
 import spock.lang.Specification
 
 class BsonSerializationTest extends Specification {
@@ -7,7 +8,7 @@ class BsonSerializationTest extends Specification {
 
     def "object can be serialized to BSON"() {
         given:
-        def expectedObject = new TestSerializable("Text", 42)
+        def expectedObject = new Message(42L, "Topic", "Some Message")
 
         and:
         def output = new ByteArrayOutputStream()
@@ -18,7 +19,7 @@ class BsonSerializationTest extends Specification {
         mapper.writeValue(output, expectedObject)
         def actualOutput = output.toByteArray()
         def actualOutputAsInput = new ByteArrayInputStream(actualOutput)
-        def actualObject = mapper.readValue(actualOutputAsInput, TestSerializable.class)
+        def actualObject = mapper.readValue(actualOutputAsInput, Message.class)
 
         then:
         actualObject == expectedObject

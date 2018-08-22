@@ -1,8 +1,11 @@
 package eu.phisikus.pivonia;
 
-import lombok.Value;
+import lombok.*;
 
-@Value
+@NoArgsConstructor
+@AllArgsConstructor
+@Getter
+@EqualsAndHashCode
 public class Message {
     private Long timestamp;
     private String topic;

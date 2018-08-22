@@ -47,7 +47,7 @@ dependencies {
     /**
      * Testing
      */
-    testCompile 'org.codehaus.groovy:groovy-all:2.5.1'
+    testCompile 'org.codehaus.groovy:groovy-all:2.5.2'
     testCompile 'org.spockframework:spock-core:1.1-groovy-2.4'
 }
 
