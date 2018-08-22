@@ -8,6 +8,11 @@ plugins {
     id 'groovy' // for Spock
 }
 
+repositories {
+    jcenter()
+    mavenCentral()
+}
+
 mainClassName = 'App'
 sourceCompatibility = JavaVersion.VERSION_1_10
 targetCompatibility = JavaVersion.VERSION_1_10
@@ -23,8 +28,8 @@ dependencies {
     /**
      * Dependency Injection
      */
-    compile 'com.google.dagger:dagger:2.x'
-    apt 'com.google.dagger:dagger-compiler:2.x'
+    compile 'com.google.dagger:dagger:2.17'
+    apt 'com.google.dagger:dagger-compiler:2.17'
 
     /**
      * Serialization
@@ -46,7 +51,4 @@ dependencies {
     testCompile 'org.spockframework:spock-core:1.1-groovy-2.4'
 }
 
-repositories {
-    jcenter()
-    mavenCentral()
-}
+
