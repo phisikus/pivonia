@@ -4,6 +4,7 @@
 plugins {
     id 'java'
     id 'application'
+    id "net.ltgt.apt" version "0.10" // for Dagger
     id 'groovy' // for Spock
 }
 
@@ -12,6 +13,12 @@ sourceCompatibility = JavaVersion.VERSION_1_10
 targetCompatibility = JavaVersion.VERSION_1_10
 
 dependencies {
+
+    /**
+     * Dependency Injection
+     */
+    compile 'com.google.dagger:dagger:2.x'
+    apt 'com.google.dagger:dagger-compiler:2.x'
 
     /**
      * Serialization
