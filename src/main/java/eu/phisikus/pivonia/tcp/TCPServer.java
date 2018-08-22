@@ -1,7 +1,10 @@
-package eu.phisikus.pivonia;
+package eu.phisikus.pivonia.tcp;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.undercouch.bson4jackson.BsonFactory;
+import eu.phisikus.pivonia.Client;
+import eu.phisikus.pivonia.Message;
+import eu.phisikus.pivonia.MessageHandler;
 import io.vavr.control.Try;
 
 import java.io.IOException;
@@ -12,19 +15,18 @@ import java.nio.channels.AsynchronousServerSocketChannel;
 import java.nio.channels.AsynchronousSocketChannel;
 import java.nio.channels.CompletionHandler;
 import java.util.concurrent.Executors;
-import java.util.function.Consumer;
 
 public class TCPServer implements AutoCloseable {
     private static final String ALL_INTERFACES_ADDRESS = "0.0.0.0";
     private AsynchronousServerSocketChannel serverSocket;
     private AsynchronousChannelGroup serverThreads;
 
-    public TCPServer(int port, Consumer<Message> messageHandler) throws IOException {
+    public TCPServer(int port, MessageHandler messageHandler) throws IOException {
         this(ALL_INTERFACES_ADDRESS, port, messageHandler);
     }
 
 
-    public TCPServer(String address, int port, Consumer<Message> messageHandler) throws IOException {
+    public TCPServer(String address, int port, MessageHandler messageHandler) throws IOException {
         serverSocket = createAndBindServerSocket(address, port);
         serverSocket.accept(messageHandler, new AcceptHandler(serverSocket));
     }
@@ -46,7 +48,7 @@ public class TCPServer implements AutoCloseable {
         serverThreads.shutdownNow();
     }
 
-    class AcceptHandler implements CompletionHandler<AsynchronousSocketChannel, Consumer<Message>> {
+    class AcceptHandler implements CompletionHandler<AsynchronousSocketChannel, MessageHandler> {
         static final int COMMUNICATION_BUFFER_SIZE = 1024000;
         private AsynchronousServerSocketChannel serverSocket;
 
@@ -55,19 +57,19 @@ public class TCPServer implements AutoCloseable {
         }
 
         @Override
-        public void completed(AsynchronousSocketChannel clientChannel, Consumer<Message> messageHandler) {
+        public void completed(AsynchronousSocketChannel clientChannel, MessageHandler messageHandler) {
             serverSocket.accept(null, this);
             var communicationBuffer = ByteBuffer.allocate(COMMUNICATION_BUFFER_SIZE);
             clientChannel.read(communicationBuffer, messageHandler, new ReadHandler(clientChannel, communicationBuffer));
         }
 
         @Override
-        public void failed(Throwable exc, Consumer<Message> messageHandler) {
+        public void failed(Throwable exc, MessageHandler messageHandler) {
             System.out.println(exc);
         }
     }
 
-    class ReadHandler implements CompletionHandler<Integer, Consumer<Message>> {
+    class ReadHandler implements CompletionHandler<Integer, MessageHandler> {
 
         private final AsynchronousSocketChannel clientChannel;
         private final ByteBuffer communicationBuffer;
@@ -79,18 +81,38 @@ public class TCPServer implements AutoCloseable {
         }
 
         @Override
-        public void completed(Integer bytesReceived, Consumer<Message> messageHandler) {
+        public void completed(Integer bytesReceived, MessageHandler messageHandler) {
             if (bytesReceived > 0) {
                 communicationBuffer.rewind();
                 Try.of(() -> mapper.readValue(communicationBuffer.array(), Message.class))
-                        .forEach(messageHandler::accept);
+                        .forEach(message -> handleMessage(message, messageHandler));
+
                 clientChannel.read(communicationBuffer, messageHandler, this);
             }
         }
 
+        private void handleMessage(Message incomingMessage, MessageHandler messageHandler) {
+            messageHandler.handleMessage(incomingMessage, new ClientConnectedThroughServer(clientChannel));
+        }
+
         @Override
-        public void failed(Throwable exc, Consumer<Message> messageQueue) {
+        public void failed(Throwable exc, MessageHandler messageQueue) {
             System.out.println(exc);
+        }
+    }
+
+
+    class ClientConnectedThroughServer implements Client {
+
+        private AsynchronousSocketChannel clientChannel;
+
+        public ClientConnectedThroughServer(AsynchronousSocketChannel clientChannel) {
+            this.clientChannel = clientChannel;
+        }
+
+        @Override
+        public Try<Integer> send(Message message) {
+           return Try.failure(null); // TODO implement
         }
     }
 }
