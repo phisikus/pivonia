@@ -16,7 +16,7 @@ class ClientServerConnectionTest extends Specification {
     @Shared
     def bsonConverter = new JacksonBSONConverter()
 
-    @Timeout(value = 3, unit = TimeUnit.SECONDS)
+    @Timeout(value = 10, unit = TimeUnit.SECONDS)
     def "Client should be able to send message to server"() {
         given:
         def testMessage = new Message(new Date().getTime(), "test", "Test Message")

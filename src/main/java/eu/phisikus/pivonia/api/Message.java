@@ -6,6 +6,7 @@ import lombok.*;
 @AllArgsConstructor
 @Getter
 @EqualsAndHashCode
+@ToString
 public class Message {
     private Long timestamp;
     private String topic;
