@@ -2,6 +2,7 @@ package eu.phisikus.pivonia.tcp.handlers;
 
 import eu.phisikus.pivonia.api.Client;
 import eu.phisikus.pivonia.api.Message;
+import eu.phisikus.pivonia.api.MessageHandler;
 import io.vavr.control.Try;
 
 import java.nio.channels.AsynchronousSocketChannel;
@@ -16,11 +17,11 @@ class ClientConnectedThroughServer implements Client {
 
     @Override
     public Try<Client> send(Message message) {
-        return Try.failure(null); // TODO implement
+        return Try.failure(null); // TODO implement message sending.
     }
 
     @Override
-    public Try<Client> connect(String address, int port) {
+    public Try<Client> connect(String address, int port, MessageHandler messageHandler) {
         return Try.success(this); // we are already connected
     }
 

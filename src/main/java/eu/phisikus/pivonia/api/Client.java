@@ -15,9 +15,10 @@ public interface Client extends AutoCloseable {
     /**
      * Connect to the client
      *
-     * @param address address of the client
-     * @param port    port of the client
+     * @param address        address of the client
+     * @param port           port of the client
+     * @param messageHandler handler that will be notified when server responds with a message
      * @return client connected to given address or exception that occurred
      */
-    Try<Client> connect(String address, int port);
+    Try<Client> connect(String address, int port, MessageHandler messageHandler);
 }

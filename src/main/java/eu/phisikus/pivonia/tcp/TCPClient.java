@@ -2,6 +2,7 @@ package eu.phisikus.pivonia.tcp;
 
 import eu.phisikus.pivonia.api.Client;
 import eu.phisikus.pivonia.api.Message;
+import eu.phisikus.pivonia.api.MessageHandler;
 import eu.phisikus.pivonia.converter.BSONConverter;
 import io.vavr.control.Try;
 
@@ -10,11 +11,14 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class TCPClient implements Client {
 
     private SocketChannel clientChannel;
     private BSONConverter bsonConverter;
+    private ExecutorService messageListener = Executors.newSingleThreadExecutor();
 
     @Inject
     public TCPClient(BSONConverter bsonConverter) {
@@ -23,14 +27,21 @@ public class TCPClient implements Client {
 
 
     @Override
-    public Try<Client> connect(String address, int port) {
+    public Try<Client> connect(String address, int port, MessageHandler messageHandler) {
         try {
             TCPClient newClient = getNewOpenClient(address, port);
             newClient.waitForReadyConnection();
+            newClient.bindMessageHandler(messageHandler);
             return Try.success(newClient);
         } catch (IOException e) {
             return Try.failure(e);
         }
+    }
+
+    private void bindMessageHandler(MessageHandler messageHandler) {
+        messageListener.submit(() -> {
+           // TODO implement message reading
+        });
     }
 
     private TCPClient getNewOpenClient(String address, int port) throws IOException {
