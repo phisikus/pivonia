@@ -4,6 +4,7 @@ import eu.phisikus.pivonia.api.MessageHandler;
 import eu.phisikus.pivonia.converter.BSONConverter;
 import lombok.extern.log4j.Log4j2;
 
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.channels.AsynchronousSocketChannel;
@@ -39,9 +40,22 @@ class MessageSizeReadHandler implements CompletionHandler<Integer, MessageHandle
                 .rewind()
                 .order(ByteOrder.LITTLE_ENDIAN)
                 .getInt();
-        var messageBuffer = ByteBuffer.allocate(messageSize);
-        var contentReadHandler = new MessageContentReadHandler(bsonConverter, clientChannel, messageBuffer, messageSize);
-        clientChannel.read(messageBuffer, messageHandler, contentReadHandler);
+        if (messageSize > 0) {
+            var messageBuffer = ByteBuffer.allocate(messageSize);
+            var contentReadHandler = new MessageContentReadHandler(bsonConverter, clientChannel, messageBuffer, messageSize);
+            clientChannel.read(messageBuffer, messageHandler, contentReadHandler);
+        } else {
+            closeCommunication();
+        }
+
+    }
+
+    private void closeCommunication() {
+        try {
+            clientChannel.close();
+        } catch (IOException exception) {
+            log.error(exception);
+        }
     }
 
     private void retryRead(MessageHandler messageHandler) {

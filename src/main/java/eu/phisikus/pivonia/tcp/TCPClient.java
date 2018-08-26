@@ -4,6 +4,7 @@ import eu.phisikus.pivonia.api.Client;
 import eu.phisikus.pivonia.api.Message;
 import eu.phisikus.pivonia.api.MessageHandler;
 import eu.phisikus.pivonia.converter.BSONConverter;
+import eu.phisikus.pivonia.tcp.handlers.AcceptHandler;
 import io.vavr.control.Try;
 
 import javax.inject.Inject;
@@ -92,6 +93,15 @@ public class TCPClient implements Client {
 
     @Override
     public void close() throws Exception {
+        sendClose();
         clientChannel.close();
+    }
+
+    private void sendClose() throws IOException {
+        var zeroMessageSize = ByteBuffer
+                .allocate(AcceptHandler.INT_SIZE)
+                .putInt(0)
+                .rewind();
+        clientChannel.write(zeroMessageSize);
     }
 }
