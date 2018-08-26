@@ -1,9 +1,8 @@
 package eu.phisikus.pivonia.tcp.handlers;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import de.undercouch.bson4jackson.BsonFactory;
 import eu.phisikus.pivonia.api.Message;
 import eu.phisikus.pivonia.api.MessageHandler;
+import eu.phisikus.pivonia.converter.BSONConverter;
 import io.vavr.control.Try;
 
 import java.nio.ByteBuffer;
@@ -14,9 +13,10 @@ class ReadHandler implements CompletionHandler<Integer, MessageHandler> {
 
     private final AsynchronousSocketChannel clientChannel;
     private final ByteBuffer communicationBuffer;
-    private final ObjectMapper mapper = new ObjectMapper(new BsonFactory());
+    private final BSONConverter bsonConverter;
 
-    public ReadHandler(AsynchronousSocketChannel clientChannel, ByteBuffer communicationBuffer) {
+    ReadHandler(BSONConverter bsonConverter, AsynchronousSocketChannel clientChannel, ByteBuffer communicationBuffer) {
+        this.bsonConverter = bsonConverter;
         this.clientChannel = clientChannel;
         this.communicationBuffer = communicationBuffer;
     }
@@ -25,7 +25,7 @@ class ReadHandler implements CompletionHandler<Integer, MessageHandler> {
     public void completed(Integer bytesReceived, MessageHandler messageHandler) {
         if (bytesReceived > 0) {
             communicationBuffer.rewind();
-            Try.of(() -> mapper.readValue(communicationBuffer.array(), Message.class))
+            Try.of(() -> bsonConverter.deserialize(communicationBuffer.array(), Message.class))
                     .forEach(message -> handleMessage(message, messageHandler));
 
             clientChannel.read(communicationBuffer, messageHandler, this);

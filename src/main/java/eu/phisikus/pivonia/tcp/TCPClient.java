@@ -1,32 +1,55 @@
 package eu.phisikus.pivonia.tcp;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import de.undercouch.bson4jackson.BsonFactory;
 import eu.phisikus.pivonia.api.Client;
 import eu.phisikus.pivonia.api.Message;
+import eu.phisikus.pivonia.converter.BSONConverter;
 import io.vavr.control.Try;
 
-import java.io.ByteArrayOutputStream;
+import javax.inject.Inject;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 
-public class TCPClient implements AutoCloseable, Client {
+public class TCPClient implements Client {
 
-    private final ObjectMapper mapper = new ObjectMapper(new BsonFactory());
     private SocketChannel clientChannel;
+    private BSONConverter bsonConverter;
 
-
-    public TCPClient(String address, int port) throws IOException {
-        InetSocketAddress clientAddress = new InetSocketAddress(address, port);
-        clientChannel = SocketChannel.open(clientAddress);
-        waitForReadyConnection();
+    @Inject
+    public TCPClient(BSONConverter bsonConverter) {
+        this.bsonConverter = bsonConverter;
     }
 
-    public Try<Integer> send(Message message) {
-        return Try.of(() -> sendMessage(message));
+
+    @Override
+    public Try<Client> connect(String address, int port) {
+        try {
+            TCPClient newClient = getNewOpenClient(address, port);
+            newClient.waitForReadyConnection();
+            return Try.success(newClient);
+        } catch (IOException e) {
+            return Try.failure(e);
+        }
     }
+
+    private TCPClient getNewOpenClient(String address, int port) throws IOException {
+        var newClient = new TCPClient(bsonConverter);
+        var clientAddress = new InetSocketAddress(address, port);
+        newClient.clientChannel = SocketChannel.open(clientAddress);
+        return newClient;
+    }
+
+
+    public Try<Client> send(Message message) {
+        try {
+            sendMessage(message);
+        } catch (IOException e) {
+            return Try.failure(e);
+        }
+        return Try.success(this);
+    }
+
 
     private Integer sendMessage(Message message) throws IOException {
         waitForReadyConnection();
@@ -39,6 +62,10 @@ public class TCPClient implements AutoCloseable, Client {
     }
 
     private void waitForReadyConnection() throws IOException {
+        if (clientChannel == null) {
+            throw new RuntimeException("You forgot to connect the client first!");
+        }
+
         boolean waitForConnection = clientChannel.isConnectionPending() && clientChannel.finishConnect();
         if (!waitForConnection) {
             boolean channelIsConnected = clientChannel.isOpen() && clientChannel.isConnected();
@@ -49,9 +76,7 @@ public class TCPClient implements AutoCloseable, Client {
     }
 
     private ByteBuffer getSerializedMessageAsBuffer(Message message) throws IOException {
-        ByteArrayOutputStream serializedMessageStream = new ByteArrayOutputStream();
-        mapper.writeValue(serializedMessageStream, message);
-        return ByteBuffer.wrap(serializedMessageStream.toByteArray());
+        return ByteBuffer.wrap(bsonConverter.serialize(message));
     }
 
     @Override

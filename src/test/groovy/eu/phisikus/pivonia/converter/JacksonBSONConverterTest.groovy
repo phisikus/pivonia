@@ -4,10 +4,10 @@ import eu.phisikus.pivonia.api.Message
 import spock.lang.Shared
 import spock.lang.Specification
 
-class BSONConverterTest extends Specification {
+class JacksonBSONConverterTest extends Specification {
 
     @Shared
-    def converter = new BSONConverter()
+    def converter = new JacksonBSONConverter()
 
     def "Object can be serialized to bytes and back"() {
 
