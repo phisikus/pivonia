@@ -82,7 +82,7 @@ public class TCPClient implements Client {
         while (bytesRead < 4) {
             bytesRead += clientChannel.read(messageSizeBuffer);
         }
-        return BufferUtils.readMessageSizeFromBufer(messageSizeBuffer);
+        return BufferUtils.readMessageSizeFromBuffer(messageSizeBuffer);
     }
 
     private TCPClient getNewOpenClient(String address, int port) throws IOException {

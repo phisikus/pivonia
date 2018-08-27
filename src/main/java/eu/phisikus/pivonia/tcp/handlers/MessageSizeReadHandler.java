@@ -36,7 +36,7 @@ class MessageSizeReadHandler implements CompletionHandler<Integer, MessageHandle
     }
 
     private void readMessageContent(MessageHandler messageHandler) {
-        int messageSize = BufferUtils.readMessageSizeFromBufer(communicationBuffer);
+        int messageSize = BufferUtils.readMessageSizeFromBuffer(communicationBuffer);
         if (messageSize > 0) {
             var messageBuffer = ByteBuffer.allocate(messageSize);
             var contentReadHandler = new MessageContentReadHandler(bsonConverter, clientChannel, messageBuffer, messageSize);

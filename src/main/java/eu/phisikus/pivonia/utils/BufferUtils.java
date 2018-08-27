@@ -3,6 +3,9 @@ package eu.phisikus.pivonia.utils;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
+/**
+ * Commonly used ByteBuffer operations have been extracted here
+ */
 public class BufferUtils {
     public static final int INT_SIZE = 4;
 
@@ -10,7 +13,7 @@ public class BufferUtils {
         return ByteBuffer.allocate(INT_SIZE);
     }
 
-    public static int readMessageSizeFromBufer(ByteBuffer buffer) {
+    public static int readMessageSizeFromBuffer(ByteBuffer buffer) {
         return buffer
                 .rewind()
                 .order(ByteOrder.LITTLE_ENDIAN)
@@ -27,8 +30,7 @@ public class BufferUtils {
 
     public static ByteBuffer getBufferWithCombinedSizeAndContent(int messageSize, ByteBuffer contentBuffer) {
         var messageSizeBuffer = getBufferWithMessageSize(messageSize);
-
-        return ByteBuffer.allocate(messageSize + INT_SIZE)
+        return ByteBuffer.allocate(contentBuffer.limit() + messageSizeBuffer.limit())
                 .put(messageSizeBuffer)
                 .put(contentBuffer)
                 .rewind();
