@@ -1,10 +1,8 @@
 package eu.phisikus.pivonia;
 
-import eu.phisikus.pivonia.api.Server;
-import eu.phisikus.pivonia.ioc.PivoniaComponent;
-//import eu.phisikus.pivonia.ioc.DaggerPivoniaComponent;
-
 import java.io.IOException;
+
+//import eu.phisikus.pivonia.ioc.DaggerPivoniaComponent;
 
 public class EntryPoint {
 

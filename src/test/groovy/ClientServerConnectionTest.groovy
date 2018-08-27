@@ -25,7 +25,7 @@ class ClientServerConnectionTest extends Specification {
 
         when:
         startServer(messageReceivedLatch)
-        def messageSent = client.connect("localhost",8090, null).get().send(testMessage)
+        def messageSent = client.connect("localhost", 8090, null).get().send(testMessage)
 
         then:
         messageSent.isSuccess()
