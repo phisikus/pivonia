@@ -2,9 +2,9 @@ package eu.phisikus.pivonia.tcp.handlers;
 
 import eu.phisikus.pivonia.api.MessageHandler;
 import eu.phisikus.pivonia.converter.BSONConverter;
+import eu.phisikus.pivonia.utils.BufferUtils;
 import lombok.extern.log4j.Log4j2;
 
-import java.nio.ByteBuffer;
 import java.nio.channels.AsynchronousServerSocketChannel;
 import java.nio.channels.AsynchronousSocketChannel;
 import java.nio.channels.CompletionHandler;
@@ -12,7 +12,7 @@ import java.nio.channels.CompletionHandler;
 
 @Log4j2
 public class AcceptHandler implements CompletionHandler<AsynchronousSocketChannel, MessageHandler> {
-    public static final int INT_SIZE = 4;
+
     private AsynchronousServerSocketChannel serverSocket;
     private BSONConverter bsonConverter;
 
@@ -24,7 +24,7 @@ public class AcceptHandler implements CompletionHandler<AsynchronousSocketChanne
     @Override
     public void completed(AsynchronousSocketChannel clientChannel, MessageHandler messageHandler) {
         serverSocket.accept(null, this);
-        var messageSizeBuffer = ByteBuffer.allocate(INT_SIZE);
+        var messageSizeBuffer = BufferUtils.getBufferForMessageSize();
         var readCallback = new MessageSizeReadHandler(bsonConverter, clientChannel, messageSizeBuffer);
         clientChannel.read(messageSizeBuffer, messageHandler, readCallback);
     }

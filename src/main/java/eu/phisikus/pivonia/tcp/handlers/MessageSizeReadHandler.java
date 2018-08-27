@@ -2,11 +2,11 @@ package eu.phisikus.pivonia.tcp.handlers;
 
 import eu.phisikus.pivonia.api.MessageHandler;
 import eu.phisikus.pivonia.converter.BSONConverter;
+import eu.phisikus.pivonia.utils.BufferUtils;
 import lombok.extern.log4j.Log4j2;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 import java.nio.channels.AsynchronousSocketChannel;
 import java.nio.channels.CompletionHandler;
 
@@ -25,7 +25,7 @@ class MessageSizeReadHandler implements CompletionHandler<Integer, MessageHandle
 
     @Override
     public void completed(Integer bytesReceived, MessageHandler messageHandler) {
-        boolean messageSizeReceived = bytesReceived.equals(AcceptHandler.INT_SIZE);
+        boolean messageSizeReceived = bytesReceived.equals(BufferUtils.INT_SIZE);
         if (messageSizeReceived) {
             readMessageContent(messageHandler);
         } else {
@@ -36,10 +36,7 @@ class MessageSizeReadHandler implements CompletionHandler<Integer, MessageHandle
     }
 
     private void readMessageContent(MessageHandler messageHandler) {
-        int messageSize = communicationBuffer
-                .rewind()
-                .order(ByteOrder.LITTLE_ENDIAN)
-                .getInt();
+        int messageSize = BufferUtils.readMessageSizeFromBufer(communicationBuffer);
         if (messageSize > 0) {
             var messageBuffer = ByteBuffer.allocate(messageSize);
             var contentReadHandler = new MessageContentReadHandler(bsonConverter, clientChannel, messageBuffer, messageSize);
