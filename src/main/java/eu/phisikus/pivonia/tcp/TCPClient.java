@@ -99,7 +99,7 @@ public class TCPClient implements Client {
     public <T> Try<Client> send(T message) {
         try {
             sendMessage(message);
-        } catch (IOException e) {
+        } catch (Exception e) {
             return Try.failure(e);
         }
         return Try.success(this);

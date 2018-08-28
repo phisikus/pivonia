@@ -25,12 +25,15 @@ class ClientServerConnectionTest extends Specification {
         def actualMessageHolder = new CompletableFuture<TestMessage>()
 
         when:
-        startServer(actualMessageHolder)
+        def server = startServer(actualMessageHolder)
         def messageSent = client.connect("localhost", 8090, null).get().send(testMessage)
 
         then:
         messageSent.isSuccess()
         actualMessageHolder.get() == testMessage
+
+        cleanup:
+        server.close()
 
     }
 
@@ -42,7 +45,7 @@ class ClientServerConnectionTest extends Specification {
         def actualMessageHolder = new CompletableFuture<TestMessage>()
 
         when:
-        startEchoServer()
+        def server = startEchoServer()
         def connectedClient = client
                 .connect("localhost", 8091, getFutureCompletingHandler(actualMessageHolder))
                 .get()
@@ -52,12 +55,15 @@ class ClientServerConnectionTest extends Specification {
         sendResult.isSuccess()
         actualMessageHolder.get() == testMessage
 
+        cleanup:
+        server.close()
+
     }
 
 
     private Server startServer(messageReceivedLatch) {
         MessageHandler messageHandler = getFutureCompletingHandler(messageReceivedLatch)
-        return new TCPServer(bsonConverter).bind(8090, messageHandler) as Server
+        return new TCPServer(bsonConverter).bind(8090, messageHandler).get()
     }
 
     private MessageHandler getFutureCompletingHandler(messageHolder) {
@@ -77,7 +83,7 @@ class ClientServerConnectionTest extends Specification {
 
     private Server startEchoServer() {
         MessageHandler<TestMessage> messageHandler = getEchoMessageHandler()
-        return new TCPServer(bsonConverter).bind(8091, messageHandler) as Server
+        return new TCPServer(bsonConverter).bind(8091, messageHandler).get()
     }
 
     static MessageHandler<TestMessage> getEchoMessageHandler() {
