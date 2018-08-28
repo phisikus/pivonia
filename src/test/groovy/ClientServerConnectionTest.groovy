@@ -1,6 +1,7 @@
 import eu.phisikus.pivonia.api.Client
 import eu.phisikus.pivonia.api.Message
 import eu.phisikus.pivonia.api.MessageHandler
+import eu.phisikus.pivonia.api.Server
 import eu.phisikus.pivonia.converter.JacksonBSONConverter
 import eu.phisikus.pivonia.tcp.TCPClient
 import eu.phisikus.pivonia.tcp.TCPServer
@@ -33,13 +34,49 @@ class ClientServerConnectionTest extends Specification {
 
     }
 
-    private void startServer(messageReceivedLatch) {
+    @Timeout(value = 10, unit = TimeUnit.SECONDS)
+    def "Client should be able to send message to server and receive it back"() {
+        given:
+        def testMessage = new Message(new Date().getTime(), "test", "Test Message")
+        def client = new TCPClient(bsonConverter)
+        def messageReceivedLatch = new CountDownLatch(1)
+
+        when:
+        startEchoServer()
+        def connectedClient = client
+                .connect("localhost", 8091, getLatchTriggeringHandler(messageReceivedLatch))
+                .get()
+
+        def sendResult = connectedClient.send(testMessage)
+
+        then:
+        sendResult.isSuccess()
+        messageReceivedLatch.await()
+
+    }
+
+    private MessageHandler getLatchTriggeringHandler(messageReceivedLatch) {
         def messageHandler = new MessageHandler() {
             @Override
             void handleMessage(Message incomingMessage, Client client) {
                 messageReceivedLatch.countDown()
             }
         }
-        def server = new TCPServer(bsonConverter).bind(8090, messageHandler)
+        messageHandler
+    }
+
+    private Server startServer(messageReceivedLatch) {
+        MessageHandler messageHandler = getLatchTriggeringHandler(messageReceivedLatch)
+        return new TCPServer(bsonConverter).bind(8090, messageHandler) as Server
+    }
+
+    private Server startEchoServer() {
+        def messageHandler = new MessageHandler() {
+            @Override
+            void handleMessage(Message incomingMessage, Client client) {
+                client.send(incomingMessage)
+            }
+        }
+        return new TCPServer(bsonConverter).bind(8091, messageHandler) as Server
     }
 }
