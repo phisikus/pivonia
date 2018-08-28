@@ -1,6 +1,5 @@
 package eu.phisikus.pivonia.tcp.handlers;
 
-import eu.phisikus.pivonia.api.Message;
 import eu.phisikus.pivonia.api.MessageHandler;
 import eu.phisikus.pivonia.converter.BSONConverter;
 import eu.phisikus.pivonia.utils.BufferUtils;
@@ -45,7 +44,7 @@ class MessageContentReadHandler implements CompletionHandler<Integer, MessageHan
 
     private void deserializeAndHandleMessage(MessageHandler messageHandler) {
         var messageBuffer = getFullMessageBuffer();
-        Try.of(() -> bsonConverter.deserialize(messageBuffer.array(), Message.class))
+        Try.of(() -> bsonConverter.deserialize(messageBuffer.array(), messageHandler.getMessageType()))
                 .onSuccess(message -> handleMessage(message, messageHandler))
                 .onFailure(log::error);
     }
@@ -55,7 +54,7 @@ class MessageContentReadHandler implements CompletionHandler<Integer, MessageHan
         return BufferUtils.getBufferWithCombinedSizeAndContent(expectedMessageSize, communicationBuffer);
     }
 
-    private void handleMessage(Message incomingMessage, MessageHandler messageHandler) {
+    private <T> void handleMessage(T incomingMessage, MessageHandler messageHandler) {
         messageHandler.handleMessage(incomingMessage, new ClientConnectedThroughServer(bsonConverter, clientChannel));
     }
 

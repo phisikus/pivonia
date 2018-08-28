@@ -1,7 +1,6 @@
 package eu.phisikus.pivonia.tcp.handlers;
 
 import eu.phisikus.pivonia.api.Client;
-import eu.phisikus.pivonia.api.Message;
 import eu.phisikus.pivonia.api.MessageHandler;
 import eu.phisikus.pivonia.converter.BSONConverter;
 import io.vavr.control.Try;
@@ -21,7 +20,7 @@ class ClientConnectedThroughServer implements Client {
     }
 
     @Override
-    public Try<Client> send(Message message) {
+    public <T> Try<Client> send(T message) {
         try {
             var serializedMessage = ByteBuffer.wrap(bsonConverter.serialize(message));
             writeMessage(serializedMessage);

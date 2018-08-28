@@ -1,7 +1,6 @@
 package eu.phisikus.pivonia.tcp;
 
 import eu.phisikus.pivonia.api.Client;
-import eu.phisikus.pivonia.api.Message;
 import eu.phisikus.pivonia.api.MessageHandler;
 import eu.phisikus.pivonia.converter.BSONConverter;
 import eu.phisikus.pivonia.utils.BufferUtils;
@@ -66,7 +65,7 @@ public class TCPClient implements Client {
     private void readAndHandleMessage(int messageSize, MessageHandler messageHandler) throws IOException {
         var contentBuffer = readMessageContent(messageSize);
         var messageBuffer = BufferUtils.getBufferWithCombinedSizeAndContent(messageSize, contentBuffer);
-        var incomingMessage = bsonConverter.deserialize(messageBuffer.array(), Message.class);
+        var incomingMessage = bsonConverter.deserialize(messageBuffer.array(), messageHandler.getMessageType());
         messageHandler.handleMessage(incomingMessage, this);
     }
 
@@ -93,7 +92,7 @@ public class TCPClient implements Client {
     }
 
 
-    public Try<Client> send(Message message) {
+    public <T> Try<Client> send(T message) {
         try {
             sendMessage(message);
         } catch (IOException e) {
@@ -103,7 +102,7 @@ public class TCPClient implements Client {
     }
 
 
-    private Integer sendMessage(Message message) throws IOException {
+    private <T> Integer sendMessage(T message) throws IOException {
         waitForReadyConnection();
         ByteBuffer serializedMessageBuffered = getSerializedMessageAsBuffer(message);
         int bytesSent = 0;
@@ -127,7 +126,7 @@ public class TCPClient implements Client {
         }
     }
 
-    private ByteBuffer getSerializedMessageAsBuffer(Message message) throws IOException {
+    private <T> ByteBuffer getSerializedMessageAsBuffer(T message) throws IOException {
         return ByteBuffer.wrap(bsonConverter.serialize(message));
     }
 

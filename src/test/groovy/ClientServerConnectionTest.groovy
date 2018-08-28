@@ -1,7 +1,7 @@
 import eu.phisikus.pivonia.api.Client
-import eu.phisikus.pivonia.api.Message
 import eu.phisikus.pivonia.api.MessageHandler
 import eu.phisikus.pivonia.api.Server
+import eu.phisikus.pivonia.api.TestMessage
 import eu.phisikus.pivonia.converter.JacksonBSONConverter
 import eu.phisikus.pivonia.tcp.TCPClient
 import eu.phisikus.pivonia.tcp.TCPServer
@@ -20,7 +20,7 @@ class ClientServerConnectionTest extends Specification {
     @Timeout(value = 10, unit = TimeUnit.SECONDS)
     def "Client should be able to send message to server"() {
         given:
-        def testMessage = new Message(new Date().getTime(), "test", "Test Message")
+        def testMessage = new TestMessage(new Date().getTime(), "test", "Test TestMessage")
         def client = new TCPClient(bsonConverter)
         def messageReceivedLatch = new CountDownLatch(1)
 
@@ -37,7 +37,7 @@ class ClientServerConnectionTest extends Specification {
     @Timeout(value = 10, unit = TimeUnit.SECONDS)
     def "Client should be able to send message to server and receive it back"() {
         given:
-        def testMessage = new Message(new Date().getTime(), "test", "Test Message")
+        def testMessage = new TestMessage(new Date().getTime(), "test", "Test TestMessage")
         def client = new TCPClient(bsonConverter)
         def messageReceivedLatch = new CountDownLatch(1)
 
@@ -56,10 +56,15 @@ class ClientServerConnectionTest extends Specification {
     }
 
     private MessageHandler getLatchTriggeringHandler(messageReceivedLatch) {
-        def messageHandler = new MessageHandler() {
+        def messageHandler = new MessageHandler<TestMessage>() {
             @Override
-            void handleMessage(Message incomingMessage, Client client) {
+            void handleMessage(TestMessage incomingMessage, Client client) {
                 messageReceivedLatch.countDown()
+            }
+
+            @Override
+            Class<TestMessage> getMessageType() {
+                return TestMessage.class;
             }
         }
         messageHandler
@@ -71,11 +76,16 @@ class ClientServerConnectionTest extends Specification {
     }
 
     private Server startEchoServer() {
-        def messageHandler = new MessageHandler() {
+        def messageHandler = new MessageHandler<TestMessage>() {
             @Override
-            void handleMessage(Message incomingMessage, Client client) {
+            void handleMessage(TestMessage incomingMessage, Client client) {
                 client.send(incomingMessage)
             }
+
+            @Override
+            Class<TestMessage> getMessageType() {
+                return TestMessage.class;
+            };
         }
         return new TCPServer(bsonConverter).bind(8091, messageHandler) as Server
     }

@@ -7,7 +7,7 @@ import lombok.*;
 @Getter
 @EqualsAndHashCode
 @ToString
-public class Message {
+public class TestMessage {
     private Long timestamp;
     private String topic;
     private String message;

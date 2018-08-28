@@ -9,7 +9,7 @@ public interface Client extends AutoCloseable {
      * @param message message that will be sent to the connected client
      * @return if successful return itself, otherwise exception that occurred
      */
-    Try<Client> send(Message message);
+    <T> Try<Client> send(T message);
 
 
     /**
