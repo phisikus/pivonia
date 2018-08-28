@@ -70,15 +70,19 @@ public class TCPClient implements Client {
     }
 
     private ByteBuffer readMessageContent(int messageSize) throws IOException {
-        ByteBuffer contentBuffer = ByteBuffer.allocate(messageSize - BufferUtils.INT_SIZE);
-        clientChannel.read(contentBuffer);
-        return contentBuffer;
+        int contentSize = messageSize - BufferUtils.INT_SIZE;
+        ByteBuffer contentBuffer = ByteBuffer.allocate(contentSize);
+        int bytesRead = 0;
+        while (bytesRead < contentSize) {
+            bytesRead += clientChannel.read(contentBuffer);
+        }
+        return contentBuffer.rewind();
     }
 
     private int readMessageSize() throws IOException {
-        var messageSizeBuffer = ByteBuffer.allocate(4);
+        var messageSizeBuffer = ByteBuffer.allocate(BufferUtils.INT_SIZE);
         int bytesRead = 0;
-        while (bytesRead < 4) {
+        while (bytesRead < BufferUtils.INT_SIZE) {
             bytesRead += clientChannel.read(messageSizeBuffer);
         }
         return BufferUtils.readMessageSizeFromBuffer(messageSizeBuffer);
