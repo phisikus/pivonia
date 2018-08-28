@@ -23,7 +23,7 @@ public class AcceptHandler implements CompletionHandler<AsynchronousSocketChanne
 
     @Override
     public void completed(AsynchronousSocketChannel clientChannel, MessageHandler messageHandler) {
-        serverSocket.accept(null, this);
+        serverSocket.accept(messageHandler, this);
         var messageSizeBuffer = BufferUtils.getBufferForMessageSize();
         var readCallback = new MessageSizeReadHandler(bsonConverter, clientChannel, messageSizeBuffer);
         clientChannel.read(messageSizeBuffer, messageHandler, readCallback);
