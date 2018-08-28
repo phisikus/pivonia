@@ -40,6 +40,7 @@ class ClientServerConnectionTest extends Specification {
         def testMessage = new TestMessage(new Date().getTime(), "test", "Test TestMessage")
         def client = new TCPClient(bsonConverter)
         def actualMessageHolder = new CompletableFuture<TestMessage>()
+
         when:
         startEchoServer()
         def connectedClient = client

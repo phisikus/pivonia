@@ -4,7 +4,6 @@ import spock.lang.Shared
 import spock.lang.Specification
 
 import java.nio.ByteBuffer
-import java.nio.ByteOrder
 
 class BufferUtilsTest extends Specification {
 
