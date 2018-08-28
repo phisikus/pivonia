@@ -108,7 +108,7 @@ public class TCPClient implements Client {
 
     private <T> Integer sendMessage(T message) throws IOException {
         waitForReadyConnection();
-        ByteBuffer serializedMessageBuffered = getSerializedMessageAsBuffer(message);
+        var serializedMessageBuffered = getSerializedMessageAsBuffer(message);
         int bytesSent = 0;
         while (serializedMessageBuffered.hasRemaining()) {
             bytesSent += clientChannel.write(serializedMessageBuffered);
