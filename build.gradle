@@ -100,10 +100,35 @@ publishing {
 }
 
 uploadArchives {
-    repositories.mavenDeployer {
-        configuration = configurations.deployerJars
-        final repositoryUrl = "sftp://szarak@s3.mydevil.net"
-        final repositoryDir = "/home/szarak/domains/phisikus.eu/public_html/maven2"
-        repository(url: repositoryUrl + repositoryDir)
+    if (project.hasProperty('deploymentUrl')) {
+        final deploymentUrl = project.property('deploymentUrl')
+        repositories.mavenDeployer {
+            configuration = configurations.deployerJars
+            repository(url: deploymentUrl)
+        }
     }
 }
+
+/**
+ * Custom task for CI
+ */
+task release(dependsOn: ['clean', 'build', 'uploadArchives'])
+uploadArchives.mustRunAfter(build)
+
+/**
+ * Custom task for publishing snapshot versions
+ */
+task setSnapshotVersion(type: Task) {
+    def getGitHash = { ->
+        final stdout = new ByteArrayOutputStream()
+        exec {
+            commandLine 'git', 'rev-parse', '--short', 'HEAD'
+            standardOutput = stdout
+        }
+        return stdout.toString().trim()
+    }
+    rootProject.version = rootProject.version + "-" + getGitHash()
+}
+
+task releaseSnapshot(dependsOn: ['clean', 'build', 'setSnapshotVersion', 'uploadArchives'])
+(build as Task).mustRunAfter(setSnapshotVersion)
