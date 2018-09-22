@@ -53,6 +53,11 @@ dependencies {
     compile 'de.undercouch:bson4jackson:2.9.2'
 
     /**
+     * Encryption
+     */
+    compile 'com.google.crypto.tink:tink:1.2.0'
+
+    /**
      * Utils
      */
     compile 'io.vavr:vavr:0.9.2'
