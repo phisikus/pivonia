@@ -6,7 +6,7 @@ import de.undercouch.bson4jackson.BsonFactory;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
-public class JacksonBSONConverter implements BSONConverter {
+class JacksonBSONConverter implements BSONConverter {
     private ObjectMapper mapper = new ObjectMapper(new BsonFactory());
 
     public <T> byte[] serialize(T inputObject) throws IOException {
@@ -18,6 +18,5 @@ public class JacksonBSONConverter implements BSONConverter {
     public <T> T deserialize(byte[] serializedObject, Class<T> objectType) throws IOException {
         return mapper.readValue(serializedObject, objectType);
     }
-
 
 }
