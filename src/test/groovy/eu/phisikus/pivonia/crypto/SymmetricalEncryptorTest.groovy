@@ -6,16 +6,16 @@ import com.google.crypto.tink.KeysetHandle
 import com.google.crypto.tink.aead.AeadConfig
 import com.google.crypto.tink.aead.AeadKeyTemplates
 import org.apache.tools.ant.util.FileUtils
-import spock.lang.Shared
 import spock.lang.Specification
+import spock.lang.Subject
 
 import java.nio.charset.Charset
 
 class SymmetricalEncryptorTest extends Specification {
 
-    @Shared
-    private Encryptor encryptor
-    private String testKeyFilename
+    @Subject
+    def encryptor
+    def testKeyFilename
 
     void setup() {
         testKeyFilename = buildRandomKeyset()

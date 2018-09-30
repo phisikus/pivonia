@@ -1,10 +1,10 @@
 package eu.phisikus.pivonia.converter.encrypted
 
-
 import eu.phisikus.pivonia.api.TestMessage
 import eu.phisikus.pivonia.converter.BSONConverter
 import eu.phisikus.pivonia.crypto.Encryptor
 import spock.lang.Specification
+import spock.lang.Subject
 
 class EncryptedBSONConverterTest extends Specification {
 
@@ -15,6 +15,7 @@ class EncryptedBSONConverterTest extends Specification {
     def mockWrappedEncryptedData = new ByteArrayWrapper(mockEncryptedData)
     def mockEncryptedSerializedData = getFakeBytes()
 
+    @Subject
     def converter = new EncryptedBSONConverter(mockConverter, mockEncryptor)
 
 

@@ -1,13 +1,12 @@
 package eu.phisikus.pivonia.converter.plaintext
 
-
 import eu.phisikus.pivonia.api.TestMessage
-import spock.lang.Shared
 import spock.lang.Specification
+import spock.lang.Subject
 
 class JacksonBSONConverterTest extends Specification {
 
-    @Shared
+    @Subject
     def converter = new JacksonBSONConverter()
 
     def "Object can be serialized to bytes and back"() {
