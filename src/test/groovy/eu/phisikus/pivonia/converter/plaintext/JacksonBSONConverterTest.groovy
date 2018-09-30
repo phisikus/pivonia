@@ -1,4 +1,4 @@
-package eu.phisikus.pivonia.converter
+package eu.phisikus.pivonia.converter.plaintext
 
 
 import eu.phisikus.pivonia.api.TestMessage

@@ -1,4 +1,4 @@
-package eu.phisikus.pivonia.converter;
+package eu.phisikus.pivonia.converter.encrypted;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

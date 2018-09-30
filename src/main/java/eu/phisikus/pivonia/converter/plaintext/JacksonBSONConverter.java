@@ -1,7 +1,8 @@
-package eu.phisikus.pivonia.converter;
+package eu.phisikus.pivonia.converter.plaintext;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.undercouch.bson4jackson.BsonFactory;
+import eu.phisikus.pivonia.converter.BSONConverter;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
