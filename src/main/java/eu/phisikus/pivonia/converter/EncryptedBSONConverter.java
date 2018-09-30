@@ -10,7 +10,12 @@ import java.io.IOException;
 import java.security.GeneralSecurityException;
 
 /**
- * This BSON Converter provides
+ * This BSON Converter provides layer of symmetric authenticated encryption.
+ * It uses some other provided converter to do the object-to-bytes serialization.
+ * Once the object is serialized the encrypted form is wrapped in a DTO and serialized again.
+ * During deserialization the encrypted bytes are extracted from wrapping DTO and decrypted.
+ * Once decryption is done, the converter is used again to provide deserialized object.
+ *
  */
 class EncryptedBSONConverter implements BSONConverter {
 
