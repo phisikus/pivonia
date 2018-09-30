@@ -2,7 +2,7 @@ package eu.phisikus.pivonia.tcp
 
 
 import eu.phisikus.pivonia.api.TestMessage
-import eu.phisikus.pivonia.converter.JacksonBSONConverter
+import eu.phisikus.pivonia.converter.plaintext.JacksonBSONConverter
 import spock.lang.Shared
 import spock.lang.Specification
 import spock.lang.Timeout

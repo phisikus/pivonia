@@ -3,13 +3,15 @@ package eu.phisikus.pivonia.tcp
 import eu.phisikus.pivonia.api.Client
 import eu.phisikus.pivonia.api.MessageHandler
 import eu.phisikus.pivonia.api.TestMessage
-import eu.phisikus.pivonia.converter.JacksonBSONConverter
+import eu.phisikus.pivonia.converter.plaintext.JacksonBSONConverter
+import spock.lang.Shared
 import spock.lang.Specification
 
 import java.util.concurrent.CompletableFuture
 
 class ClientServerDataTransferTest extends Specification {
 
+    @Shared
     def bsonConverter = new JacksonBSONConverter()
 
     def "Message with a lot of data should be sent by client and received by server"() {
