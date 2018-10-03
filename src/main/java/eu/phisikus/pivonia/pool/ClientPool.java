@@ -1,22 +1,30 @@
 package eu.phisikus.pivonia.pool;
 
 import eu.phisikus.pivonia.api.Client;
-import eu.phisikus.pivonia.api.MessageHandler;
-import lombok.Value;
 
-import java.util.LinkedList;
-import java.util.List;
-import java.util.function.Function;
+import java.util.Optional;
 
-class ClientPool {
-    private MessageHandler realMessageHandler;
-    private List<ClientPool> entries = new LinkedList<>();
+/**
+ * This ClientPool manages a list of connected Clients.
+ * The assumption is that a certain node identifies by some key of type K.
+ * If that node can be accessed through one of the clients, the pool will provide that Client.
+ *
+ * @param <K> type of key used to identify nodes
+ */
+public interface ClientPool<K> extends AutoCloseable {
+    /**
+     * It provides an instance of Client connected to node identifying with certain ID.
+     *
+     * @param id key that the connected node is identifying with (ID)
+     * @return if found the object will contain an instance of connected Client.
+     */
+    Optional<Client> getClient(K id);
 
-    @Value
-    class ClientPoolEntry {
-        private Long lastMessageTime;
-        private Client client;
-        private Function<MessageHandler, Client> clientProvider;
-    }
-
+    /**
+     * Checks if there is a Client connected to a node that uses certain ID.
+     *
+     * @param id key used by the requested node
+     * @return true if there is an active Client
+     */
+    boolean isAvailable(K id);
 }
