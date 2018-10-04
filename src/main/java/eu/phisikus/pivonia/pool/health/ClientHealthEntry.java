@@ -15,7 +15,7 @@ import java.util.function.Function;
 
 @Builder
 @Data
-public class ClientHealthEntry<T> {
+class ClientHealthEntry<T> {
     private Long lastTimeSeen;
     private Long reconnectAttempts;
     private Client currentClient;

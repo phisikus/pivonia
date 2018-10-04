@@ -2,6 +2,8 @@ package eu.phisikus.pivonia.pool.health;
 
 import io.vavr.control.Try;
 
+import java.util.Optional;
+
 /**
  * This interface represents a factory of "echo" messages of type T.
  * Those messages should contain a field of type K that represents sender ID.
@@ -24,7 +26,7 @@ public interface EchoMessageFactory<K, T> {
      * Verifies if provided message is an "echo" message or just a regular application message.
      *
      * @param message input message
-     * @return success with sender node ID if provided message is echo or failure if a regular message.
+     * @return sender node ID if provided message is echo or empty if a regular message.
      */
-    Try<K> verifyMessage(T message);
+    Optional<K> verifyMessage(T message);
 }
