@@ -12,7 +12,7 @@ import java.util.function.Consumer;
 class HealthCheckMessageHandler<K, T> implements MessageHandler<T> {
 
     private K nodeId;
-    private ClientHealthEntry healthEntry;
+    private final ClientHealthEntry healthEntry;
     private Map<K, Client> clientForNode;
     private EchoMessageFactory<K, T> messageFactory;
     private MessageHandler<T> targetMessageHandler;
@@ -32,10 +32,12 @@ class HealthCheckMessageHandler<K, T> implements MessageHandler<T> {
 
     private Consumer<K> handleEchoSuccess(Client client) {
         return senderId -> {
-            long currentTime = Instant.now().toEpochMilli();
-            clientForNode.put(senderId, client);
-            healthEntry.setCurrentClient(client);
-            healthEntry.setLastTimeSeen(currentTime);
+            synchronized (healthEntry) {
+                long currentTime = Instant.now().toEpochMilli();
+                clientForNode.put(senderId, client);
+                healthEntry.setCurrentClient(client);
+                healthEntry.setLastTimeSeen(currentTime);
+            }
         };
     }
 
