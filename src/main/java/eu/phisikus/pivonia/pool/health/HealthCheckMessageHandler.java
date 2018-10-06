@@ -35,8 +35,8 @@ class HealthCheckMessageHandler<K, T> implements MessageHandler<T> {
             synchronized (healthEntry) {
                 long currentTime = Instant.now().toEpochMilli();
                 clientForNode.put(senderId, client);
-                healthEntry.setCurrentClient(client);
                 healthEntry.setLastTimeSeen(currentTime);
+                healthEntry.setCurrentClient(client);
             }
         };
     }

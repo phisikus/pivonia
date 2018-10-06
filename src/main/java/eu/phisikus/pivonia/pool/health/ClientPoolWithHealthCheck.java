@@ -48,9 +48,10 @@ public class ClientPoolWithHealthCheck<K, T> implements ClientPool<K> {
 
 
     /**
+     * Creates Client Pool with health check.
      *
      * @param nodeID node ID
-     * @param timeRate amount of time (in milliseconds) between health checks messages
+     * @param timeRate amount of time (in milliseconds) between health check messages
      * @param echoMessageFactory factory of messages used for health checks
      * @param messageHandler common message handler for all of the clients
      */
