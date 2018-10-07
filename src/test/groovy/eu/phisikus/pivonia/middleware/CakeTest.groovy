@@ -9,6 +9,7 @@ import spock.lang.Subject
 class CakeTest extends Specification {
 
     def "Should initialize all of its layers"() {
+
         given: "there are two layers of middleware and empty cake"
         def stateContainer = Mock(StateContainer)
         def firstMiddleware = Mock(Middleware)
@@ -32,6 +33,7 @@ class CakeTest extends Specification {
     }
 
     def "Should construct client message processor properly"() {
+
         given: "there is a cake"
         def stateContainer = Mock(StateContainer)
 
@@ -69,6 +71,7 @@ class CakeTest extends Specification {
     }
 
     def "Should construct server message processor properly"() {
+
         given: "there is a cake"
         def stateContainer = Mock(StateContainer)
 
@@ -106,6 +109,7 @@ class CakeTest extends Specification {
     }
 
     def "Should avoid calling the second message processor in chain if first gave an empty result"() {
+
         given: "there is a cake"
         def stateContainer = Mock(StateContainer)
 
@@ -142,6 +146,7 @@ class CakeTest extends Specification {
     }
 
     def "Should throw an exception if layer of dependency is missing"() {
+
         given: "there is a cake with layer of middleware"
         def stateContainer = Mock(StateContainer)
         @Subject
@@ -150,7 +155,7 @@ class CakeTest extends Specification {
         cake.addLayer(firstMiddleware)
 
         and: "that one layer has unmet dependency"
-        1 * firstMiddleware.initialize(_) >> { throw new MissingMiddlewareException(String.class) }
+        1 * firstMiddleware.initialize(stateContainer) >> { throw new MissingMiddlewareException(String.class) }
 
         when: "cake is initialized"
         cake.initialize()
