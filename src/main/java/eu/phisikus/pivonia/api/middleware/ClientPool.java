@@ -1,4 +1,4 @@
-package eu.phisikus.pivonia.pool;
+package eu.phisikus.pivonia.api.middleware;
 
 import eu.phisikus.pivonia.api.Client;
 import eu.phisikus.pivonia.api.MessageHandler;
@@ -15,7 +15,7 @@ import java.util.function.Function;
  * @param <K> type of key used to identify nodes
  * @param <T> type of message used in communication
  */
-public interface ClientPool<K,T> extends AutoCloseable {
+public interface ClientPool<K, T> extends AutoCloseable {
     /**
      * It provides an instance of Client connected to node identifying with certain ID.
      *

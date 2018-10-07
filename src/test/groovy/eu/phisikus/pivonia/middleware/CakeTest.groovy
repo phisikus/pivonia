@@ -1,7 +1,7 @@
 package eu.phisikus.pivonia.middleware
 
-import eu.phisikus.pivonia.api.MessageProcessor
-import eu.phisikus.pivonia.api.Middleware
+import eu.phisikus.pivonia.api.middleware.MessageProcessor
+import eu.phisikus.pivonia.api.middleware.Middleware
 import eu.phisikus.pivonia.api.TestMessage
 import spock.lang.Specification
 import spock.lang.Subject

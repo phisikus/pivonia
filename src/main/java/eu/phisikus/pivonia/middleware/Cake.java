@@ -1,7 +1,7 @@
 package eu.phisikus.pivonia.middleware;
 
-import eu.phisikus.pivonia.api.MessageProcessor;
-import eu.phisikus.pivonia.api.Middleware;
+import eu.phisikus.pivonia.api.middleware.MessageProcessor;
+import eu.phisikus.pivonia.api.middleware.Middleware;
 
 import java.util.LinkedList;
 import java.util.List;

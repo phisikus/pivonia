@@ -1,4 +1,4 @@
-package eu.phisikus.pivonia.api;
+package eu.phisikus.pivonia.api.middleware;
 
 import java.util.Optional;
 

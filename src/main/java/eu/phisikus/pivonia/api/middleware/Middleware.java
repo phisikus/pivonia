@@ -1,4 +1,4 @@
-package eu.phisikus.pivonia.api;
+package eu.phisikus.pivonia.api.middleware;
 
 import eu.phisikus.pivonia.middleware.MissingMiddlewareException;
 import eu.phisikus.pivonia.middleware.StateContainer;
