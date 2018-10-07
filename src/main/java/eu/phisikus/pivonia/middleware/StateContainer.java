@@ -33,4 +33,12 @@ public class StateContainer {
         containerMap.put(type, stateElement);
     }
 
+    /**
+     * Helper method that provides empty StateContainer.
+     * @return empty state container
+     */
+    public static StateContainer empty() {
+        return new StateContainer();
+    }
+
 }

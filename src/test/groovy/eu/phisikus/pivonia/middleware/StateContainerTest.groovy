@@ -5,7 +5,7 @@ import spock.lang.Subject
 
 class StateContainerTest extends Specification {
     @Subject
-    def stateContainer = new StateContainer()
+    def stateContainer = StateContainer.empty()
 
     def "State container should store given object"() {
         given: "sample object is created"
