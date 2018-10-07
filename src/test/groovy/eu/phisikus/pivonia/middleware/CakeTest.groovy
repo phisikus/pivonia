@@ -1,6 +1,7 @@
 package eu.phisikus.pivonia.middleware
 
 import eu.phisikus.pivonia.api.MessageProcessor
+import eu.phisikus.pivonia.api.Middleware
 import eu.phisikus.pivonia.api.TestMessage
 import spock.lang.Specification
 import spock.lang.Subject
@@ -138,5 +139,25 @@ class CakeTest extends Specification {
 
         then: "that processor is called and only one handler is called"
         messageProcessor.processMessage(fakeMessage) == Optional.empty()
+    }
+
+    def "Should throw an exception if layer of dependency is missing"() {
+        given: "there is a cake with layer of middleware"
+        def stateContainer = Mock(StateContainer)
+        @Subject
+        def cake = new Cake(stateContainer)
+        def firstMiddleware = Mock(Middleware)
+        cake.addLayer(firstMiddleware)
+
+        and: "that one layer has unmet dependency"
+        1 * firstMiddleware.initialize(_) >> { throw new MissingMiddlewareException(String.class) }
+
+        when: "cake is initialized"
+        cake.initialize()
+        g
+        then: "exception is thrown"
+        thrown(MissingMiddlewareException)
+
+
     }
 }
