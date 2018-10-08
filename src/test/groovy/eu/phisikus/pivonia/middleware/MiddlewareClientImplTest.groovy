@@ -8,18 +8,23 @@ import spock.lang.Specification
 
 class MiddlewareClientImplTest extends Specification {
 
+    final firstMessage = Mock(TestMessage)
+    final secondMessage = Mock(TestMessage)
+    final thirdMessage = Mock(TestMessage)
+
     final firstMiddleware = Mock(Middleware)
     final secondMiddleware = Mock(Middleware)
     final thirdMiddleware = Mock(Middleware)
     final middlewares = List.of(firstMiddleware, secondMiddleware, thirdMiddleware)
+
     final threeClients = List.of(
             new MiddlewareClientImpl(TestMessage, middlewares, 0),
             new MiddlewareClientImpl(TestMessage, middlewares, 1),
             new MiddlewareClientImpl(TestMessage, middlewares, 2)
     )
-    final firstMessage = Mock(TestMessage)
-    final secondMessage = Mock(TestMessage)
-    final thirdMessage = Mock(TestMessage)
+    final oneClient = List.of(
+            new MiddlewareClientImpl(TestMessage, List.of(firstMiddleware), 0),
+    )
 
 
     def "Should build client that can pass a message upwards"() {
@@ -40,9 +45,7 @@ class MiddlewareClientImplTest extends Specification {
     def "Should build client that work with one layer"() {
 
         given: "there is one layer with created client"
-        def clients = List.of(
-                new MiddlewareClientImpl(TestMessage, List.of(firstMiddleware), 0),
-        )
+        def clients = oneClient
 
         expect: "sending the message to not produce any errors"
         clients.last().sendMessage(firstMessage)
@@ -90,6 +93,19 @@ class MiddlewareClientImplTest extends Specification {
 
 
         then: "sending the message will not pass the message to the third handler"
+        clients.first().getMessageHandler().handleMessage(firstMessage, Mock(Client))
+    }
+
+
+    def "Should build client that pass message through only one layer"() {
+
+        given: "there are is one layer of middleware with created client"
+        def clients = oneClient
+
+        and: "message handler is prepared"
+        1 * firstMiddleware.handleIncomingMessage(firstMessage) >> Optional.of(secondMessage)
+
+        expect: "sending the message to call that handler"
         clients.first().getMessageHandler().handleMessage(firstMessage, Mock(Client))
     }
 
