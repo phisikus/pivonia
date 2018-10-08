@@ -1,32 +1,34 @@
 package eu.phisikus.pivonia.middleware;
 
-import eu.phisikus.pivonia.api.middleware.MessageProcessor;
 import eu.phisikus.pivonia.api.middleware.Middleware;
+import io.vavr.collection.List;
+import lombok.extern.log4j.Log4j2;
 
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Optional;
-import java.util.function.Function;
-import java.util.stream.Collectors;
+import java.util.function.IntConsumer;
+import java.util.stream.IntStream;
 
 /**
- * Cake binds together multiple layers of middleware by aggregating its Message Processors.
- * During initialization each layer of middleware is initialized with a shared StateContainer.
- * In the beginning the only instance available in the state container is Cake itself.
- * To make the Cake functional, one of the used layers should deal with networking.
- * In that layer you can get the Cake instance from state container and get aggregated Message Processors.
- * At that moment your Message Processor can be used as message handler in the initialized client/server.
+ * Cake binds together multiple layers of middleware by aggregating its message handlers.
+ * During initialization each layer of middleware is initialized by providing a reference to MiddlewareClient.
+ * That reference allows for the layer to generate messages and push them through parent layers out of the system.
+ * The MiddlewareClient also provides an aggregated message handler that triggers processing through all layers below.
+ * The assumption is that the top layer will be connected to incoming and outgoing network traffic.
  *
  * @param <T> type of message used in the communication
  */
-public class Cake<T> {
+@Log4j2
+public class Cake<T> implements AutoCloseable {
 
-    private StateContainer stateContainer;
-    private List<Middleware<T>> middlewares = new LinkedList<>();
+    private Class<T> messageType;
+    private List<Middleware<T>> middlewares = List.empty();
 
-    public Cake(StateContainer stateContainer) {
-        this.stateContainer = stateContainer;
-        stateContainer.set(Cake.class, this);
+    /**
+     * Creates Cake instance with given message type
+     *
+     * @param messageType type of message used in the system
+     */
+    public Cake(Class<T> messageType) {
+        this.messageType = messageType;
     }
 
     /**
@@ -36,7 +38,7 @@ public class Cake<T> {
      * @return the same instance of cake but with additional middleware
      */
     public Cake addLayer(Middleware<T> middleware) {
-        middlewares.add(middleware);
+        middlewares = middlewares.append(middleware);
         return this;
     }
 
@@ -48,51 +50,28 @@ public class Cake<T> {
      * @throws MissingMiddlewareException if any of the layers have unmet dependency
      */
     public Cake initialize() throws MissingMiddlewareException {
-        middlewares.forEach(middleware -> middleware.initialize(stateContainer));
+        IntStream.range(0, middlewares.size())
+                .forEach(ithMiddlewareInitializer());
         return this;
     }
 
-    /**
-     * Get aggregated client-side MessageProcessor.
-     * It should call processors from all layers in chain unless one of them returns an empty message.
-     *
-     * @return MessageProcessor that calls client-side processors from all middleware layers.
-     */
-    public MessageProcessor<T> getClientSideMessageProcessor() {
-        List<MessageProcessor<T>> processors = getProcessorsFromMiddleware(Middleware::getClientSideMessageProcessor);
-        return buildAggregatedProcessor(processors);
-    }
-
-
-    /**
-     * Get aggregated server-side MessageProcessor.
-     * It should call processors from all layers in chain unless one of them returns an empty message.
-     *
-     * @return MessageProcessor that calls client-side processors from all middleware layers.
-     */
-    public MessageProcessor<T> getServerSideMessageProcessor() {
-        List<MessageProcessor<T>> processors = getProcessorsFromMiddleware(Middleware::getServerSideMessageProcessor);
-        return buildAggregatedProcessor(processors);
-    }
-
-    private List<MessageProcessor<T>> getProcessorsFromMiddleware(Function<Middleware<T>, MessageProcessor<T>> extractor) {
-        return middlewares.stream()
-                .map(extractor)
-                .collect(Collectors.toList());
-    }
-
-    private MessageProcessor<T> buildAggregatedProcessor(List<MessageProcessor<T>> processors) {
-        return message -> {
-            var currentMessage = Optional.of(message);
-            for (MessageProcessor<T> processor : processors) {
-                currentMessage = processor.processMessage(currentMessage.get());
-                if (!currentMessage.isPresent()) {
-                    break;
-                }
-            }
-            return currentMessage;
-
+    private IntConsumer ithMiddlewareInitializer() {
+        return index -> {
+            var middleware = middlewares.get(index);
+            var middlewareClient = new MiddlewareClientImpl<>(messageType, middlewares, index);
+            middleware.initialize(middlewareClient);
         };
+    }
+
+    @Override
+    public void close() throws Exception {
+        for (var middleware : middlewares) {
+            try {
+                middleware.close();
+            } catch (Exception ignored) {
+                log.error(ignored);
+            }
+        }
     }
 
 }
