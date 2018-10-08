@@ -1,38 +1,48 @@
 package eu.phisikus.pivonia.api.middleware;
 
 import eu.phisikus.pivonia.middleware.MissingMiddlewareException;
-import eu.phisikus.pivonia.middleware.StateContainer;
+
+import java.util.Optional;
 
 /**
- * Middleware represents a layer of algorithm in message processing.
- * Initialization phase allows for the layer to get some information from common state container.
- * Two MessageProcessors have to be defined - one for client and one for server-side message handling.
+ * Middleware represents a layer of processing.
+ * Messages coming into the system are passed through one handler, outgoing through another.
+ * Middleware can produce its own messages and pass them through parent layer out using provided MiddlewareClient.
  *
  * @param <T> type of message used for data transfer
  */
-public interface Middleware<T> {
+public interface Middleware<T> extends AutoCloseable {
 
     /**
-     * It initializes middleware. At this stage the middleware can register some data structure in the container.
-     * If it depends on data structure from another middleware it can be detected here and exception can be thrown.
+     * In this method additional resources should be created for middleware to function.
      *
-     * @param stateContainer state container for storing shared data
+     * @param middlewareClient reference to management layer that can be used to push outgoing messages
      * @throws MissingMiddlewareException exception thrown if some required layer is missing
      */
-    void initialize(StateContainer stateContainer) throws MissingMiddlewareException;
+    void initialize(MiddlewareClient<T> middlewareClient) throws MissingMiddlewareException;
 
     /**
-     * Returns a MessageProcessor that will be called for messages received by the client
+     * Message coming into the system will be processed by this handler.
+     * The layer can do one of three things:
+     *  - return a new message with changed contents
+     *  - return the message unchanged (possibly produce side-effects)
+     *  - return empty value which stops the message from being processed further
      *
-     * @return message processor on the client side
+     * @param message input message
+     * @return output message or empty value
      */
-    MessageProcessor<T> getClientSideMessageProcessor();
-
+    Optional<T> handleIncomingMessage(T message);
 
     /**
-     * Returns a MessageProcessor that will be called for messages received by the server
+     * Message coming out of the system will be processed by this handler.
+     * The layer can do one of three things:
+     *  - return a new message with changed contents
+     *  - return the message unchanged (possibly produce side-effects)
+     *  - return empty value which stops the message from being processed further
      *
-     * @return message processor on the server side
+     * @param message input message
+     * @return output message or empty value
      */
-    MessageProcessor<T> getServerSideMessageProcessor();
+    Optional<T> handleOutgoingMessage(T message);
+
 }
