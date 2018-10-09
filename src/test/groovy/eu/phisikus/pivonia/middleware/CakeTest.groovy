@@ -62,7 +62,6 @@ class CakeTest extends Specification {
         1 * secondMiddleware.close()
         1 * thirdMiddleware.close()
 
-
         expect: "all closing procedures will be called on cake closing"
         cake.close()
     }
