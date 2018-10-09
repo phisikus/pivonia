@@ -45,6 +45,26 @@ class CakeTest extends Specification {
         thrown(MissingMiddlewareException)
     }
 
-    // TODO Add integration test for Cake
+
+    def "Should close all middleware instances on closing"() {
+        given: "there is a cake with three layers of middleware"
+        def cake = new Cake(TestMessage)
+        def firstMiddleware = Mock(Middleware)
+        def secondMiddleware = Mock(Middleware)
+        def thirdMiddleware = Mock(Middleware)
+        cake
+                .addLayer(firstMiddleware)
+                .addLayer(secondMiddleware)
+                .addLayer(thirdMiddleware)
+
+        and: "those layers have defined closing procedure"
+        1 * firstMiddleware.close()
+        1 * secondMiddleware.close()
+        1 * thirdMiddleware.close()
+
+
+        expect: "all closing procedures will be called on cake closing"
+        cake.close()
+    }
 
 }
