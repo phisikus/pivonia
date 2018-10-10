@@ -62,7 +62,7 @@ class MiddlewareClientImplTest extends Specification {
         0 * firstMiddleware.handleOutgoingMessage(_)
 
 
-        then: "sending the message calls only the second handler but not the first"
+        then: "sending the message calls only the second client but not the first"
         clients.last().sendMessage(firstMessage)
     }
 
@@ -86,13 +86,13 @@ class MiddlewareClientImplTest extends Specification {
         given: "there are three middleware layers with created clients"
         def clients = threeClients
 
-        when: "the second message handler returns an empty value"
+        when: "the second message client returns an empty value"
         1 * firstMiddleware.handleIncomingMessage(firstMessage) >> Optional.of(secondMessage)
         1 * secondMiddleware.handleIncomingMessage(secondMessage) >> Optional.empty()
         0 * thirdMiddleware.handleIncomingMessage(_)
 
 
-        then: "sending the message will not pass the message to the third handler"
+        then: "sending the message will not pass the message to the third client"
         clients.first().getMessageHandler().handleMessage(firstMessage, Mock(Client))
     }
 
@@ -102,10 +102,10 @@ class MiddlewareClientImplTest extends Specification {
         given: "there are is one layer of middleware with created client"
         def clients = oneClient
 
-        and: "message handler is prepared"
+        and: "message client is prepared"
         1 * firstMiddleware.handleIncomingMessage(firstMessage) >> Optional.of(secondMessage)
 
-        expect: "sending the message to call that handler"
+        expect: "sending the message to call that client"
         clients.first().getMessageHandler().handleMessage(firstMessage, Mock(Client))
     }
 
