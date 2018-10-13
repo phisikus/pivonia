@@ -1,7 +1,8 @@
-package eu.phisikus.pivonia.middleware;
+package eu.phisikus.pivonia.middleware.layer;
 
 import eu.phisikus.pivonia.api.middleware.Middleware;
 import eu.phisikus.pivonia.api.middleware.MiddlewareClient;
+import eu.phisikus.pivonia.middleware.MissingMiddlewareException;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.Logger;
 
