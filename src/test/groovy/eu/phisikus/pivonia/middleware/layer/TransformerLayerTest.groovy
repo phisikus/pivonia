@@ -6,13 +6,13 @@ import spock.lang.Specification
 
 import java.util.function.Function
 
-class TransformerMiddlewareTest extends Specification {
+class TransformerLayerTest extends Specification {
 
     def "Middleware should be created and initialized properly"() {
         given: "instance of the middleware is created"
         def incomingConverter = Mock(Function)
         def outgoingConverter = Mock(Function)
-        def middleware = new TransformerMiddleware(incomingConverter, outgoingConverter)
+        def middleware = new TransformerLayer(incomingConverter, outgoingConverter)
 
         expect: "the initializing function to complete without errors"
         middleware.initialize(Mock(MiddlewareClient))
@@ -23,7 +23,7 @@ class TransformerMiddlewareTest extends Specification {
         given: "instance of the middleware is created"
         def incomingConverter = Mock(Function)
         def outgoingConverter = Mock(Function)
-        def middleware = new TransformerMiddleware(incomingConverter, outgoingConverter)
+        def middleware = new TransformerLayer(incomingConverter, outgoingConverter)
 
         and: "test message is defined"
         def testMessage = Mock(TestMessage)
@@ -41,7 +41,7 @@ class TransformerMiddlewareTest extends Specification {
         given: "instance of the middleware is created"
         def incomingConverter = Mock(Function)
         def outgoingConverter = Mock(Function)
-        def middleware = new TransformerMiddleware(incomingConverter, outgoingConverter)
+        def middleware = new TransformerLayer(incomingConverter, outgoingConverter)
 
         and: "test message is defined"
         def testMessage = Mock(TestMessage)

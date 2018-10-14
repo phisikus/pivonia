@@ -13,19 +13,19 @@ import java.util.Optional;
  *
  * @param <T> type of message used in the system
  */
-public class LoggerMiddleware<T> implements Middleware<T> {
+public class LoggerLayer<T> implements Middleware<T> {
 
     private Level logLevel;
     private Logger logger;
 
-    public LoggerMiddleware(Logger logger, Level logLevel) {
+    public LoggerLayer(Logger logger, Level logLevel) {
         this.logLevel = logLevel;
         this.logger = logger;
     }
 
     @Override
     public void initialize(MiddlewareClient<T> middlewareClient) throws MissingMiddlewareException {
-        logger.log(logLevel, "Initializing LoggerMiddleware layer.");
+        logger.log(logLevel, "Initializing LoggerLayer.");
     }
 
     @Override
@@ -42,6 +42,6 @@ public class LoggerMiddleware<T> implements Middleware<T> {
 
     @Override
     public void close() throws Exception {
-        logger.log(logLevel, "Shutting down LoggerMiddleware.");
+        logger.log(logLevel, "Shutting down LoggerLayer.");
     }
 }

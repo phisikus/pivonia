@@ -2,19 +2,18 @@ package eu.phisikus.pivonia.middleware.layer
 
 import eu.phisikus.pivonia.api.TestMessage
 import eu.phisikus.pivonia.api.middleware.MiddlewareClient
-import eu.phisikus.pivonia.middleware.layer.LoggerMiddleware
 import org.apache.logging.log4j.Level
 import org.apache.logging.log4j.Logger
 import spock.lang.Specification
 import spock.lang.Subject
 
-class LoggerMiddlewareTest extends Specification {
+class LoggerLayerTest extends Specification {
 
     final logger = Mock(Logger)
     final logLevel = Level.INFO
 
     @Subject
-    def loggerMiddleware = new LoggerMiddleware<TestMessage>(logger, logLevel)
+    def loggerMiddleware = new LoggerLayer<TestMessage>(logger, logLevel)
 
     def "Should initialize middleware properly"() {
         expect: "the initialization to finish without errors"

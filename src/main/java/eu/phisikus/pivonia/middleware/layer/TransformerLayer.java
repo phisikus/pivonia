@@ -12,7 +12,7 @@ import java.util.function.Function;
  *
  * @param <T> type of message used in the system
  */
-public class TransformerMiddleware<T> implements Middleware<T> {
+public class TransformerLayer<T> implements Middleware<T> {
 
     private final Function<T, T> incomingConverter;
     private final Function<T, T> outgoingConverter;
@@ -23,7 +23,7 @@ public class TransformerMiddleware<T> implements Middleware<T> {
      * @param incomingConverter function that will be applied to incoming message
      * @param outgoingConverter function that will be applied to outgoing message
      */
-    public TransformerMiddleware(Function<T, T> incomingConverter, Function<T, T> outgoingConverter) {
+    public TransformerLayer(Function<T, T> incomingConverter, Function<T, T> outgoingConverter) {
         this.incomingConverter = incomingConverter;
         this.outgoingConverter = outgoingConverter;
     }
