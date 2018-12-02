@@ -1,18 +1,19 @@
 package eu.phisikus.pivonia.middleware.layer.pool
 
 import eu.phisikus.pivonia.api.Client
-import eu.phisikus.pivonia.api.MessageHandler
 import eu.phisikus.pivonia.api.Server
-import eu.phisikus.pivonia.api.pool.HasSenderId
+import eu.phisikus.pivonia.api.pool.Envelope
+import eu.phisikus.pivonia.api.pool.MessageWithClient
+import io.reactivex.observers.TestObserver
+import io.vavr.control.Try
 import spock.lang.Specification
 import spock.lang.Subject
 
-class BasicClientPoolSpec extends Specification {
-    final messageHandler = Mock(MessageHandler)
+class ClientPoolImplSpec extends Specification {
     final randomId = UUID.randomUUID()
 
     @Subject
-    def pool = new BasicClientPool(messageHandler, messageHandler)
+    def pool = new ClientPoolImpl()
 
     def "Should not return client non-existing node"() {
         expect: "Empty result for random node ID"
@@ -34,14 +35,14 @@ class BasicClientPoolSpec extends Specification {
     }
 
     def "Should add client through server"() {
-        given: "Client was added to the pool"
+        given: "Server was added to the pool"
         def client = new LoopbackClient()
         pool.addSourceUsingBuilder({ it ->
             client.connect(null, 0, it)
-            Mock(Server)
+            Try.success(Mock(Server))
         })
 
-        when: "Client receives a message with sender's ID"
+        when: "Server receives a message with sender's ID"
         def message = buildMessage(randomId)
         client.send(message)
 
@@ -61,7 +62,6 @@ class BasicClientPoolSpec extends Specification {
 
         then: "It exists in the client pool"
         pool.exists(randomId)
-
     }
 
     def "Should close clients belonging to the pool"() {
@@ -107,10 +107,60 @@ class BasicClientPoolSpec extends Specification {
         !pool.exists(randomId)
     }
 
-    private HasSenderId buildMessage(UUID randomId) {
-        new HasSenderId() {
+    def "Should expose client messages as a stream"() {
+        given: "There is connected client"
+        def client = pool.addUsingBuilder({
+            messageHandler -> new LoopbackClient().connect(null, 0, messageHandler)
+        }).get()
+
+        and: "Message stream is monitored"
+        def testSubscriber = new TestObserver()
+        pool.getClientMessages().subscribe(testSubscriber)
+
+        when: "Message is sent to the client"
+        def message = buildMessage(randomId)
+        client.send(message)
+
+        then: "Message is passed to the message stream"
+        testSubscriber.assertSubscribed()
+        testSubscriber.assertNoErrors()
+        testSubscriber.values() == [new MessageWithClient(message, client)]
+    }
+
+
+    def "Should expose server messages as a stream"() {
+        given: "There is connected client"
+        def serverMessageHandler = null
+        pool.addSourceUsingBuilder({
+            messageHandler ->
+                serverMessageHandler = messageHandler
+                return Try.success(Mock(Server))
+        }).get()
+
+        and: "Message stream is monitored"
+        def testSubscriber = new TestObserver()
+        pool.getServerMessages().subscribe(testSubscriber)
+
+        when: "Message is sent to the client"
+        def message = buildMessage(randomId)
+        def client = Mock(Client)
+        serverMessageHandler.handleMessage(message, client)
+
+        then: "Message is passed to the message stream"
+        testSubscriber.assertSubscribed()
+        testSubscriber.assertNoErrors()
+        testSubscriber.values() == [new MessageWithClient(message, client)]
+    }
+
+    private Envelope buildMessage(UUID randomId) {
+        new Envelope() {
             @Override
             UUID getSenderId() {
+                return randomId
+            }
+
+            @Override
+            Object getRecipientId() {
                 return randomId
             }
         }

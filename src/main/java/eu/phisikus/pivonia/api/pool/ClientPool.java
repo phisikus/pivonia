@@ -3,6 +3,8 @@ package eu.phisikus.pivonia.api.pool;
 import eu.phisikus.pivonia.api.Client;
 import eu.phisikus.pivonia.api.MessageHandler;
 import eu.phisikus.pivonia.api.Server;
+import io.reactivex.Observable;
+import io.vavr.control.Try;
 
 import java.util.Optional;
 import java.util.function.Function;
@@ -15,7 +17,7 @@ import java.util.function.Function;
  * @param <K> type of key used to identify nodes
  * @param <T> type of message used in communication
  */
-public interface ClientPool<K, T extends HasSenderId<K>> extends AutoCloseable {
+public interface ClientPool<K, T extends Envelope<K>> extends AutoCloseable {
     /**
      * It provides an instance of Client connected to node identifying with certain ID.
      *
@@ -38,21 +40,23 @@ public interface ClientPool<K, T extends HasSenderId<K>> extends AutoCloseable {
      * Returned client should be already connected.
      *
      * @param clientBuilder function that creates Client instance and uses provided MessageHandler to do so
+     * @return created client instance of failure
      */
-    void addUsingBuilder(Function<MessageHandler<T>, Client> clientBuilder);
+    Try<Client> addUsingBuilder(Function<MessageHandler<T>, Try<Client>> clientBuilder);
 
     /**
      * This function uses provided server builder to create the server with custom MessageHandler.
      * That handler will intercept any incoming messages and register new Client instances into the pool.
      *
      * @param serverBuilder function that creates the Server instance and uses provided MessageHandler to do so
+     * @return created server instance or failure
      */
-    void addSourceUsingBuilder(Function<MessageHandler<T>, Server> serverBuilder);
+    Try<Server> addSourceUsingBuilder(Function<MessageHandler<T>, Try<Server>> serverBuilder);
 
     /**
      * Associates client with given node ID.
      *
-     * @param id identifier od node that can be reached with given client
+     * @param id     identifier od node that can be reached with given client
      * @param client connected client that can be used to communicate with node of given ID
      */
     void set(K id, Client client);
@@ -64,5 +68,20 @@ public interface ClientPool<K, T extends HasSenderId<K>> extends AutoCloseable {
      * @param client instance to remove
      */
     void remove(Client client);
+
+    /**
+     * Returns observable stream of messages coming from clients in the pool.
+     *
+     * @return observable client messages
+     */
+    Observable<MessageWithClient<T>> getClientMessages();
+
+    /**
+     * Returns observable stream of messages received by servers in the pool.
+     *
+     * @return observable server messages
+     */
+    Observable<MessageWithClient<T>> getServerMessages();
+
 }
 
