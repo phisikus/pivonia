@@ -9,13 +9,13 @@ import io.vavr.control.Try
 import spock.lang.Specification
 import spock.lang.Subject
 
-class ClientPoolImplSpec extends Specification {
+class ClientPoolImplTest extends Specification {
     final randomId = UUID.randomUUID()
 
     @Subject
     def pool = new ClientPoolImpl()
 
-    def "Should not return client non-existing node"() {
+    def "Should not return client for non-existing node"() {
         expect: "Empty result for random node ID"
         !pool.exists(UUID.randomUUID())
         Optional.empty() == pool.get(UUID.randomUUID())
@@ -34,7 +34,20 @@ class ClientPoolImplSpec extends Specification {
         pool.get(message.getSenderId()) == Optional.of(client)
     }
 
-    def "Should add client through server"() {
+    def "Should check if client exists for given ID"() {
+        given: "Client was added to the pool"
+        def client = new LoopbackClient()
+        pool.addUsingBuilder({ it -> client.connect(null, 0, it) })
+
+        when: "Client receives a message"
+        def message = buildMessage(randomId)
+        client.send(message)
+
+        then: "It exists in the client pool"
+        pool.exists(randomId)
+    }
+
+    def "Should add client when message comes through registered server"() {
         given: "Server was added to the pool"
         def client = new LoopbackClient()
         pool.addSourceUsingBuilder({ it ->
@@ -48,20 +61,6 @@ class ClientPoolImplSpec extends Specification {
 
         then: "It can be found in the client pool"
         pool.get(message.getSenderId()) == Optional.of(client)
-
-    }
-
-    def "Should check if client exists for given key"() {
-        given: "Client was added to the pool"
-        def client = new LoopbackClient()
-        pool.addUsingBuilder({ it -> client.connect(null, 0, it) })
-
-        when: "Client receives a message"
-        def message = buildMessage(randomId)
-        client.send(message)
-
-        then: "It exists in the client pool"
-        pool.exists(randomId)
     }
 
     def "Should close clients belonging to the pool"() {
@@ -126,7 +125,6 @@ class ClientPoolImplSpec extends Specification {
         testSubscriber.assertNoErrors()
         testSubscriber.values() == [new MessageWithClient(message, client)]
     }
-
 
     def "Should expose server messages as a stream"() {
         given: "There is connected client"
