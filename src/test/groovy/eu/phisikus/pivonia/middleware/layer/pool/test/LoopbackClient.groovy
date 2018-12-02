@@ -1,4 +1,4 @@
-package eu.phisikus.pivonia.middleware.layer.pool
+package eu.phisikus.pivonia.middleware.layer.pool.test
 
 import eu.phisikus.pivonia.api.Client
 import eu.phisikus.pivonia.api.MessageHandler
