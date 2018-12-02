@@ -48,5 +48,21 @@ public interface ClientPool<K, T extends HasSenderId<K>> extends AutoCloseable {
      * @param serverBuilder function that creates the Server instance and uses provided MessageHandler to do so
      */
     void addSourceUsingBuilder(Function<MessageHandler<T>, Server> serverBuilder);
+
+    /**
+     * Associates client with given node ID.
+     *
+     * @param id identifier od node that can be reached with given client
+     * @param client connected client that can be used to communicate with node of given ID
+     */
+    void set(K id, Client client);
+
+
+    /**
+     * Removes (presumably broken) client from the client pool.
+     *
+     * @param client instance to remove
+     */
+    void remove(Client client);
 }
 

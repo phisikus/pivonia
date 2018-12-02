@@ -1,6 +1,6 @@
 package eu.phisikus.pivonia.middleware.layer.pool
 
-
+import eu.phisikus.pivonia.api.Client
 import eu.phisikus.pivonia.api.MessageHandler
 import eu.phisikus.pivonia.api.Server
 import eu.phisikus.pivonia.api.pool.HasSenderId
@@ -82,6 +82,29 @@ class BasicClientPoolSpec extends Specification {
 
         then: "All of the clients are closed"
         firstClient.isClosed && secondClient.isClosed
+    }
+
+    def "Should associate client with node ID manually"() {
+        given: "Client is defined"
+        def client = Mock(Client)
+
+        when: "Client is associated with node ID"
+        pool.set(randomId, client)
+
+        then: "It can be retrieved for that ID"
+        pool.get(randomId) == Optional.of(client)
+    }
+
+    def "Should remove association between node ID and Client"() {
+        given: "There is association"
+        def client = Mock(Client)
+        pool.set(randomId, client)
+
+        when: "Association is removed"
+        pool.remove(client)
+
+        then: "It cannot be retrieved using ID"
+        !pool.exists(randomId)
     }
 
     private HasSenderId buildMessage(UUID randomId) {

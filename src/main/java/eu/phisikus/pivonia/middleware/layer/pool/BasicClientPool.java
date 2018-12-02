@@ -42,6 +42,19 @@ public class BasicClientPool<K, T extends HasSenderId<K>> implements ClientPool<
         serverBuilder.apply(buildMessageHandler(serverHandler));
     }
 
+    @Override
+    public void set(K id, Client client) {
+        clients.put(id, client);
+    }
+
+    @Override
+    public void remove(Client client) {
+        clients.entrySet()
+                .stream()
+                .filter(entry -> client.equals(entry.getValue()))
+                .forEach(entry -> clients.remove(entry.getKey(), entry.getValue()));
+    }
+
     private MessageHandler<T> buildMessageHandler(MessageHandler<T> commonMessageHandler) {
         return new MessageHandler<>() {
             @Override
