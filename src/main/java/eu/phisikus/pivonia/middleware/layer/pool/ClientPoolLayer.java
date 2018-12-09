@@ -20,7 +20,6 @@ public class ClientPoolLayer<K, T extends Envelope<K>> implements Middleware<T> 
     private final List<Disposable> disposables = new LinkedList<>();
     private MiddlewareClient<T> middlewareClient;
 
-    // TODO add tests, complete implementation
     public ClientPoolLayer(ClientPool<K, T> clientPool) {
         this.clientPool = clientPool;
     }
