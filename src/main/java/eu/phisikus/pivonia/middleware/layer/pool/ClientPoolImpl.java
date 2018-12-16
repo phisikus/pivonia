@@ -16,7 +16,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.function.Function;
 
-class ClientPoolImpl<K, T extends Envelope<K>> implements ClientPool<K, T> {
+public class ClientPoolImpl<K, T extends Envelope<K>> implements ClientPool<K, T> {
 
     private final ConcurrentMap<K, Client> clients = new ConcurrentHashMap<>();
     private final Subject<MessageWithClient<T>> clientMessages = PublishSubject.create();
