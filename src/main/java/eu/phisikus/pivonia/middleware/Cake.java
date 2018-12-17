@@ -37,7 +37,7 @@ public class Cake<T> implements AutoCloseable {
      * @param middleware middleware to be added
      * @return the same instance of cake but with additional middleware
      */
-    public Cake addLayer(Middleware<T> middleware) {
+    public Cake<T> addLayer(Middleware<T> middleware) {
         middlewares = middlewares.append(middleware);
         return this;
     }
@@ -49,7 +49,7 @@ public class Cake<T> implements AutoCloseable {
      * @return the same, initialized instance of cake
      * @throws MissingMiddlewareException if any of the layers have unmet dependency
      */
-    public Cake initialize() throws MissingMiddlewareException {
+    public Cake<T> initialize() throws MissingMiddlewareException {
         IntStream.range(0, middlewares.size())
                 .forEach(ithMiddlewareInitializer());
         return this;
