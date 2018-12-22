@@ -12,7 +12,7 @@ import spock.lang.Timeout
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.TimeUnit
 
-class ClientServerConnectionTest extends Specification {
+class ClientServerConnectionSpec extends Specification {
 
     @Shared
     def bsonConverter = new JacksonBSONConverter()

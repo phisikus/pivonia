@@ -9,7 +9,7 @@ import io.reactivex.Observable
 import spock.lang.Specification
 import spock.lang.Subject
 
-class ClientPoolLayerTest extends Specification {
+class ClientPoolLayerSpec extends Specification {
 
     def clientPool = Mock(ClientPool)
 

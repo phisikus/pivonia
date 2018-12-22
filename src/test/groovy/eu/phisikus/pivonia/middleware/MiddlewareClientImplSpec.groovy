@@ -6,7 +6,7 @@ import eu.phisikus.pivonia.api.middleware.Middleware
 import io.vavr.collection.List
 import spock.lang.Specification
 
-class MiddlewareClientImplTest extends Specification {
+class MiddlewareClientImplSpec extends Specification {
 
     final firstMessage = Mock(TestMessage)
     final secondMessage = Mock(TestMessage)

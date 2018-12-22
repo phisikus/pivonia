@@ -9,7 +9,7 @@ import spock.lang.Timeout
 
 import java.util.concurrent.TimeUnit
 
-class ClientFailureTest extends Specification {
+class ClientFailureSpec extends Specification {
 
     @Shared
     def bsonConverter = new JacksonBSONConverter()

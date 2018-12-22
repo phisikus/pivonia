@@ -14,7 +14,7 @@ import spock.lang.Specification
 import spock.lang.Subject
 import spock.util.concurrent.PollingConditions
 
-class ClientPoolImplITTest extends Specification {
+class ClientPoolImplITSpec extends Specification {
 
     @Subject
     def clientPool = new ClientPoolImpl(FakeMessage)

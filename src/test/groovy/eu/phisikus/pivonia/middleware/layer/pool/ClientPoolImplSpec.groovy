@@ -10,7 +10,7 @@ import io.vavr.control.Try
 import spock.lang.Specification
 import spock.lang.Subject
 
-class ClientPoolImplTest extends Specification {
+class ClientPoolImplSpec extends Specification {
     final randomId = UUID.randomUUID()
 
     @Subject

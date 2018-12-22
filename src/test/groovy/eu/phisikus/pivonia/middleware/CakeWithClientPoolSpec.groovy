@@ -3,7 +3,7 @@ package eu.phisikus.pivonia.middleware
 import eu.phisikus.pivonia.middleware.layer.pool.test.FakeMessage
 import spock.lang.Subject
 
-class CakeWithClientPoolTest extends CakeIntegrationTest {
+class CakeWithClientPoolSpec extends CakeITSpec {
 
     @Subject
     def cake = new CakeWithClientPool(FakeMessage)

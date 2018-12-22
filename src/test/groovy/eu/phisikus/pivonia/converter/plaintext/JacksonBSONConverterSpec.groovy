@@ -4,7 +4,7 @@ import eu.phisikus.pivonia.api.TestMessage
 import spock.lang.Specification
 import spock.lang.Subject
 
-class JacksonBSONConverterTest extends Specification {
+class JacksonBSONConverterSpec extends Specification {
 
     @Subject
     def converter = new JacksonBSONConverter()

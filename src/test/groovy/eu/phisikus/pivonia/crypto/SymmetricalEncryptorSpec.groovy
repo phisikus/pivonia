@@ -11,7 +11,7 @@ import spock.lang.Subject
 
 import java.nio.charset.Charset
 
-class SymmetricalEncryptorTest extends Specification {
+class SymmetricalEncryptorSpec extends Specification {
 
     @Subject
     def encryptor

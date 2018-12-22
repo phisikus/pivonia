@@ -10,7 +10,7 @@ import spock.lang.Subject
 
 import java.util.function.Consumer
 
-class CakeIntegrationTest extends Specification {
+class CakeITSpec extends Specification {
 
     @Subject
     def cake = new Cake(TestMessage)

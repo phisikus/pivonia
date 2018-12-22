@@ -7,7 +7,7 @@ import org.apache.logging.log4j.Logger
 import spock.lang.Specification
 import spock.lang.Subject
 
-class LoggerLayerTest extends Specification {
+class LoggerLayerSpec extends Specification {
 
     final logger = Mock(Logger)
     final logLevel = Level.INFO

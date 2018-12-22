@@ -5,7 +5,7 @@ import spock.lang.Specification
 
 import java.nio.ByteBuffer
 
-class BufferUtilsTest extends Specification {
+class BufferUtilsSpec extends Specification {
 
     @Shared
     def testBuffer = ByteBuffer

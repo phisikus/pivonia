@@ -6,7 +6,7 @@ import eu.phisikus.pivonia.crypto.Encryptor
 import spock.lang.Specification
 import spock.lang.Subject
 
-class EncryptedBSONConverterTest extends Specification {
+class EncryptedBSONConverterSpec extends Specification {
 
     def mockConverter = Mock(BSONConverter)
     def mockEncryptor = Mock(Encryptor)

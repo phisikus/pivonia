@@ -9,7 +9,7 @@ import spock.lang.Specification
 
 import java.util.concurrent.CompletableFuture
 
-class ClientServerDataTransferTest extends Specification {
+class ClientServerDataTransferSpec extends Specification {
 
     @Shared
     def bsonConverter = new JacksonBSONConverter()
@@ -33,7 +33,7 @@ class ClientServerDataTransferTest extends Specification {
         given: "Server is running"
         def testMessage = new TestMessage(4L, "bigTopic", getBigMessage())
         def actualMessage = new CompletableFuture<TestMessage>()
-        def server = new TCPServer(bsonConverter).bind(8093, ClientServerConnectionTest.getEchoMessageHandler())
+        def server = new TCPServer(bsonConverter).bind(8093, ClientServerConnectionSpec.getEchoMessageHandler())
 
         when: "Client is connected and message is sent"
         def client = new TCPClient(bsonConverter).connect("localhost", 8093, buildMessageHandlerWithTrap(actualMessage)).get()

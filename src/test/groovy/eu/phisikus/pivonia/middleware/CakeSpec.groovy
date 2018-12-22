@@ -4,7 +4,7 @@ import eu.phisikus.pivonia.api.TestMessage
 import eu.phisikus.pivonia.api.middleware.Middleware
 import spock.lang.Specification
 
-class CakeTest extends Specification {
+class CakeSpec extends Specification {
 
     def "Should initialize all of its layers"() {
 

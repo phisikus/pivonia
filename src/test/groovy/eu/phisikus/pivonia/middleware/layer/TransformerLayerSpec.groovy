@@ -6,7 +6,7 @@ import spock.lang.Specification
 
 import java.util.function.Function
 
-class TransformerLayerTest extends Specification {
+class TransformerLayerSpec extends Specification {
 
     def "Middleware should be created and initialized properly"() {
         given: "instance of the middleware is created"
