@@ -17,7 +17,7 @@ configurations {
  * Settings
  */
 rootProject.group = "eu.phisikus.pivonia"
-rootProject.version = '0.0.3'
+rootProject.version = '0.0.4'
 
 
 sourceCompatibility = JavaVersion.VERSION_1_10
