@@ -1,5 +1,6 @@
 package eu.phisikus.pivonia.tcp
 
+import eu.phisikus.pivonia.ServerTestUtils
 import eu.phisikus.pivonia.api.Client
 import eu.phisikus.pivonia.api.MessageHandler
 import eu.phisikus.pivonia.api.TestMessage
@@ -18,10 +19,11 @@ class ClientServerDataTransferSpec extends Specification {
         given: "Server is running"
         def testMessage = new TestMessage(1L, "bigTopic", getBigMessage())
         def actualMessage = new CompletableFuture<TestMessage>()
-        def server = new TCPServer(bsonConverter).bind(8092, buildMessageHandlerWithTrap(actualMessage))
+        def port = ServerTestUtils.getRandomPort()
+        def server = new TCPServer(bsonConverter).bind(port, buildMessageHandlerWithTrap(actualMessage))
 
         when: "Client is connected and message is sent"
-        def client = new TCPClient(bsonConverter).connect("localhost", 8092, null).get()
+        def client = new TCPClient(bsonConverter).connect("localhost", port, null).get()
         def sendResult = client.send(testMessage)
 
         then: "The operation finishes properly and received message is equal to expected"
@@ -33,10 +35,11 @@ class ClientServerDataTransferSpec extends Specification {
         given: "Server is running"
         def testMessage = new TestMessage(4L, "bigTopic", getBigMessage())
         def actualMessage = new CompletableFuture<TestMessage>()
-        def server = new TCPServer(bsonConverter).bind(8093, ClientServerConnectionSpec.getEchoMessageHandler())
+        def port = ServerTestUtils.getRandomPort()
+        def server = new TCPServer(bsonConverter).bind(port, ClientServerConnectionSpec.getEchoMessageHandler())
 
         when: "Client is connected and message is sent"
-        def client = new TCPClient(bsonConverter).connect("localhost", 8093, buildMessageHandlerWithTrap(actualMessage)).get()
+        def client = new TCPClient(bsonConverter).connect("localhost", port, buildMessageHandlerWithTrap(actualMessage)).get()
         def sendResult = client.send(testMessage)
 
         then: "The operation finishes properly and received message is equal to expected"

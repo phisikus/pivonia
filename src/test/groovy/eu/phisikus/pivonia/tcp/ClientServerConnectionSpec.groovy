@@ -1,5 +1,6 @@
 package eu.phisikus.pivonia.tcp
 
+import eu.phisikus.pivonia.ServerTestUtils
 import eu.phisikus.pivonia.api.Client
 import eu.phisikus.pivonia.api.MessageHandler
 import eu.phisikus.pivonia.api.Server
@@ -25,8 +26,9 @@ class ClientServerConnectionSpec extends Specification {
         def actualMessageHolder = new CompletableFuture<TestMessage>()
 
         when:
-        def server = startServer(actualMessageHolder)
-        def messageSent = client.connect("localhost", 8090, null).get().send(testMessage)
+        def port = ServerTestUtils.getRandomPort()
+        def server = startServer(port, actualMessageHolder)
+        def messageSent = client.connect("localhost", port, null).get().send(testMessage)
 
         then:
         messageSent.isSuccess()
@@ -43,11 +45,12 @@ class ClientServerConnectionSpec extends Specification {
         def testMessage = new TestMessage(new Date().getTime(), "test", "Test TestMessage")
         def client = new TCPClient(bsonConverter)
         def actualMessageHolder = new CompletableFuture<TestMessage>()
+        def port = ServerTestUtils.getRandomPort()
 
         when:
-        def server = startEchoServer()
+        def server = startEchoServer(port)
         def connectedClient = client
-                .connect("localhost", 8091, getFutureCompletingHandler(actualMessageHolder))
+                .connect("localhost", port, getFutureCompletingHandler(actualMessageHolder))
                 .get()
         def sendResult = connectedClient.send(testMessage)
 
@@ -61,9 +64,9 @@ class ClientServerConnectionSpec extends Specification {
     }
 
 
-    private Server startServer(messageReceivedLatch) {
+    private Server startServer(int port, messageReceivedLatch) {
         MessageHandler messageHandler = getFutureCompletingHandler(messageReceivedLatch)
-        return new TCPServer(bsonConverter).bind(8090, messageHandler).get()
+        return new TCPServer(bsonConverter).bind(port, messageHandler).get()
     }
 
     private MessageHandler getFutureCompletingHandler(messageHolder) {
@@ -81,9 +84,9 @@ class ClientServerConnectionSpec extends Specification {
         messageHandler
     }
 
-    private Server startEchoServer() {
+    private Server startEchoServer(port) {
         MessageHandler<TestMessage> messageHandler = getEchoMessageHandler()
-        return new TCPServer(bsonConverter).bind(8091, messageHandler).get()
+        return new TCPServer(bsonConverter).bind(port, messageHandler).get()
     }
 
     static MessageHandler<TestMessage> getEchoMessageHandler() {

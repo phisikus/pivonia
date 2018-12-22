@@ -1,6 +1,6 @@
 package eu.phisikus.pivonia.tcp
 
-
+import eu.phisikus.pivonia.ServerTestUtils
 import eu.phisikus.pivonia.api.TestMessage
 import eu.phisikus.pivonia.converter.plaintext.JacksonBSONConverter
 import spock.lang.Shared
@@ -33,7 +33,7 @@ class ClientFailureSpec extends Specification {
         def client = new TCPClient(bsonConverter)
 
         when:
-        def connectedClient = client.connect("localhost", 65520, null)
+        def connectedClient = client.connect("localhost", ServerTestUtils.getRandomPort(), null)
 
         then:
         connectedClient.isFailure()
@@ -43,8 +43,9 @@ class ClientFailureSpec extends Specification {
     def "Client should fail to send message when it was closed"() {
         given:
         def testMessage = new TestMessage()
-        def server = new TCPServer(bsonConverter).bind(9999, null).get()
-        def client = new TCPClient(bsonConverter).connect("localhost", 9999, null).get()
+        def port = ServerTestUtils.getRandomPort()
+        def server = new TCPServer(bsonConverter).bind(port, null).get()
+        def client = new TCPClient(bsonConverter).connect("localhost", port, null).get()
 
         when:
         client.close()

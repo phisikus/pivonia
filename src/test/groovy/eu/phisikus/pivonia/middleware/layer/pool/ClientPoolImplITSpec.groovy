@@ -1,5 +1,6 @@
 package eu.phisikus.pivonia.middleware.layer.pool
 
+import eu.phisikus.pivonia.ServerTestUtils
 import eu.phisikus.pivonia.api.Client
 import eu.phisikus.pivonia.api.MessageHandler
 import eu.phisikus.pivonia.api.pool.MessageWithClient
@@ -31,7 +32,7 @@ class ClientPoolImplITSpec extends Specification {
 
     def pollingConditions = new PollingConditions(timeout: 5)
 
-    def PORT = 7979
+    def PORT = ServerTestUtils.getRandomPort()
 
     def "Should register client when registered server accepts message from new node"() {
         given: "Server is added to the pool"
