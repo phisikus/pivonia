@@ -9,7 +9,7 @@ class CakeWithClientPoolSpec extends CakeITSpec {
     def cake = new CakeWithClientPool(FakeMessage)
 
     def "Should compose client pool"() {
-        expect: "Client pool to be available"
+        expect: "client pool to be available"
         cake.getClientPool() != null
     }
 }

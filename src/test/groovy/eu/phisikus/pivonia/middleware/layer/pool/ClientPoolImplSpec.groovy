@@ -162,6 +162,11 @@ class ClientPoolImplSpec extends Specification {
             Object getRecipientId() {
                 return randomId
             }
+
+            @Override
+            Envelope readress(Object senderId, Object recipientId) {
+                return this
+            }
         }
     }
 

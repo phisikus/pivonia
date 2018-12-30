@@ -13,4 +13,9 @@ import java.util.UUID;
 public class FakeMessage implements Envelope<UUID> {
     private UUID senderId;
     private UUID recipientId;
+
+    @Override
+    public Envelope<UUID> readress(UUID senderId, UUID recipientId) {
+        return new FakeMessage(senderId, recipientId);
+    }
 }
