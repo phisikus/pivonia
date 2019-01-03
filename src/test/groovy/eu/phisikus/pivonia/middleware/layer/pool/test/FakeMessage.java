@@ -15,7 +15,7 @@ public class FakeMessage implements Envelope<UUID> {
     private UUID recipientId;
 
     @Override
-    public Envelope<UUID> readress(UUID senderId, UUID recipientId) {
+    public Envelope<UUID> readdress(UUID senderId, UUID recipientId) {
         return new FakeMessage(senderId, recipientId);
     }
 }

@@ -27,5 +27,5 @@ public interface Envelope<K> {
      * @param recipientId new recipient id
      * @return some instance containing new data
      */
-    Envelope<K> readress(K senderId, K recipientId);
+    Envelope<K> readdress(K senderId, K recipientId);
 }

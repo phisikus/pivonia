@@ -164,7 +164,7 @@ class ClientPoolImplSpec extends Specification {
             }
 
             @Override
-            Envelope readress(Object senderId, Object recipientId) {
+            Envelope readdress(Object senderId, Object recipientId) {
                 return this
             }
         }

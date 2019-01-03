@@ -39,7 +39,7 @@ public class IdLayer<K, T extends Envelope<K>> implements Middleware<T> {
 
     @Override
     public Optional<T> handleOutgoingMessage(T message) {
-        T newEnvelope = (T) message.readress(id, message.getRecipientId());
+        T newEnvelope = (T) message.readdress(id, message.getRecipientId());
         return Optional.of(newEnvelope);
     }
 
