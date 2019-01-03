@@ -2,12 +2,12 @@ package eu.phisikus.pivonia.middleware.layer.pool
 
 import eu.phisikus.pivonia.ServerTestUtils
 import eu.phisikus.pivonia.api.Client
+import eu.phisikus.pivonia.api.EmptyEnvelope
 import eu.phisikus.pivonia.api.MessageHandler
 import eu.phisikus.pivonia.api.pool.MessageWithClient
 import eu.phisikus.pivonia.converter.DaggerConverterComponent
 import eu.phisikus.pivonia.crypto.CryptoModule
 import eu.phisikus.pivonia.crypto.DaggerCryptoComponent
-import eu.phisikus.pivonia.middleware.layer.pool.test.FakeMessage
 import eu.phisikus.pivonia.tcp.TCPClient
 import eu.phisikus.pivonia.tcp.TCPServer
 import io.reactivex.observers.TestObserver
@@ -18,7 +18,7 @@ import spock.util.concurrent.PollingConditions
 class ClientPoolImplITSpec extends Specification {
 
     @Subject
-    def clientPool = new ClientPoolImpl(FakeMessage)
+    def clientPool = new ClientPoolImpl(EmptyEnvelope)
 
     def encryptionKey = UUID.randomUUID().toString().getBytes()
     def cryptoModule = new CryptoModule(encryptionKey)
@@ -49,9 +49,9 @@ class ClientPoolImplITSpec extends Specification {
         clientPool.getServerMessages().subscribe(listener)
 
         when: "Message is sent to the server"
-        def sendingNode = UUID.randomUUID()
-        def receivingNode = UUID.randomUUID()
-        def message = new FakeMessage(sendingNode, receivingNode)
+        def sendingNode = UUID.randomUUID().toString()
+        def receivingNode = UUID.randomUUID().toString()
+        def message = new EmptyEnvelope(sendingNode, receivingNode)
         client.send(message)
 
         then: "Message is received by the server and registered through pool handler"
@@ -71,11 +71,11 @@ class ClientPoolImplITSpec extends Specification {
 
     def "Should register client under new ID when it accepts message from server"() {
         given: "Server is running"
-        def serverId = UUID.randomUUID()
+        def serverId = UUID.randomUUID().toString()
         def server = new TCPServer(converter).bind(PORT, buildEchoHandler(serverId)).get()
 
         and: "Client is connected and added to the pool"
-        def clientId = UUID.randomUUID()
+        def clientId = UUID.randomUUID().toString()
         def client = clientPool.addUsingBuilder({
             handler -> new TCPClient(converter).connect("localhost", PORT, handler)
         }).get()
@@ -86,11 +86,11 @@ class ClientPoolImplITSpec extends Specification {
         clientPool.getClientMessages().subscribe(listener)
 
         when: "Message is sent to the server"
-        def message = new FakeMessage(clientId, serverId)
+        def message = new EmptyEnvelope(clientId, serverId)
         client.send(message)
 
         then: "Message is sent back from the server to the client and pushed to the client message stream"
-        def expectedMessage = new FakeMessage(serverId, clientId)
+        def expectedMessage = new EmptyEnvelope(serverId, clientId)
         pollingConditions.eventually {
             listener.assertValueCount(1)
             def actualEvent = listener.values().first() as MessageWithClient
@@ -106,19 +106,16 @@ class ClientPoolImplITSpec extends Specification {
     }
 
 
-    def buildEchoHandler(UUID senderId) {
-        return new MessageHandler<FakeMessage>() {
-
+    def buildEchoHandler(String senderId) {
+        return new MessageHandler<EmptyEnvelope>() {
             @Override
-            void handleMessage(FakeMessage incomingMessage, Client client) {
-                incomingMessage.setRecipientId(incomingMessage.getSenderId())
-                incomingMessage.setSenderId(senderId)
-                client.send(incomingMessage)
+            void handleMessage(EmptyEnvelope incomingMessage, Client client) {
+                client.send(new EmptyEnvelope(senderId, incomingMessage.getSenderId()))
             }
 
             @Override
             Class getMessageType() {
-                return FakeMessage
+                return EmptyEnvelope
             }
         }
 

@@ -1,6 +1,6 @@
 package eu.phisikus.pivonia.middleware.layer
 
-import eu.phisikus.pivonia.middleware.layer.pool.test.FakeMessage
+import eu.phisikus.pivonia.api.EmptyEnvelope
 import spock.lang.Specification
 import spock.lang.Subject
 
@@ -11,7 +11,7 @@ class IdLayerSpec extends Specification {
 
     def "Should set sender ID for outgoing message"() {
         given: "there is a message with defined recipient"
-        final message = new FakeMessage(null, UUID.randomUUID())
+        final message = new EmptyEnvelope<UUID>(null, UUID.randomUUID())
 
         when: "handling outgoing message"
         def actualMessage = idLayer.handleOutgoingMessage(message)
@@ -22,7 +22,7 @@ class IdLayerSpec extends Specification {
 
     def "Should pass message with correct recipient ID"() {
         given: "there is a message with correct recipient ID"
-        final message = new FakeMessage(null, idLayer.getId())
+        final message = new EmptyEnvelope(null, idLayer.getId())
 
         when: "handling incoming message"
         def actualMessage = idLayer.handleIncomingMessage(message)
@@ -34,7 +34,7 @@ class IdLayerSpec extends Specification {
 
     def "Should reject messages without matching recipient ID"() {
         given: "there is a message with correct recipient ID"
-        final message = new FakeMessage(null, UUID.randomUUID())
+        final message = new EmptyEnvelope(null, UUID.randomUUID())
 
         when: "handling incoming message"
         def actualMessage = idLayer.handleIncomingMessage(message)
