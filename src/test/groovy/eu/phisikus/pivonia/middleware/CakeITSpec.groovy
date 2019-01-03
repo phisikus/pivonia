@@ -2,8 +2,9 @@ package eu.phisikus.pivonia.middleware
 
 import eu.phisikus.pivonia.api.Client
 import eu.phisikus.pivonia.api.TestMessage
+import eu.phisikus.pivonia.middleware.layer.ReturnLayer
 import eu.phisikus.pivonia.middleware.test.FirstMiddleware
-import eu.phisikus.pivonia.middleware.test.LastMiddleware
+
 import eu.phisikus.pivonia.middleware.test.MiddleMiddleware
 import spock.lang.Specification
 import spock.lang.Subject
@@ -23,7 +24,7 @@ class CakeITSpec extends Specification {
                 .addLayer(new MiddleMiddleware(2))
                 .addLayer(new MiddleMiddleware(3))
                 .addLayer(new MiddleMiddleware(4))
-                .addLayer(new LastMiddleware())
+                .addLayer(new ReturnLayer())
 
         and: "some test messages"
         def testMessage = new TestMessage(0L, "general", "Hello ")
