@@ -1,6 +1,6 @@
 package eu.phisikus.pivonia.tcp
 
-import eu.phisikus.pivonia.ServerTestUtils
+import eu.phisikus.pivonia.test.ServerTestUtils
 import eu.phisikus.pivonia.api.TestMessage
 import eu.phisikus.pivonia.converter.plaintext.JacksonBSONConverter
 import spock.lang.Shared

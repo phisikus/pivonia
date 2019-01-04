@@ -1,15 +1,9 @@
 package eu.phisikus.pivonia.crypto
 
-import com.google.crypto.tink.CleartextKeysetHandle
-import com.google.crypto.tink.JsonKeysetWriter
-import com.google.crypto.tink.KeysetHandle
-import com.google.crypto.tink.aead.AeadConfig
-import com.google.crypto.tink.aead.AeadKeyTemplates
+import eu.phisikus.pivonia.test.CryptoUtils
 import org.apache.tools.ant.util.FileUtils
 import spock.lang.Specification
 import spock.lang.Subject
-
-import java.nio.charset.Charset
 
 class SymmetricalEncryptorSpec extends Specification {
 
@@ -18,8 +12,8 @@ class SymmetricalEncryptorSpec extends Specification {
     def testKeyFilename
 
     void setup() {
-        testKeyFilename = buildRandomKeyset()
-        def testKeyContent = new FileInputStream(testKeyFilename).getBytes()
+        testKeyFilename = CryptoUtils.buildRandomKeyset()
+        def testKeyContent = CryptoUtils.getKeysetContent(testKeyFilename)
         encryptor = new SymmetricalEncryptor(testKeyContent)
     }
 
@@ -31,7 +25,7 @@ class SymmetricalEncryptorSpec extends Specification {
     def "Object can be and encrypted and decrypted"() {
 
         given: "there is a set of random input bytes"
-        def expectedBytes = getRandomBytes()
+        def expectedBytes = CryptoUtils.getRandomBytes()
 
         when: "encryption and decryption is performed"
         def encryptedBytes = encryptor.encrypt(expectedBytes)
@@ -40,18 +34,5 @@ class SymmetricalEncryptorSpec extends Specification {
         then: "decrypted object is equal to the one that was serialized"
         actualBytes == expectedBytes
 
-    }
-
-    private byte[] getRandomBytes() {
-        UUID.randomUUID().toString().getBytes(Charset.defaultCharset())
-    }
-
-    private String buildRandomKeyset() {
-        AeadConfig.register()
-        def keysetHandle = KeysetHandle.generateNew(AeadKeyTemplates.AES128_GCM)
-        def testKeyFilename = UUID.randomUUID().toString() + ".json"
-        def keysetWriter = JsonKeysetWriter.withPath(testKeyFilename)
-        CleartextKeysetHandle.write(keysetHandle, keysetWriter)
-        testKeyFilename
     }
 }

@@ -1,6 +1,6 @@
 package eu.phisikus.pivonia.middleware.layer.pool
 
-import eu.phisikus.pivonia.ServerTestUtils
+import eu.phisikus.pivonia.test.ServerTestUtils
 import eu.phisikus.pivonia.api.Client
 import eu.phisikus.pivonia.api.EmptyEnvelope
 import eu.phisikus.pivonia.api.MessageHandler

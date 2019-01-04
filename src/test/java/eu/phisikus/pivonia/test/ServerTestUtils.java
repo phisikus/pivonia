@@ -1,4 +1,4 @@
-package eu.phisikus.pivonia;
+package eu.phisikus.pivonia.test;
 
 import java.io.IOException;
 import java.net.ServerSocket;

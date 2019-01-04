@@ -1,6 +1,6 @@
 package eu.phisikus.pivonia.tcp
 
-import eu.phisikus.pivonia.ServerTestUtils
+import eu.phisikus.pivonia.test.ServerTestUtils
 import eu.phisikus.pivonia.api.Client
 import eu.phisikus.pivonia.api.MessageHandler
 import eu.phisikus.pivonia.api.Server
