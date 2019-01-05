@@ -1,13 +1,13 @@
-package eu.phisikus.pivonia;
+package eu.phisikus.pivonia.integration;
 
 import eu.phisikus.pivonia.api.pool.Envelope;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode
+@ToString
 class TimeMessage implements Envelope<String> {
     private String senderId;
     private String recipientId;
