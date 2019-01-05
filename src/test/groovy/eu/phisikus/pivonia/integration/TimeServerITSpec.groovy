@@ -25,6 +25,7 @@ import java.util.concurrent.ConcurrentLinkedQueue
  *
  * This test creates a "Cake" that works like a time server.
  * Client sends a message and proper timestamp is returned.
+ * Both outgoing and incoming traffic are encrypted.
  *
  * Layers look like that:
  *
