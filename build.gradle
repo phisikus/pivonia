@@ -38,8 +38,8 @@ dependencies {
     /**
      * Lombok
      */
-    annotationProcessor 'org.projectlombok:lombok:1.18.2'
-    implementation 'org.projectlombok:lombok:1.18.2'
+    annotationProcessor 'org.projectlombok:lombok:1.18.4'
+    implementation 'org.projectlombok:lombok:1.18.4'
 
     /**
      * Dependency Injection
@@ -67,8 +67,8 @@ dependencies {
     /**
      * Testing
      */
-    testCompile 'org.codehaus.groovy:groovy-all:2.5.2'
-    testCompile 'org.spockframework:spock-core:1.1-groovy-2.4'
+    testCompile 'org.codehaus.groovy:groovy-all:2.5.5'
+    testCompile 'org.spockframework:spock-core:1.2-groovy-2.5'
     testCompile 'cglib:cglib-nodep:3.2.8'
     testCompile 'org.objenesis:objenesis:2.6'
 
