@@ -28,7 +28,6 @@ targetCompatibility = JavaVersion.VERSION_1_10
  */
 
 repositories {
-    jcenter()
     mavenCentral()
 }
 
