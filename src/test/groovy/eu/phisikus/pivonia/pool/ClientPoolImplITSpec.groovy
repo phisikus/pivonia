@@ -1,4 +1,4 @@
-package eu.phisikus.pivonia.middleware.layer.pool
+package eu.phisikus.pivonia.pool
 
 import eu.phisikus.pivonia.test.ServerTestUtils
 import eu.phisikus.pivonia.api.Client

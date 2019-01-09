@@ -1,10 +1,9 @@
-package eu.phisikus.pivonia.middleware.layer.pool
+package eu.phisikus.pivonia.pool
 
 import eu.phisikus.pivonia.api.Client
 import eu.phisikus.pivonia.api.Server
 import eu.phisikus.pivonia.api.pool.Envelope
 import eu.phisikus.pivonia.api.pool.MessageWithClient
-import eu.phisikus.pivonia.middleware.layer.pool.test.LoopbackClient
 import io.reactivex.observers.TestObserver
 import io.vavr.control.Try
 import spock.lang.Specification
