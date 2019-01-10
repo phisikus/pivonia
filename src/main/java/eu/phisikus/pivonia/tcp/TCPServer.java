@@ -40,6 +40,7 @@ public class TCPServer implements Server {
     @Override
     public Try<Server> bind(String address, int port) {
         TCPServer newServer = new TCPServer(bsonConverter);
+        newServer.handlers = handlers;
         try {
             newServer.serverSocket = newServer.createAndBindServerSocket(address, port);
         } catch (IOException e) {
