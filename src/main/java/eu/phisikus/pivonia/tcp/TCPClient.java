@@ -111,6 +111,7 @@ public class TCPClient implements Client {
         var newClient = new TCPClient(bsonConverter);
         var clientAddress = new InetSocketAddress(address, port);
         newClient.clientChannel = SocketChannel.open(clientAddress);
+        newClient.handlers = handlers;
         return newClient;
     }
 

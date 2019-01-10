@@ -29,6 +29,7 @@ public interface BSONConverter {
 
     /**
      * Enable deserialization for object of certain class.
+     *
      * @param type class object of the type
      * @param <T> type of the object
      */
