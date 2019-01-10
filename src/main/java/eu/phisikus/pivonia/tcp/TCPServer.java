@@ -4,6 +4,7 @@ import eu.phisikus.pivonia.api.MessageHandler;
 import eu.phisikus.pivonia.api.Server;
 import eu.phisikus.pivonia.converter.BSONConverter;
 import eu.phisikus.pivonia.tcp.handlers.AcceptHandler;
+import io.vavr.collection.List;
 import io.vavr.control.Try;
 
 import javax.inject.Inject;
@@ -18,6 +19,7 @@ public class TCPServer implements Server {
     private AsynchronousServerSocketChannel serverSocket;
     private AsynchronousChannelGroup serverThreads;
     private BSONConverter bsonConverter;
+    private List<MessageHandler> handlers = List.empty();
 
     @Inject
     public TCPServer(BSONConverter bsonConverter) {
@@ -31,20 +33,20 @@ public class TCPServer implements Server {
     }
 
     @Override
-    public Try<Server> bind(int port, MessageHandler messageHandler) {
-        return bind(ALL_INTERFACES_ADDRESS, port, messageHandler);
+    public Try<Server> bind(int port) {
+        return bind(ALL_INTERFACES_ADDRESS, port);
     }
 
     @Override
-    public Try<Server> bind(String address, int port, MessageHandler messageHandler) {
-        bsonConverter.enableType(messageHandler.getMessageType());
+    public Try<Server> bind(String address, int port) {
         TCPServer newServer = new TCPServer(bsonConverter);
         try {
             newServer.serverSocket = newServer.createAndBindServerSocket(address, port);
         } catch (IOException e) {
             return Try.failure(e);
         }
-        newServer.serverSocket.accept(messageHandler, new AcceptHandler(bsonConverter, newServer.serverSocket));
+        handlers.forEach(messageHandler -> bsonConverter.enableType(messageHandler.getMessageType()));
+        newServer.serverSocket.accept(handlers, new AcceptHandler(bsonConverter, newServer.serverSocket));
         return Try.success(newServer);
     }
 
@@ -56,5 +58,11 @@ public class TCPServer implements Server {
         return AsynchronousServerSocketChannel
                 .open(serverThreads)
                 .bind(serverSocketAddress);
+    }
+
+    @Override
+    public <T> Server addHandler(MessageHandler<T> messageHandler) {
+        handlers = handlers.push(messageHandler);
+        return this;
     }
 }

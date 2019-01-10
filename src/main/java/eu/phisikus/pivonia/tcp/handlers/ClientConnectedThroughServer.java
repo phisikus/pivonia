@@ -30,16 +30,22 @@ class ClientConnectedThroughServer implements Client {
         }
     }
 
+    @Override
+    public Try<Client> connect(String address, int port) {
+        return Try.success(this);
+    }
+
+    @Override
+    public <T> Client addHandler(MessageHandler<T> messageHandler) {
+        return this;
+    }
+
     private void writeMessage(ByteBuffer serializedMessage) {
         while (serializedMessage.hasRemaining()) {
             clientChannel.write(serializedMessage);
         }
     }
 
-    @Override
-    public Try<Client> connect(String address, int port, MessageHandler messageHandler) {
-        return Try.success(this); // we are already connected
-    }
 
     @Override
     public void close() throws Exception {

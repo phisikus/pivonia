@@ -48,7 +48,7 @@ class ClientFailureSpec extends Specification {
         def client = new TCPClient(bsonConverter)
 
         when:
-        def connectedClient = client.connect("localhost", ServerTestUtils.getRandomPort(), null)
+        def connectedClient = client.addHandler(dummyHandler).connect("localhost", ServerTestUtils.getRandomPort())
 
         then:
         connectedClient.isFailure()
@@ -59,8 +59,8 @@ class ClientFailureSpec extends Specification {
         given:
         def testMessage = new TestMessage()
         def port = ServerTestUtils.getRandomPort()
-        def server = new TCPServer(bsonConverter).bind(port, dummyHandler).get()
-        def client = new TCPClient(bsonConverter).connect("localhost", port, dummyHandler).get()
+        def server = new TCPServer(bsonConverter).addHandler(dummyHandler).bind(port).get()
+        def client = new TCPClient(bsonConverter).addHandler(dummyHandler).connect("localhost", port).get()
 
         when:
         client.close()

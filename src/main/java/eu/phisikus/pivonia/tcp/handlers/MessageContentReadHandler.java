@@ -3,6 +3,7 @@ package eu.phisikus.pivonia.tcp.handlers;
 import eu.phisikus.pivonia.api.MessageHandler;
 import eu.phisikus.pivonia.converter.BSONConverter;
 import eu.phisikus.pivonia.utils.BufferUtils;
+import io.vavr.collection.List;
 import io.vavr.control.Try;
 import lombok.extern.log4j.Log4j2;
 
@@ -11,7 +12,7 @@ import java.nio.channels.AsynchronousSocketChannel;
 import java.nio.channels.CompletionHandler;
 
 @Log4j2
-class MessageContentReadHandler implements CompletionHandler<Integer, MessageHandler> {
+class MessageContentReadHandler implements CompletionHandler<Integer, List<MessageHandler>> {
 
     private final AsynchronousSocketChannel clientChannel;
     private final ByteBuffer communicationBuffer;
@@ -26,26 +27,26 @@ class MessageContentReadHandler implements CompletionHandler<Integer, MessageHan
     }
 
     @Override
-    public void completed(Integer availableBytes, MessageHandler messageHandler) {
+    public void completed(Integer availableBytes, List<MessageHandler> handlers) {
         int bytesMinusSizeHeader = expectedMessageSize - BufferUtils.INT_SIZE;
         if (communicationBuffer.position() >= bytesMinusSizeHeader) {
-            deserializeAndHandleMessage(messageHandler);
-            orderNextMessageSizeRead(messageHandler);
+            deserializeAndHandleMessage(handlers);
+            orderNextMessageSizeRead(handlers);
         } else {
-            clientChannel.read(communicationBuffer, messageHandler, this);
+            clientChannel.read(communicationBuffer, handlers, this);
         }
     }
 
-    private void orderNextMessageSizeRead(MessageHandler messageHandler) {
+    private void orderNextMessageSizeRead(List<MessageHandler> handlers) {
         var messageSizeReadBuffer = BufferUtils.getBufferForMessageSize();
         var readCallback = new MessageSizeReadHandler(bsonConverter, clientChannel, messageSizeReadBuffer);
-        clientChannel.read(messageSizeReadBuffer, messageHandler, readCallback);
+        clientChannel.read(messageSizeReadBuffer, handlers, readCallback);
     }
 
-    private void deserializeAndHandleMessage(MessageHandler messageHandler) {
+    private void deserializeAndHandleMessage(List<MessageHandler> handlers) {
         var messageBuffer = getFullMessageBuffer();
         Try.of(() -> bsonConverter.deserialize(messageBuffer.array()))
-                .onSuccess(message -> handleMessage(message, messageHandler))
+                .onSuccess(message -> handleMessage(message, handlers))
                 .onFailure(log::error);
     }
 
@@ -54,12 +55,17 @@ class MessageContentReadHandler implements CompletionHandler<Integer, MessageHan
         return BufferUtils.getBufferWithCombinedSizeAndContent(expectedMessageSize, communicationBuffer);
     }
 
-    private <T> void handleMessage(T incomingMessage, MessageHandler messageHandler) {
-        messageHandler.handleMessage(incomingMessage, new ClientConnectedThroughServer(bsonConverter, clientChannel));
+    private <T> void handleMessage(T incomingMessage, List<MessageHandler> handlers) {
+        var messageType = incomingMessage.getClass();
+        handlers.filter(messageHandler -> messageHandler.getMessageType().equals(messageType))
+                .forEach(messageHandler -> messageHandler.handleMessage(
+                        incomingMessage,
+                        new ClientConnectedThroughServer(bsonConverter, clientChannel))
+                );
     }
 
     @Override
-    public void failed(Throwable exception, MessageHandler messageQueue) {
+    public void failed(Throwable exception, List<MessageHandler> handlers) {
         log.error(exception);
     }
 }

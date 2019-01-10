@@ -16,9 +16,14 @@ class LoopbackClient implements Client {
     }
 
     @Override
-    Try<Client> connect(String address, int port, MessageHandler messageHandler) {
-        this.messageHandler = messageHandler
+    Try<Client> connect(String address, int port) {
         return Try.success(this)
+    }
+
+    @Override
+    <T> Client addHandler(MessageHandler<T> messageHandler) {
+        this.messageHandler = messageHandler
+        return this
     }
 
     @Override

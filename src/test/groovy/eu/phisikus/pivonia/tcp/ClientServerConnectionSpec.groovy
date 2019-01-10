@@ -1,11 +1,11 @@
 package eu.phisikus.pivonia.tcp
 
-import eu.phisikus.pivonia.test.ServerTestUtils
 import eu.phisikus.pivonia.api.Client
 import eu.phisikus.pivonia.api.MessageHandler
 import eu.phisikus.pivonia.api.Server
 import eu.phisikus.pivonia.api.TestMessage
 import eu.phisikus.pivonia.converter.plaintext.JacksonBSONConverter
+import eu.phisikus.pivonia.test.ServerTestUtils
 import spock.lang.Shared
 import spock.lang.Specification
 import spock.lang.Timeout
@@ -18,6 +18,18 @@ class ClientServerConnectionSpec extends Specification {
     @Shared
     def bsonConverter = new JacksonBSONConverter()
 
+    final dummyHandler = new MessageHandler() {
+        @Override
+        void handleMessage(Object incomingMessage, Client client) {
+            // nothing to do here
+        }
+
+        @Override
+        Class getMessageType() {
+            return Object
+        }
+    }
+
     @Timeout(value = 10, unit = TimeUnit.SECONDS)
     def "Client should be able to send message to server"() {
         given:
@@ -28,7 +40,7 @@ class ClientServerConnectionSpec extends Specification {
         when:
         def port = ServerTestUtils.getRandomPort()
         def server = startServer(port, actualMessageHolder)
-        def messageSent = client.connect("localhost", port, null).get().send(testMessage)
+        def messageSent = client.addHandler(dummyHandler).connect("localhost", port).get().send(testMessage)
 
         then:
         messageSent.isSuccess()
@@ -50,7 +62,8 @@ class ClientServerConnectionSpec extends Specification {
         when:
         def server = startEchoServer(port)
         def connectedClient = client
-                .connect("localhost", port, getFutureCompletingHandler(actualMessageHolder))
+                .addHandler(getFutureCompletingHandler(actualMessageHolder))
+                .connect("localhost", port)
                 .get()
         def sendResult = connectedClient.send(testMessage)
 
@@ -66,7 +79,7 @@ class ClientServerConnectionSpec extends Specification {
 
     private Server startServer(int port, messageReceivedLatch) {
         MessageHandler messageHandler = getFutureCompletingHandler(messageReceivedLatch)
-        return new TCPServer(bsonConverter).bind(port, messageHandler).get()
+        return new TCPServer(bsonConverter).addHandler(messageHandler).bind(port).get()
     }
 
     private MessageHandler getFutureCompletingHandler(messageHolder) {
@@ -86,7 +99,7 @@ class ClientServerConnectionSpec extends Specification {
 
     private Server startEchoServer(port) {
         MessageHandler<TestMessage> messageHandler = getEchoMessageHandler()
-        return new TCPServer(bsonConverter).bind(port, messageHandler).get()
+        return new TCPServer(bsonConverter).addHandler(messageHandler).bind(port).get()
     }
 
     static MessageHandler<TestMessage> getEchoMessageHandler() {

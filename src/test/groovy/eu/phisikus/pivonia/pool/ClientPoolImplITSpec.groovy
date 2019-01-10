@@ -37,12 +37,12 @@ class ClientPoolImplITSpec extends Specification {
     def "Should register client when registered server accepts message from new node"() {
         given: "Server is added to the pool"
         def server = clientPool.addSourceUsingBuilder({
-            handler -> new TCPServer(converter).bind(PORT, handler)
+            handler -> new TCPServer(converter).addHandler(handler).bind(PORT)
         }).get()
 
         and: "Client is prepared to send message to the server"
         def messageHandler = Mock(MessageHandler)
-        def client = new TCPClient(converter).connect("localhost", PORT, messageHandler).get()
+        def client = new TCPClient(converter).addHandler(messageHandler).connect("localhost", PORT).get()
 
         and: "Incoming message stream for the pool is monitored"
         def listener = new TestObserver()
@@ -72,12 +72,12 @@ class ClientPoolImplITSpec extends Specification {
     def "Should register client under new ID when it accepts message from server"() {
         given: "Server is running"
         def serverId = UUID.randomUUID().toString()
-        def server = new TCPServer(converter).bind(PORT, buildEchoHandler(serverId)).get()
+        def server = new TCPServer(converter).addHandler(buildEchoHandler(serverId)).bind(PORT).get()
 
         and: "Client is connected and added to the pool"
         def clientId = UUID.randomUUID().toString()
         def client = clientPool.addUsingBuilder({
-            handler -> new TCPClient(converter).connect("localhost", PORT, handler)
+            handler -> new TCPClient(converter).addHandler(handler).connect("localhost", PORT)
         }).get()
 
 

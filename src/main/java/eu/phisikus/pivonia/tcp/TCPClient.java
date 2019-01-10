@@ -4,6 +4,7 @@ import eu.phisikus.pivonia.api.Client;
 import eu.phisikus.pivonia.api.MessageHandler;
 import eu.phisikus.pivonia.converter.BSONConverter;
 import eu.phisikus.pivonia.utils.BufferUtils;
+import io.vavr.collection.List;
 import io.vavr.control.Try;
 import lombok.extern.log4j.Log4j2;
 
@@ -22,6 +23,7 @@ public class TCPClient implements Client {
     private SocketChannel clientChannel;
     private BSONConverter bsonConverter;
     private ExecutorService messageListener = Executors.newSingleThreadExecutor();
+    private List<MessageHandler> handlers = List.empty();
 
     @Inject
     public TCPClient(BSONConverter bsonConverter) {
@@ -30,44 +32,60 @@ public class TCPClient implements Client {
 
 
     @Override
-    public Try<Client> connect(String address, int port, MessageHandler messageHandler) {
+    public Try<Client> connect(String address, int port) {
         try {
             TCPClient newClient = getNewOpenClient(address, port);
             newClient.waitForReadyConnection();
-            newClient.bindMessageHandler(messageHandler);
+            newClient.bindMessageHandlers(handlers);
             return Try.success(newClient);
         } catch (IOException e) {
             return Try.failure(e);
         }
     }
 
-    private void bindMessageHandler(MessageHandler messageHandler) {
+    @Override
+    public <T> Client addHandler(MessageHandler<T> messageHandler) {
+        handlers = handlers.push(messageHandler);
+        return this;
+    }
+
+    private void bindMessageHandlers(List<MessageHandler> handlers) {
         messageListener.submit(() -> {
             try {
-                bsonConverter.enableType(messageHandler.getMessageType());
-                listenForMessages(messageHandler);
+                listenForMessages(handlers);
             } catch (IOException | ClassNotFoundException exception) {
                 log.error(exception);
             }
         });
     }
 
-    private void listenForMessages(MessageHandler messageHandler) throws IOException, ClassNotFoundException {
+    private void listenForMessages(List<MessageHandler> handlers) throws IOException, ClassNotFoundException {
+        registerTypes(handlers);
         while (clientChannel.isOpen()) {
             int messageSize = readMessageSize();
             if (messageSize > 0) {
-                readAndHandleMessage(messageSize, messageHandler);
+                readAndHandleMessage(messageSize, handlers);
             } else {
                 break;
             }
         }
     }
 
-    private void readAndHandleMessage(int messageSize, MessageHandler messageHandler) throws IOException, ClassNotFoundException {
+    private void registerTypes(List<MessageHandler> handlers) {
+        handlers.forEach(messageHandler -> bsonConverter.enableType(messageHandler.getMessageType()));
+    }
+
+    private void readAndHandleMessage(int messageSize, List<MessageHandler> handlers) throws IOException, ClassNotFoundException {
         var contentBuffer = readMessageContent(messageSize);
         var messageBuffer = BufferUtils.getBufferWithCombinedSizeAndContent(messageSize, contentBuffer);
         var incomingMessage = bsonConverter.deserialize(messageBuffer.array());
-        messageHandler.handleMessage(incomingMessage, this);
+        handleMessage(incomingMessage, handlers);
+    }
+
+    private <T> void handleMessage(T incomingMessage, List<MessageHandler> handlers) {
+        var messageType = incomingMessage.getClass();
+        handlers.filter(messageHandler -> messageHandler.getMessageType().equals(messageType))
+                .forEach(messageHandler -> messageHandler.handleMessage(incomingMessage, this));
     }
 
     private ByteBuffer readMessageContent(int messageSize) throws IOException {

@@ -24,7 +24,7 @@ class ClientPoolImplSpec extends Specification {
     def "Should return existing client for given ID"() {
         given: "Client was added to the pool"
         def client = new LoopbackClient()
-        pool.addUsingBuilder({ it -> client.connect(null, 0, it) })
+        pool.addUsingBuilder({ handler -> client.addHandler(handler).connect(null, 0) })
 
         when: "Client receives a message with sender's ID"
         def message = buildMessage(randomId)
@@ -37,7 +37,7 @@ class ClientPoolImplSpec extends Specification {
     def "Should check if client exists for given ID"() {
         given: "Client was added to the pool"
         def client = new LoopbackClient()
-        pool.addUsingBuilder({ it -> client.connect(null, 0, it) })
+        pool.addUsingBuilder({ handler -> client.addHandler(handler).connect(null, 0) })
 
         when: "Client receives a message"
         def message = buildMessage(randomId)
@@ -50,8 +50,8 @@ class ClientPoolImplSpec extends Specification {
     def "Should add client when message comes through registered server"() {
         given: "Server was added to the pool"
         def client = new LoopbackClient()
-        pool.addSourceUsingBuilder({ it ->
-            client.connect(null, 0, it)
+        pool.addSourceUsingBuilder({ handler ->
+            client.addHandler(handler).connect(null, 0)
             Try.success(Mock(Server))
         })
 
@@ -67,8 +67,8 @@ class ClientPoolImplSpec extends Specification {
         given: "Clients were added to the pool"
         def firstClient = new LoopbackClient()
         def secondClient = new LoopbackClient()
-        pool.addUsingBuilder({ it -> firstClient.connect(null, 0, it) })
-        pool.addUsingBuilder({ it -> secondClient.connect(null, 0, it) })
+        pool.addUsingBuilder({ handler -> firstClient.addHandler(handler).connect(null, 0) })
+        pool.addUsingBuilder({ handler -> secondClient.addHandler(handler).connect(null, 0) })
 
         and: "Clients receive messages"
         def message = buildMessage(UUID.randomUUID())
@@ -109,7 +109,7 @@ class ClientPoolImplSpec extends Specification {
     def "Should expose client messages as a stream"() {
         given: "There is connected client"
         def client = pool.addUsingBuilder({
-            messageHandler -> new LoopbackClient().connect(null, 0, messageHandler)
+            messageHandler -> new LoopbackClient().addHandler(messageHandler).connect(null, 0)
         }).get()
 
         and: "Message stream is monitored"
