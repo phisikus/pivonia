@@ -1,10 +1,8 @@
 package eu.phisikus.pivonia.tcp
 
-import eu.phisikus.pivonia.api.Client
-import eu.phisikus.pivonia.api.MessageHandler
-import eu.phisikus.pivonia.test.ServerTestUtils
 import eu.phisikus.pivonia.api.TestMessage
 import eu.phisikus.pivonia.converter.plaintext.JacksonBSONConverter
+import eu.phisikus.pivonia.test.ServerTestUtils
 import spock.lang.Shared
 import spock.lang.Specification
 import spock.lang.Timeout
@@ -15,18 +13,6 @@ class ClientFailureSpec extends Specification {
 
     @Shared
     def bsonConverter = new JacksonBSONConverter()
-
-    final dummyHandler = new MessageHandler() {
-        @Override
-        void handleMessage(Object incomingMessage, Client client) {
-            // nothing to do here
-        }
-
-        @Override
-        Class getMessageType() {
-            return Object
-        }
-    }
 
 
     @Timeout(value = 10, unit = TimeUnit.SECONDS)
@@ -48,7 +34,7 @@ class ClientFailureSpec extends Specification {
         def client = new TCPClient(bsonConverter)
 
         when:
-        def connectedClient = client.addHandler(dummyHandler).connect("localhost", ServerTestUtils.getRandomPort())
+        def connectedClient = client.connect("localhost", ServerTestUtils.getRandomPort())
 
         then:
         connectedClient.isFailure()
@@ -59,8 +45,8 @@ class ClientFailureSpec extends Specification {
         given:
         def testMessage = new TestMessage()
         def port = ServerTestUtils.getRandomPort()
-        def server = new TCPServer(bsonConverter).addHandler(dummyHandler).bind(port).get()
-        def client = new TCPClient(bsonConverter).addHandler(dummyHandler).connect("localhost", port).get()
+        def server = new TCPServer(bsonConverter).bind(port).get()
+        def client = new TCPClient(bsonConverter).connect("localhost", port).get()
 
         when:
         client.close()

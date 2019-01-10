@@ -15,18 +15,6 @@ class ClientServerDataTransferSpec extends Specification {
     @Shared
     def bsonConverter = new JacksonBSONConverter()
 
-    final dummyHandler = new MessageHandler() {
-        @Override
-        void handleMessage(Object incomingMessage, Client client) {
-            // nothing to do here
-        }
-
-        @Override
-        Class getMessageType() {
-            return Object
-        }
-    }
-
     def "Message with a lot of data should be sent by client and received by server"() {
         given: "Server is running"
         def testMessage = new TestMessage(1L, "bigTopic", getBigMessage())
@@ -35,7 +23,7 @@ class ClientServerDataTransferSpec extends Specification {
         def server = new TCPServer(bsonConverter).addHandler(buildMessageHandlerWithTrap(actualMessage)).bind(port)
 
         when: "Client is connected and message is sent"
-        def client = new TCPClient(bsonConverter).addHandler(dummyHandler).connect("localhost", port).get()
+        def client = new TCPClient(bsonConverter).connect("localhost", port).get()
         def sendResult = client.send(testMessage)
 
         then: "The operation finishes properly and received message is equal to expected"

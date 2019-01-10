@@ -18,17 +18,6 @@ class ClientServerConnectionSpec extends Specification {
     @Shared
     def bsonConverter = new JacksonBSONConverter()
 
-    final dummyHandler = new MessageHandler() {
-        @Override
-        void handleMessage(Object incomingMessage, Client client) {
-            // nothing to do here
-        }
-
-        @Override
-        Class getMessageType() {
-            return Object
-        }
-    }
 
     @Timeout(value = 10, unit = TimeUnit.SECONDS)
     def "Client should be able to send message to server"() {
@@ -40,7 +29,7 @@ class ClientServerConnectionSpec extends Specification {
         when:
         def port = ServerTestUtils.getRandomPort()
         def server = startServer(port, actualMessageHolder)
-        def messageSent = client.addHandler(dummyHandler).connect("localhost", port).get().send(testMessage)
+        def messageSent = client.connect("localhost", port).get().send(testMessage)
 
         then:
         messageSent.isSuccess()
