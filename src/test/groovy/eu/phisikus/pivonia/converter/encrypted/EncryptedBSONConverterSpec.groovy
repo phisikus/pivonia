@@ -26,7 +26,7 @@ class EncryptedBSONConverterSpec extends Specification {
 
         when: "serialization and encryption is performed and the decrypted result is deserialized"
         def serializedObject = converter.serialize(expectedObject)
-        def deserializedObject = converter.deserialize(serializedObject, TestMessage.class)
+        def deserializedObject = converter.deserialize(serializedObject)
 
         then: "deserialized object is equal to the one that was serialized"
         deserializedObject == expectedObject
@@ -35,9 +35,9 @@ class EncryptedBSONConverterSpec extends Specification {
         1 * mockConverter.serialize(expectedObject) >> mockData
         1 * mockEncryptor.encrypt(mockData) >> mockEncryptedData
         1 * mockConverter.serialize(mockWrappedEncryptedData) >> mockEncryptedSerializedData
-        1 * mockConverter.deserialize(mockEncryptedSerializedData, ByteArrayWrapper) >> mockWrappedEncryptedData
+        1 * mockConverter.deserialize(mockEncryptedSerializedData) >> mockWrappedEncryptedData
         1 * mockEncryptor.decrypt(mockEncryptedData) >> mockData
-        1 * mockConverter.deserialize(mockData, TestMessage) >> expectedObject
+        1 * mockConverter.deserialize(mockData) >> expectedObject
 
     }
 

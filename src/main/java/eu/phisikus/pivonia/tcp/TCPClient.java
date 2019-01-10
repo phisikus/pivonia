@@ -44,14 +44,15 @@ public class TCPClient implements Client {
     private void bindMessageHandler(MessageHandler messageHandler) {
         messageListener.submit(() -> {
             try {
+                bsonConverter.enableType(messageHandler.getMessageType());
                 listenForMessages(messageHandler);
-            } catch (IOException exception) {
+            } catch (IOException | ClassNotFoundException exception) {
                 log.error(exception);
             }
         });
     }
 
-    private void listenForMessages(MessageHandler messageHandler) throws IOException {
+    private void listenForMessages(MessageHandler messageHandler) throws IOException, ClassNotFoundException {
         while (clientChannel.isOpen()) {
             int messageSize = readMessageSize();
             if (messageSize > 0) {
@@ -62,10 +63,10 @@ public class TCPClient implements Client {
         }
     }
 
-    private void readAndHandleMessage(int messageSize, MessageHandler messageHandler) throws IOException {
+    private void readAndHandleMessage(int messageSize, MessageHandler messageHandler) throws IOException, ClassNotFoundException {
         var contentBuffer = readMessageContent(messageSize);
         var messageBuffer = BufferUtils.getBufferWithCombinedSizeAndContent(messageSize, contentBuffer);
-        var incomingMessage = bsonConverter.deserialize(messageBuffer.array(), messageHandler.getMessageType());
+        var incomingMessage = bsonConverter.deserialize(messageBuffer.array());
         messageHandler.handleMessage(incomingMessage, this);
     }
 

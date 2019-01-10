@@ -44,7 +44,7 @@ class MessageContentReadHandler implements CompletionHandler<Integer, MessageHan
 
     private void deserializeAndHandleMessage(MessageHandler messageHandler) {
         var messageBuffer = getFullMessageBuffer();
-        Try.of(() -> bsonConverter.deserialize(messageBuffer.array(), messageHandler.getMessageType()))
+        Try.of(() -> bsonConverter.deserialize(messageBuffer.array()))
                 .onSuccess(message -> handleMessage(message, messageHandler))
                 .onFailure(log::error);
     }

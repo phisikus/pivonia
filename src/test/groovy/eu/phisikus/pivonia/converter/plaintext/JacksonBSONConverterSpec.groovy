@@ -14,9 +14,12 @@ class JacksonBSONConverterSpec extends Specification {
         given: "our test object is a message"
         def expectedObject = new TestMessage(42L, "TestTopic", "TestMessage")
 
+        and: "test object's type is enabled"
+        converter.enableType(TestMessage.class)
+
         when: "serialization is performed and the result is deserialized"
         def serializedObject = converter.serialize(expectedObject)
-        def deserializedObject = converter.deserialize(serializedObject, TestMessage.class)
+        def deserializedObject = converter.deserialize(serializedObject)
 
         then: "deserialized object is equal to the one that was serialized"
         deserializedObject == expectedObject

@@ -37,6 +37,7 @@ public class TCPServer implements Server {
 
     @Override
     public Try<Server> bind(String address, int port, MessageHandler messageHandler) {
+        bsonConverter.enableType(messageHandler.getMessageType());
         TCPServer newServer = new TCPServer(bsonConverter);
         try {
             newServer.serverSocket = newServer.createAndBindServerSocket(address, port);

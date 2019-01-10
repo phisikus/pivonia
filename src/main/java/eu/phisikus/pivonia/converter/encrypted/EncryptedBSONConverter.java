@@ -34,10 +34,15 @@ class EncryptedBSONConverter implements BSONConverter {
     }
 
     @Override
-    public <T> T deserialize(byte[] serializedObject, Class<T> objectType) throws IOException {
-        var deserializedEncrypted = bsonConverter.deserialize(serializedObject, ByteArrayWrapper.class);
+    public <T> T deserialize(byte[] serializedObject) throws IOException, ClassNotFoundException {
+        ByteArrayWrapper deserializedEncrypted = bsonConverter.deserialize(serializedObject);
         var decryptedSerialized = encryptor.decrypt(deserializedEncrypted.getData());
-        var decryptedDeserialized = bsonConverter.deserialize(decryptedSerialized, objectType);
-        return decryptedDeserialized;
+        var decryptedDeserialized = bsonConverter.deserialize(decryptedSerialized);
+        return (T) decryptedDeserialized;
+    }
+
+    @Override
+    public <T> void enableType(Class<T> type) {
+        bsonConverter.enableType(type);
     }
 }
