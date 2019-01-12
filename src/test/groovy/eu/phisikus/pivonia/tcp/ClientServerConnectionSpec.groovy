@@ -21,23 +21,26 @@ class ClientServerConnectionSpec extends Specification {
 
     @Timeout(value = 10, unit = TimeUnit.SECONDS)
     def "Client should be able to send message to server"() {
-        given:
+        given: "message and client are created"
         def testMessage = new TestMessage(new Date().getTime(), "test", "Test TestMessage")
         def client = new TCPClient(bsonConverter)
         def actualMessageHolder = new CompletableFuture<TestMessage>()
 
-        when:
+        when: "server is running and client is connected"
         def port = ServerTestUtils.getRandomPort()
         def server = startServer(port, actualMessageHolder)
         def connectedClient = client.connect("localhost", port).get()
+
+
+        and: "message is sent using client"
         def messageSent = connectedClient.send(testMessage)
 
 
-        then:
+        then: "result is successful and message is received by the server"
         messageSent.isSuccess()
         actualMessageHolder.get() == testMessage
 
-        cleanup:
+        cleanup: "close server and connected client"
         server.close()
         connectedClient.close()
 
@@ -45,25 +48,27 @@ class ClientServerConnectionSpec extends Specification {
 
     @Timeout(value = 10, unit = TimeUnit.SECONDS)
     def "Client should be able to send message to server and receive it back"() {
-        given:
+        given: "client is created and test message is defined"
         def testMessage = new TestMessage(new Date().getTime(), "test", "Test TestMessage")
         def client = new TCPClient(bsonConverter)
         def actualMessageHolder = new CompletableFuture<TestMessage>()
         def port = ServerTestUtils.getRandomPort()
 
-        when:
+        when: "server is started and client connected"
         def server = startEchoServer(port)
         def connectedClient = client
                 .addHandler(getFutureCompletingHandler(actualMessageHolder))
                 .connect("localhost", port)
                 .get()
+
+        and: "message is sent using client"
         def sendResult = connectedClient.send(testMessage)
 
-        then:
+        then: "sending is successful and the client received the message back"
         sendResult.isSuccess()
         actualMessageHolder.get() == testMessage
 
-        cleanup:
+        cleanup: "close server and connected client"
         server.close()
         connectedClient.close()
 

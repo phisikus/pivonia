@@ -16,7 +16,7 @@ class ClientServerDataTransferSpec extends Specification {
     def bsonConverter = new JacksonBSONConverter()
 
     def "Message with a lot of data should be sent by client and received by server"() {
-        given: "Server is running"
+        given: "server is running"
         def testMessage = new TestMessage(1L, "bigTopic", getBigMessage())
         def actualMessage = new CompletableFuture<TestMessage>()
         def port = ServerTestUtils.getRandomPort()
@@ -25,21 +25,21 @@ class ClientServerDataTransferSpec extends Specification {
                 .bind(port)
                 .get()
 
-        when: "Client is connected and message is sent"
+        when: "client is connected and message is sent"
         def client = new TCPClient(bsonConverter).connect("localhost", port).get()
         def sendResult = client.send(testMessage)
 
-        then: "The operation finishes properly and received message is equal to expected"
+        then: "the operation finishes properly and received message is equal to expected"
         sendResult.isSuccess()
         actualMessage.get() == testMessage
 
-        cleanup:
+        cleanup: "close the server and client"
         server.close()
         client.close()
     }
 
     def "Message with a lot of data should be sent by client to the server and back"() {
-        given: "Server is running"
+        given: "server is running"
         def testMessage = new TestMessage(4L, "bigTopic", getBigMessage())
         def actualMessage = new CompletableFuture<TestMessage>()
         def port = ServerTestUtils.getRandomPort()
@@ -48,18 +48,18 @@ class ClientServerDataTransferSpec extends Specification {
                 .bind(port)
                 .get()
 
-        when: "Client is connected and message is sent"
+        when: "client is connected and message is sent"
         def client = new TCPClient(bsonConverter)
                 .addHandler(buildMessageHandlerWithTrap(actualMessage))
                 .connect("localhost", port)
                 .get()
         def sendResult = client.send(testMessage)
 
-        then: "The operation finishes properly and received message is equal to expected"
+        then: "the operation finishes properly and received message is equal to expected"
         sendResult.isSuccess()
         actualMessage.get() == testMessage
 
-        cleanup:
+        cleanup: "close the server and client"
         server.close()
         client.close()
     }

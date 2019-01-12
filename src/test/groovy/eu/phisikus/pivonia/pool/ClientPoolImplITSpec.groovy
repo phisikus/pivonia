@@ -35,61 +35,61 @@ class ClientPoolImplITSpec extends Specification {
     def PORT = ServerTestUtils.getRandomPort()
 
     def "Should register client when registered server accepts message from new node"() {
-        given: "Server is added to the pool"
+        given: "server is added to the pool"
         def server = clientPool.addSourceUsingBuilder({
             handler -> new TCPServer(converter).addHandler(handler).bind(PORT)
         }).get()
 
-        and: "Client is prepared to send message to the server"
+        and: "client is prepared to send message to the server"
         def messageHandler = Mock(MessageHandler)
         def client = new TCPClient(converter).addHandler(messageHandler).connect("localhost", PORT).get()
 
-        and: "Incoming message stream for the pool is monitored"
+        and: "incoming message stream for the pool is monitored"
         def listener = new TestObserver()
         clientPool.getServerMessages().subscribe(listener)
 
-        when: "Message is sent to the server"
+        when: "message is sent to the server"
         def sendingNode = UUID.randomUUID().toString()
         def receivingNode = UUID.randomUUID().toString()
         def message = new EmptyEnvelope(sendingNode, receivingNode)
         client.send(message)
 
-        then: "Message is received by the server and registered through pool handler"
+        then: "message is received by the server and registered through pool handler"
         pollingConditions.eventually {
             listener.assertValueCount(1)
             def actualEvent = listener.values().first() as MessageWithClient
             assert actualEvent.getMessage() == message
         }
 
-        and: "Client for the sender exists in the pool"
+        and: "client for the sender exists in the pool"
         clientPool.exists(sendingNode)
 
-        cleanup:
+        cleanup: "close client pool and server"
         clientPool.close()
         server.close()
     }
 
     def "Should register client under new ID when it accepts message from server"() {
-        given: "Server is running"
+        given: "server is running"
         def serverId = UUID.randomUUID().toString()
         def server = new TCPServer(converter).addHandler(buildEchoHandler(serverId)).bind(PORT).get()
 
-        and: "Client is connected and added to the pool"
+        and: "client is connected and added to the pool"
         def clientId = UUID.randomUUID().toString()
         def client = clientPool.addUsingBuilder({
             handler -> new TCPClient(converter).addHandler(handler).connect("localhost", PORT)
         }).get()
 
 
-        and: "Incoming message stream for the pool is monitored"
+        and: "incoming message stream for the pool is monitored"
         def listener = new TestObserver()
         clientPool.getClientMessages().subscribe(listener)
 
-        when: "Message is sent to the server"
+        when: "message is sent to the server"
         def message = new EmptyEnvelope(clientId, serverId)
         client.send(message)
 
-        then: "Message is sent back from the server to the client and pushed to the client message stream"
+        then: "message is sent back from the server to the client and pushed to the client message stream"
         def expectedMessage = new EmptyEnvelope(serverId, clientId)
         pollingConditions.eventually {
             listener.assertValueCount(1)
@@ -97,10 +97,10 @@ class ClientPoolImplITSpec extends Specification {
             assert actualEvent.getMessage() == expectedMessage
         }
 
-        and: "Client is associated with new node ID"
+        and: "client is associated with new node ID"
         clientPool.get(serverId) == Optional.of(client)
 
-        cleanup:
+        cleanup: "close client pool and server"
         clientPool.close()
         server.close()
     }
