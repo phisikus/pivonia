@@ -20,7 +20,10 @@ class ClientServerDataTransferSpec extends Specification {
         def testMessage = new TestMessage(1L, "bigTopic", getBigMessage())
         def actualMessage = new CompletableFuture<TestMessage>()
         def port = ServerTestUtils.getRandomPort()
-        def server = new TCPServer(bsonConverter).addHandler(buildMessageHandlerWithTrap(actualMessage)).bind(port)
+        def server = new TCPServer(bsonConverter)
+                .addHandler(buildMessageHandlerWithTrap(actualMessage))
+                .bind(port)
+                .get()
 
         when: "Client is connected and message is sent"
         def client = new TCPClient(bsonConverter).connect("localhost", port).get()
@@ -29,6 +32,10 @@ class ClientServerDataTransferSpec extends Specification {
         then: "The operation finishes properly and received message is equal to expected"
         sendResult.isSuccess()
         actualMessage.get() == testMessage
+
+        cleanup:
+        server.close()
+        client.close()
     }
 
     def "Message with a lot of data should be sent by client to the server and back"() {
@@ -39,6 +46,7 @@ class ClientServerDataTransferSpec extends Specification {
         def server = new TCPServer(bsonConverter)
                 .addHandler(ClientServerConnectionSpec.getEchoMessageHandler())
                 .bind(port)
+                .get()
 
         when: "Client is connected and message is sent"
         def client = new TCPClient(bsonConverter)
@@ -50,6 +58,10 @@ class ClientServerDataTransferSpec extends Specification {
         then: "The operation finishes properly and received message is equal to expected"
         sendResult.isSuccess()
         actualMessage.get() == testMessage
+
+        cleanup:
+        server.close()
+        client.close()
     }
 
     private MessageHandler buildMessageHandlerWithTrap(CompletableFuture<TestMessage> messageHolder) {

@@ -29,7 +29,9 @@ class ClientServerConnectionSpec extends Specification {
         when:
         def port = ServerTestUtils.getRandomPort()
         def server = startServer(port, actualMessageHolder)
-        def messageSent = client.connect("localhost", port).get().send(testMessage)
+        def connectedClient = client.connect("localhost", port).get()
+        def messageSent = connectedClient.send(testMessage)
+
 
         then:
         messageSent.isSuccess()
@@ -37,6 +39,7 @@ class ClientServerConnectionSpec extends Specification {
 
         cleanup:
         server.close()
+        connectedClient.close()
 
     }
 
@@ -62,6 +65,7 @@ class ClientServerConnectionSpec extends Specification {
 
         cleanup:
         server.close()
+        connectedClient.close()
 
     }
 
