@@ -12,7 +12,7 @@ import java.time.Instant
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.TimeUnit
 
-class ClientServerConnectionSpec extends Specification {
+class ClientServerConnectionITSpec extends Specification {
 
     @Shared
     def bsonConverter = new JacksonBSONConverter()
@@ -81,9 +81,7 @@ class ClientServerConnectionSpec extends Specification {
     private Server startServer(int port, messageReceivedLatch) {
         def server = new TCPServer(bsonConverter).bind(port).get()
         server.getMessages(TestMessage)
-                .subscribe({
-            event -> messageReceivedLatch.complete(event.getMessage())
-        })
+                .subscribe({ event -> messageReceivedLatch.complete(event.getMessage()) })
         return server
     }
 
@@ -92,10 +90,8 @@ class ClientServerConnectionSpec extends Specification {
         def server = new TCPServer(bsonConverter)
                 .bind(port)
                 .get()
-        server.getMessages(TestMessage.class)
-                .subscribe({
-            event -> event.getClient().send(event.getMessage())
-        })
+        server.getMessages(TestMessage)
+                .subscribe({ event -> event.getClient().send(event.getMessage()) })
         return server
     }
 }

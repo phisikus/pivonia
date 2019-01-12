@@ -8,7 +8,7 @@ import spock.lang.Specification
 
 import java.util.concurrent.CompletableFuture
 
-class ClientServerDataTransferSpec extends Specification {
+class ClientServerDataTransferITSpec extends Specification {
 
 
     @Shared
