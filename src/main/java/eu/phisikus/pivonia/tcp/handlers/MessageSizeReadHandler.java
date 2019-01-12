@@ -1,18 +1,18 @@
 package eu.phisikus.pivonia.tcp.handlers;
 
-import eu.phisikus.pivonia.api.MessageHandler;
 import eu.phisikus.pivonia.converter.BSONConverter;
 import eu.phisikus.pivonia.utils.BufferUtils;
-import io.vavr.collection.List;
+import io.reactivex.subjects.Subject;
 import lombok.extern.log4j.Log4j2;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.AsynchronousSocketChannel;
 import java.nio.channels.CompletionHandler;
+import java.util.Map;
 
 @Log4j2
-class MessageSizeReadHandler implements CompletionHandler<Integer, List<MessageHandler>> {
+class MessageSizeReadHandler implements CompletionHandler<Integer, Map<Class, Subject>> {
 
     private final AsynchronousSocketChannel clientChannel;
     private final ByteBuffer communicationBuffer;
@@ -25,23 +25,23 @@ class MessageSizeReadHandler implements CompletionHandler<Integer, List<MessageH
     }
 
     @Override
-    public void completed(Integer bytesReceived, List<MessageHandler> handlers) {
+    public void completed(Integer bytesReceived, Map<Class, Subject> listeners) {
         boolean messageSizeReceived = bytesReceived.equals(BufferUtils.INT_SIZE);
         if (messageSizeReceived) {
-            readMessageContent(handlers);
+            readMessageContent(listeners);
         } else {
             if (bytesReceived > 0) {
-                retryRead(handlers);
+                retryRead(listeners);
             }
         }
     }
 
-    private void readMessageContent(List<MessageHandler> handlers) {
+    private void readMessageContent(Map<Class, Subject> listeners) {
         int messageSize = BufferUtils.readMessageSizeFromBuffer(communicationBuffer);
         if (messageSize > 0) {
             var messageBuffer = ByteBuffer.allocate(messageSize);
             var contentReadHandler = new MessageContentReadHandler(bsonConverter, clientChannel, messageBuffer, messageSize);
-            clientChannel.read(messageBuffer, handlers, contentReadHandler);
+            clientChannel.read(messageBuffer, listeners, contentReadHandler);
         } else {
             closeCommunication();
         }
@@ -56,13 +56,13 @@ class MessageSizeReadHandler implements CompletionHandler<Integer, List<MessageH
         }
     }
 
-    private void retryRead(List<MessageHandler> handlers) {
-        clientChannel.read(communicationBuffer, handlers, this);
+    private void retryRead(Map<Class, Subject> listeners) {
+        clientChannel.read(communicationBuffer, listeners, this);
     }
 
 
     @Override
-    public void failed(Throwable exception, List<MessageHandler> handlers) {
+    public void failed(Throwable exception, Map<Class, Subject> listeners) {
         log.error(exception);
     }
 }

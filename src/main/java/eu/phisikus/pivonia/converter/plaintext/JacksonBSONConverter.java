@@ -7,10 +7,7 @@ import eu.phisikus.pivonia.converter.BSONConverter;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
-import java.util.concurrent.ConcurrentSkipListSet;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 class JacksonBSONConverter implements BSONConverter {
     private final ObjectMapper mapper;

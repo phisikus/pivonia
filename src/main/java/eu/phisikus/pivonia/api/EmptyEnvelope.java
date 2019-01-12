@@ -1,7 +1,8 @@
 package eu.phisikus.pivonia.api;
 
-import eu.phisikus.pivonia.api.pool.Envelope;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @AllArgsConstructor
 @NoArgsConstructor

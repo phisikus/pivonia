@@ -1,4 +1,4 @@
-package eu.phisikus.pivonia.api.pool;
+package eu.phisikus.pivonia.api;
 
 /**
  * Implement this interface in your message to provide source and target node identification.
@@ -23,7 +23,7 @@ public interface Envelope<K> {
     /**
      * Changes envelope data like sender and recipient id.
      *
-     * @param senderId new sender id
+     * @param senderId    new sender id
      * @param recipientId new recipient id
      * @return some instance containing new data
      */

@@ -1,18 +1,18 @@
 package eu.phisikus.pivonia.tcp.handlers;
 
-import eu.phisikus.pivonia.api.MessageHandler;
 import eu.phisikus.pivonia.converter.BSONConverter;
 import eu.phisikus.pivonia.utils.BufferUtils;
-import io.vavr.collection.List;
+import io.reactivex.subjects.Subject;
 import lombok.extern.log4j.Log4j2;
 
 import java.nio.channels.AsynchronousServerSocketChannel;
 import java.nio.channels.AsynchronousSocketChannel;
 import java.nio.channels.CompletionHandler;
+import java.util.Map;
 
 
 @Log4j2
-public class AcceptHandler implements CompletionHandler<AsynchronousSocketChannel, List<MessageHandler>> {
+public class AcceptHandler implements CompletionHandler<AsynchronousSocketChannel, Map<Class, Subject>> {
 
     private AsynchronousServerSocketChannel serverSocket;
     private BSONConverter bsonConverter;
@@ -23,15 +23,15 @@ public class AcceptHandler implements CompletionHandler<AsynchronousSocketChanne
     }
 
     @Override
-    public void completed(AsynchronousSocketChannel clientChannel, List<MessageHandler> handlers) {
-        serverSocket.accept(handlers, this);
+    public void completed(AsynchronousSocketChannel clientChannel, Map<Class, Subject> listeners) {
+        serverSocket.accept(listeners, this);
         var messageSizeBuffer = BufferUtils.getBufferForMessageSize();
         var readCallback = new MessageSizeReadHandler(bsonConverter, clientChannel, messageSizeBuffer);
-        clientChannel.read(messageSizeBuffer, handlers, readCallback);
+        clientChannel.read(messageSizeBuffer, listeners, readCallback);
     }
 
     @Override
-    public void failed(Throwable exception, List<MessageHandler> handlers) {
+    public void failed(Throwable exception, Map<Class, Subject> listeners) {
         log.error(exception);
     }
 }

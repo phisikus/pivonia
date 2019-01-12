@@ -1,34 +1,36 @@
 package eu.phisikus.pivonia.api;
 
+import io.reactivex.Observable;
 import io.vavr.control.Try;
 
 public interface Server extends AutoCloseable {
 
     /**
-     * Start listening on given port
+     * Start listening on given port.
      *
-     * @param port           number of the port
+     * @param port number of the port
      * @return instance of the Server  that will handle the traffic
      */
     Try<Server> bind(int port);
 
     /**
-     * Start listening on given port & address
+     * Start listening on given port & address.
      *
-     * @param address        address that the server should listen on
-     * @param port           number of the port
+     * @param address address that the server should listen on
+     * @param port    number of the port
      * @return instance of the Server that will handle the traffic
      */
     Try<Server> bind(String address, int port);
 
     /**
-     * Register message handler for certain type of incoming message.
-     * Only one handler should be registered per message type.
+     * Returns messages received by this server that match provided type.
+     * The server will not cache messages received prior to this method call.
+     * Messages are paired together with client instance that can be used to send response.
      *
-     * @param messageHandler message handler called for incoming messages
-     * @param <T> type of messages
-     * @return server with registered handler
+     * @param messageType type of messages that will be returned
+     * @param <T>         type of message
+     * @return observable stream of incoming messages paired with client instance that can be used to send response
      */
-    <T> Server addHandler(MessageHandler<T> messageHandler);
+    <T> Observable<MessageWithClient<T>> getMessages(Class<T> messageType);
 
 }

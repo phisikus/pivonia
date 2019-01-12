@@ -1,10 +1,12 @@
 package eu.phisikus.pivonia.tcp;
 
-import eu.phisikus.pivonia.api.MessageHandler;
+import eu.phisikus.pivonia.api.MessageWithClient;
 import eu.phisikus.pivonia.api.Server;
 import eu.phisikus.pivonia.converter.BSONConverter;
 import eu.phisikus.pivonia.tcp.handlers.AcceptHandler;
-import io.vavr.collection.List;
+import io.reactivex.Observable;
+import io.reactivex.subjects.PublishSubject;
+import io.reactivex.subjects.Subject;
 import io.vavr.control.Try;
 
 import javax.inject.Inject;
@@ -12,6 +14,8 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.channels.AsynchronousChannelGroup;
 import java.nio.channels.AsynchronousServerSocketChannel;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 
 public class TCPServer implements Server {
@@ -19,7 +23,7 @@ public class TCPServer implements Server {
     private AsynchronousServerSocketChannel serverSocket;
     private AsynchronousChannelGroup serverThreads;
     private BSONConverter bsonConverter;
-    private List<MessageHandler> handlers = List.empty();
+    private Map<Class, Subject> listeners = new ConcurrentHashMap<>();
 
     @Inject
     public TCPServer(BSONConverter bsonConverter) {
@@ -40,15 +44,21 @@ public class TCPServer implements Server {
     @Override
     public Try<Server> bind(String address, int port) {
         TCPServer newServer = new TCPServer(bsonConverter);
-        newServer.handlers = handlers;
+        newServer.listeners = new ConcurrentHashMap<>(listeners);
         try {
             newServer.serverSocket = newServer.createAndBindServerSocket(address, port);
         } catch (IOException e) {
             return Try.failure(e);
         }
-        handlers.forEach(messageHandler -> bsonConverter.enableType(messageHandler.getMessageType()));
-        newServer.serverSocket.accept(handlers, new AcceptHandler(bsonConverter, newServer.serverSocket));
+        newServer.serverSocket.accept(newServer.listeners, new AcceptHandler(bsonConverter, newServer.serverSocket));
         return Try.success(newServer);
+    }
+
+    @Override
+    public <T> Observable<MessageWithClient<T>> getMessages(Class<T> messageType) {
+        bsonConverter.enableType(messageType);
+        listeners.putIfAbsent(messageType, PublishSubject.create());
+        return listeners.get(messageType);
     }
 
     private AsynchronousServerSocketChannel createAndBindServerSocket(String address, int port) throws IOException {
@@ -59,11 +69,5 @@ public class TCPServer implements Server {
         return AsynchronousServerSocketChannel
                 .open(serverThreads)
                 .bind(serverSocketAddress);
-    }
-
-    @Override
-    public <T> Server addHandler(MessageHandler<T> messageHandler) {
-        handlers = handlers.push(messageHandler);
-        return this;
     }
 }

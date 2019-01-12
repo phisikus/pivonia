@@ -1,7 +1,5 @@
 package eu.phisikus.pivonia.tcp
 
-import eu.phisikus.pivonia.api.Client
-import eu.phisikus.pivonia.api.MessageHandler
 import eu.phisikus.pivonia.api.Server
 import eu.phisikus.pivonia.api.TestMessage
 import eu.phisikus.pivonia.converter.plaintext.JacksonBSONConverter
@@ -10,6 +8,7 @@ import spock.lang.Shared
 import spock.lang.Specification
 import spock.lang.Timeout
 
+import java.time.Instant
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.TimeUnit
 
@@ -22,7 +21,7 @@ class ClientServerConnectionSpec extends Specification {
     @Timeout(value = 10, unit = TimeUnit.SECONDS)
     def "Client should be able to send message to server"() {
         given: "message and client are created"
-        def testMessage = new TestMessage(new Date().getTime(), "test", "Test TestMessage")
+        def testMessage = new TestMessage(Instant.now().toEpochMilli(), "test", "Test TestMessage")
         def client = new TCPClient(bsonConverter)
         def actualMessageHolder = new CompletableFuture<TestMessage>()
 
@@ -54,14 +53,18 @@ class ClientServerConnectionSpec extends Specification {
         def actualMessageHolder = new CompletableFuture<TestMessage>()
         def port = ServerTestUtils.getRandomPort()
 
-        when: "server is started and client connected"
+        and: "server is started and client connected"
         def server = startEchoServer(port)
         def connectedClient = client
-                .addHandler(getFutureCompletingHandler(actualMessageHolder))
                 .connect("localhost", port)
                 .get()
 
-        and: "message is sent using client"
+        and: "incoming messages for the client will be monitored"
+        connectedClient
+                .getMessages(TestMessage)
+                .subscribe({ event -> actualMessageHolder.complete(event.getMessage()) })
+
+        when: "message is sent using client"
         def sendResult = connectedClient.send(testMessage)
 
         then: "sending is successful and the client received the message back"
@@ -76,42 +79,23 @@ class ClientServerConnectionSpec extends Specification {
 
 
     private Server startServer(int port, messageReceivedLatch) {
-        MessageHandler messageHandler = getFutureCompletingHandler(messageReceivedLatch)
-        return new TCPServer(bsonConverter).addHandler(messageHandler).bind(port).get()
+        def server = new TCPServer(bsonConverter).bind(port).get()
+        server.getMessages(TestMessage)
+                .subscribe({
+            event -> messageReceivedLatch.complete(event.getMessage())
+        })
+        return server
     }
 
-    private MessageHandler getFutureCompletingHandler(messageHolder) {
-        def messageHandler = new MessageHandler<TestMessage>() {
-            @Override
-            void handleMessage(TestMessage incomingMessage, Client client) {
-                messageHolder.complete(incomingMessage)
-            }
-
-            @Override
-            Class<TestMessage> getMessageType() {
-                return TestMessage.class
-            }
-        }
-        messageHandler
-    }
 
     private Server startEchoServer(port) {
-        MessageHandler<TestMessage> messageHandler = getEchoMessageHandler()
-        return new TCPServer(bsonConverter).addHandler(messageHandler).bind(port).get()
-    }
-
-    static MessageHandler<TestMessage> getEchoMessageHandler() {
-        def messageHandler = new MessageHandler<TestMessage>() {
-            @Override
-            void handleMessage(TestMessage incomingMessage, Client client) {
-                client.send(incomingMessage)
-            }
-
-            @Override
-            Class<TestMessage> getMessageType() {
-                return TestMessage.class
-            };
-        }
-        messageHandler
+        def server = new TCPServer(bsonConverter)
+                .bind(port)
+                .get()
+        server.getMessages(TestMessage.class)
+                .subscribe({
+            event -> event.getClient().send(event.getMessage())
+        })
+        return server
     }
 }

@@ -1,8 +1,9 @@
 package eu.phisikus.pivonia.tcp.handlers;
 
 import eu.phisikus.pivonia.api.Client;
-import eu.phisikus.pivonia.api.MessageHandler;
+import eu.phisikus.pivonia.api.MessageWithClient;
 import eu.phisikus.pivonia.converter.BSONConverter;
+import io.reactivex.Observable;
 import io.vavr.control.Try;
 
 import java.io.IOException;
@@ -36,8 +37,8 @@ class ClientConnectedThroughServer implements Client {
     }
 
     @Override
-    public <T> Client addHandler(MessageHandler<T> messageHandler) {
-        return this;
+    public <T> Observable<MessageWithClient<T>> getMessages(Class<T> messageType) {
+        throw new IllegalStateException("This client does not return any messages, associated server does");
     }
 
     private void writeMessage(ByteBuffer serializedMessage) {

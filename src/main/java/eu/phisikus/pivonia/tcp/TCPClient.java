@@ -1,10 +1,12 @@
 package eu.phisikus.pivonia.tcp;
 
 import eu.phisikus.pivonia.api.Client;
-import eu.phisikus.pivonia.api.MessageHandler;
+import eu.phisikus.pivonia.api.MessageWithClient;
 import eu.phisikus.pivonia.converter.BSONConverter;
 import eu.phisikus.pivonia.utils.BufferUtils;
-import io.vavr.collection.List;
+import io.reactivex.Observable;
+import io.reactivex.subjects.PublishSubject;
+import io.reactivex.subjects.Subject;
 import io.vavr.control.Try;
 import lombok.extern.log4j.Log4j2;
 
@@ -13,6 +15,8 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -23,7 +27,8 @@ public class TCPClient implements Client {
     private SocketChannel clientChannel;
     private BSONConverter bsonConverter;
     private ExecutorService messageListener = Executors.newSingleThreadExecutor();
-    private List<MessageHandler> handlers = List.empty();
+    private Map<Class, Subject> listeners = new ConcurrentHashMap<>();
+
 
     @Inject
     public TCPClient(BSONConverter bsonConverter) {
@@ -34,9 +39,9 @@ public class TCPClient implements Client {
     @Override
     public Try<Client> connect(String address, int port) {
         try {
-            TCPClient newClient = getNewOpenClient(address, port);
+            var newClient = getNewOpenClient(address, port);
             newClient.waitForReadyConnection();
-            newClient.bindMessageHandlers(handlers);
+            newClient.bindMessageListeners(newClient.listeners);
             return Try.success(newClient);
         } catch (IOException e) {
             return Try.failure(e);
@@ -44,48 +49,49 @@ public class TCPClient implements Client {
     }
 
     @Override
-    public <T> Client addHandler(MessageHandler<T> messageHandler) {
-        handlers = handlers.push(messageHandler);
-        return this;
+    public <T> Observable<MessageWithClient<T>> getMessages(Class<T> messageType) {
+        bsonConverter.enableType(messageType);
+        listeners.putIfAbsent(messageType, PublishSubject.create());
+        return listeners.get(messageType);
     }
 
-    private void bindMessageHandlers(List<MessageHandler> handlers) {
+
+    private void bindMessageListeners(Map<Class, Subject> listeners) {
         messageListener.submit(() -> {
             try {
-                listenForMessages(handlers);
+                listenForMessages(listeners);
             } catch (IOException | ClassNotFoundException exception) {
                 log.error(exception);
             }
         });
     }
 
-    private void listenForMessages(List<MessageHandler> handlers) throws IOException, ClassNotFoundException {
-        registerTypes(handlers);
+    private void listenForMessages(Map<Class, Subject> listeners) throws IOException, ClassNotFoundException {
         while (clientChannel.isOpen()) {
             int messageSize = readMessageSize();
             if (messageSize > 0) {
-                readAndHandleMessage(messageSize, handlers);
+                readAndHandleMessage(messageSize, listeners);
             } else {
                 break;
             }
         }
     }
 
-    private void registerTypes(List<MessageHandler> handlers) {
-        handlers.forEach(messageHandler -> bsonConverter.enableType(messageHandler.getMessageType()));
-    }
 
-    private void readAndHandleMessage(int messageSize, List<MessageHandler> handlers) throws IOException, ClassNotFoundException {
+    private void readAndHandleMessage(int messageSize, Map<Class, Subject> listeners)
+            throws IOException, ClassNotFoundException {
         var contentBuffer = readMessageContent(messageSize);
         var messageBuffer = BufferUtils.getBufferWithCombinedSizeAndContent(messageSize, contentBuffer);
         var incomingMessage = bsonConverter.deserialize(messageBuffer.array());
-        handleMessage(incomingMessage, handlers);
+        handleMessage(incomingMessage, listeners);
     }
 
-    private <T> void handleMessage(T incomingMessage, List<MessageHandler> handlers) {
+    private <T> void handleMessage(T incomingMessage, Map<Class, Subject> listeners) {
         var messageType = incomingMessage.getClass();
-        handlers.filter(messageHandler -> messageHandler.getMessageType().equals(messageType))
-                .forEach(messageHandler -> messageHandler.handleMessage(incomingMessage, this));
+        var listener = listeners.get(messageType);
+        if (listener != null) {
+            listener.onNext(new MessageWithClient<>(incomingMessage, this));
+        }
     }
 
     private ByteBuffer readMessageContent(int messageSize) throws IOException {
@@ -111,7 +117,7 @@ public class TCPClient implements Client {
         var newClient = new TCPClient(bsonConverter);
         var clientAddress = new InetSocketAddress(address, port);
         newClient.clientChannel = SocketChannel.open(clientAddress);
-        newClient.handlers = handlers;
+        newClient.listeners = new ConcurrentHashMap<>(listeners);
         return newClient;
     }
 
@@ -159,6 +165,7 @@ public class TCPClient implements Client {
         sendClose();
         clientChannel.close();
         messageListener.shutdownNow();
+        listeners.clear();
     }
 
     private void sendClose() throws IOException {

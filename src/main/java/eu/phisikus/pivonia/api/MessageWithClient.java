@@ -1,6 +1,5 @@
-package eu.phisikus.pivonia.api.pool;
+package eu.phisikus.pivonia.api;
 
-import eu.phisikus.pivonia.api.Client;
 import lombok.Value;
 
 @Value
