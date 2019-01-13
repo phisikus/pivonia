@@ -1,4 +1,4 @@
-package eu.phisikus.pivonia.pool;
+package eu.phisikus.pivonia.pool.address;
 
 import lombok.Value;
 

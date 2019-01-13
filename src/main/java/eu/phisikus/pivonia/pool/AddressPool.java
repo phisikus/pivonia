@@ -1,30 +1,44 @@
 package eu.phisikus.pivonia.pool;
 
-import io.reactivex.subjects.PublishSubject;
-import lombok.Getter;
+import eu.phisikus.pivonia.pool.address.Address;
+import eu.phisikus.pivonia.pool.address.AddressChange;
+import io.reactivex.Observable;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.List;
 
-class AddressPool {
-    @Getter
-    private Set<Address> addresses = new HashSet<>();
+public interface AddressPool {
 
-    @Getter
-    private PublishSubject<Address> newAddresses = PublishSubject.create();
+    /**
+     * Add a new address to the address pool
+     *
+     * @param hostname some hostname
+     * @param port     some port
+     * @return Address object added to the pool
+     */
+    Address add(String hostname, int port);
+
+    /**
+     * Remove address from the pool.
+     * It does not produce any errors if given address was already deleted.
+     *
+     * @param address address that should be removed from the pool.
+     */
+    void remove(Address address);
 
 
-    public Address add(String hostname, int port) {
-        var newAddress = new Address(hostname, port);
-        addresses.add(newAddress);
-        newAddresses.onNext(newAddress);
-        return newAddress;
-    }
+    /**
+     * Get list of all addresses in the pool.
+     *
+     * @return all addresses in the pool
+     */
+    List<Address> getAddresses();
 
-
-    public void remove(Address address) {
-        addresses.remove(address);
-
-    }
+    /**
+     * Observable source of address change events.
+     * Every add/delete operation triggers change event.
+     *
+     * @return observable address changes
+     */
+    Observable<AddressChange> getAddressChanges();
 
 }
