@@ -53,5 +53,94 @@ class ClientPoolImplSpec extends Specification {
         1 * changeListener.onNext(expectedEvent)
     }
 
-    // TODO add assignment tests
+    def "Should assign client to node ID"() {
+        given: "there is a client pool"
+        def clientPool = new ClientPoolImpl()
+
+        and: "it contains a client"
+        def nodeId = "first"
+        def client = Mock(Client)
+        clientPool.add(client)
+
+        and: "change events are monitored"
+        def changes = clientPool.getClientChanges()
+        def changeListener = Mock(Observer)
+        def expectedEvent = new ClientChange(client, nodeId, ClientChange.Operation.ASSIGN)
+        changes.subscribe(changeListener)
+
+        when: "assigning client with node ID"
+        clientPool.set(nodeId, client)
+
+        then: "that client can be retrieved using node ID"
+        clientPool.get(nodeId).get() == client
+
+        and: "assignment event was emitted"
+        1 * changeListener.onNext(expectedEvent)
+
+    }
+
+    def "Should unassign client on removal"() {
+        given: "there is a client pool"
+        def clientPool = new ClientPoolImpl()
+
+        and: "it contains a client"
+        def nodeId = "first"
+        def client = Mock(Client)
+        clientPool.add(client)
+
+        and: "change events are monitored"
+        def changes = clientPool.getClientChanges()
+        def changeListener = Mock(Observer)
+        def assignEvent = new ClientChange(client, nodeId, ClientChange.Operation.ASSIGN)
+        def unassignEvent = new ClientChange(client, nodeId, ClientChange.Operation.UNASSIGN)
+        def deleteEvent = new ClientChange(client, null, ClientChange.Operation.REMOVE)
+        changes.subscribe(changeListener)
+
+        when: "assigning client with node ID"
+        clientPool.set(nodeId, client)
+
+        and: "removing it"
+        clientPool.remove(client)
+
+        then: "that client cannot be retrieved using node ID"
+        !clientPool.get(nodeId).isPresent()
+
+        and: "events were emitted"
+        1 * changeListener.onNext(assignEvent)
+        1 * changeListener.onNext(unassignEvent)
+        1 * changeListener.onNext(deleteEvent)
+    }
+
+    def "Should assign new client to node ID"() {
+        given: "there is a client pool"
+        def clientPool = new ClientPoolImpl()
+
+        and: "it contains two clients"
+        def nodeId = "node"
+        def client = Mock(Client)
+        def secondClient = Mock(Client)
+        clientPool.add(client)
+        clientPool.add(secondClient)
+
+        and: "change events are monitored"
+        def changes = clientPool.getClientChanges()
+        def changeListener = Mock(Observer)
+        def firstEvent = new ClientChange(client, nodeId, ClientChange.Operation.ASSIGN)
+        def secondEvent = new ClientChange(secondClient, nodeId, ClientChange.Operation.ASSIGN)
+        changes.subscribe(changeListener)
+
+        when: "assigning client with node ID"
+        clientPool.set(nodeId, client)
+
+        and: "assigning second client with the same ID"
+        clientPool.set(nodeId, secondClient)
+
+        then: "second client can be retrieved using node ID"
+        clientPool.get(nodeId).get() == secondClient
+
+        and: "assignment events were emitted"
+        1 * changeListener.onNext(firstEvent)
+        1 * changeListener.onNext(secondEvent)
+    }
+
 }

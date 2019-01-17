@@ -27,7 +27,7 @@ public class ClientPoolImpl<K> implements ClientPool<K> {
 
     @Override
     public void set(K id, Client client) {
-        var previousClient = mappings.putIfAbsent(id, client);
+        var previousClient = mappings.put(id, client);
         var isNewValue = previousClient != client;
         var wasPreviouslyAssigned = previousClient != null && isNewValue;
 
