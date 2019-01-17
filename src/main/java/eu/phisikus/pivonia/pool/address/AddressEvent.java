@@ -3,7 +3,7 @@ package eu.phisikus.pivonia.pool.address;
 import lombok.Value;
 
 @Value
-public class AddressChange {
+public class AddressEvent {
 
     private final Operation operation;
     private final Address address;

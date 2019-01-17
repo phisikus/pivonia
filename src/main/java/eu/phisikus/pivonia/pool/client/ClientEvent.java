@@ -4,7 +4,7 @@ import eu.phisikus.pivonia.api.Client;
 import lombok.Value;
 
 @Value
-public class ClientChange<K> {
+public class ClientEvent<K> {
 
     private final Client client;
     private final K id;

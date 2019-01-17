@@ -14,7 +14,7 @@ class ClientPoolImplSpec extends Specification {
         def clientPool = new ClientPoolImpl()
 
         and: "change events are monitored"
-        def expectedEvent = new ClientChange<>(client, null, ClientChange.Operation.ADD)
+        def expectedEvent = new ClientEvent<>(client, null, ClientEvent.Operation.ADD)
         def changes = clientPool.getClientChanges()
         def changeListener = Mock(Observer)
         changes.subscribe(changeListener)
@@ -38,7 +38,7 @@ class ClientPoolImplSpec extends Specification {
         clientPool.add(client)
 
         and: "change events are monitored"
-        def expectedEvent = new ClientChange<>(client, null, ClientChange.Operation.REMOVE)
+        def expectedEvent = new ClientEvent<>(client, null, ClientEvent.Operation.REMOVE)
         def changes = clientPool.getClientChanges()
         def changeListener = Mock(Observer)
         changes.subscribe(changeListener)
@@ -65,7 +65,7 @@ class ClientPoolImplSpec extends Specification {
         and: "change events are monitored"
         def changes = clientPool.getClientChanges()
         def changeListener = Mock(Observer)
-        def expectedEvent = new ClientChange(client, nodeId, ClientChange.Operation.ASSIGN)
+        def expectedEvent = new ClientEvent(client, nodeId, ClientEvent.Operation.ASSIGN)
         changes.subscribe(changeListener)
 
         when: "assigning client with node ID"
@@ -91,9 +91,9 @@ class ClientPoolImplSpec extends Specification {
         and: "change events are monitored"
         def changes = clientPool.getClientChanges()
         def changeListener = Mock(Observer)
-        def assignEvent = new ClientChange(client, nodeId, ClientChange.Operation.ASSIGN)
-        def unassignEvent = new ClientChange(client, nodeId, ClientChange.Operation.UNASSIGN)
-        def deleteEvent = new ClientChange(client, null, ClientChange.Operation.REMOVE)
+        def assignEvent = new ClientEvent(client, nodeId, ClientEvent.Operation.ASSIGN)
+        def unassignEvent = new ClientEvent(client, nodeId, ClientEvent.Operation.UNASSIGN)
+        def deleteEvent = new ClientEvent(client, null, ClientEvent.Operation.REMOVE)
         changes.subscribe(changeListener)
 
         when: "assigning client with node ID"
@@ -125,9 +125,9 @@ class ClientPoolImplSpec extends Specification {
         and: "change events are monitored"
         def changes = clientPool.getClientChanges()
         def changeListener = Mock(Observer)
-        def firstEvent = new ClientChange(client, nodeId, ClientChange.Operation.ASSIGN)
-        def secondEvent = new ClientChange(client, nodeId, ClientChange.Operation.UNASSIGN)
-        def thirdEvent = new ClientChange(secondClient, nodeId, ClientChange.Operation.ASSIGN)
+        def firstEvent = new ClientEvent(client, nodeId, ClientEvent.Operation.ASSIGN)
+        def secondEvent = new ClientEvent(client, nodeId, ClientEvent.Operation.UNASSIGN)
+        def thirdEvent = new ClientEvent(secondClient, nodeId, ClientEvent.Operation.ASSIGN)
         changes.subscribe(changeListener)
 
         when: "assigning client with node ID"
@@ -158,7 +158,7 @@ class ClientPoolImplSpec extends Specification {
         and: "change events are monitored"
         def changes = clientPool.getClientChanges()
         def changeListener = Mock(Observer)
-        def firstEvent = new ClientChange(client, nodeId, ClientChange.Operation.ASSIGN)
+        def firstEvent = new ClientEvent(client, nodeId, ClientEvent.Operation.ASSIGN)
         changes.subscribe(changeListener)
 
         when: "assigning client with node ID"

@@ -18,7 +18,7 @@ public class ClientPoolImpl<K> implements ClientPool<K> {
     @Getter
     private final List<Client> clients = new CopyOnWriteArrayList<>();
     private final Map<K, Client> mappings = new ConcurrentHashMap<>();
-    private final Subject<ClientChange> clientChanges = PublishSubject.create();
+    private final Subject<ClientEvent> clientChanges = PublishSubject.create();
 
     @Override
     public Optional<Client> get(K id) {
@@ -32,25 +32,25 @@ public class ClientPoolImpl<K> implements ClientPool<K> {
         var wasPreviouslyAssigned = previousClient != null && isNewValue;
 
         if(wasPreviouslyAssigned) {
-            notify(id, previousClient, ClientChange.Operation.UNASSIGN);
+            notify(id, previousClient, ClientEvent.Operation.UNASSIGN);
         }
 
         if(isNewValue) {
-            notify(id, client, ClientChange.Operation.ASSIGN);
+            notify(id, client, ClientEvent.Operation.ASSIGN);
         }
     }
 
     @Override
     public void add(Client client) {
         clients.add(client);
-        notify(null, client, ClientChange.Operation.ADD);
+        notify(null, client, ClientEvent.Operation.ADD);
     }
 
     @Override
     public void remove(Client client) {
         clients.remove(client);
         removeMappings(client);
-        notify(null, client, ClientChange.Operation.REMOVE);
+        notify(null, client, ClientEvent.Operation.REMOVE);
     }
 
     private void removeMappings(Client client) {
@@ -59,17 +59,17 @@ public class ClientPoolImpl<K> implements ClientPool<K> {
                 .filter(entry -> entry.getValue().equals(client))
                 .forEach(entry -> {
                     mappings.remove(entry.getKey(), entry.getValue());
-                    notify(entry.getKey(), entry.getValue(), ClientChange.Operation.UNASSIGN);
+                    notify(entry.getKey(), entry.getValue(), ClientEvent.Operation.UNASSIGN);
                 });
     }
 
-    private void notify(K id, Client client, ClientChange.Operation assign) {
-        var changeEvent = new ClientChange<>(client, id, assign);
+    private void notify(K id, Client client, ClientEvent.Operation assign) {
+        var changeEvent = new ClientEvent<>(client, id, assign);
         clientChanges.onNext(changeEvent);
     }
 
     @Override
-    public Observable<ClientChange> getClientChanges() {
+    public Observable<ClientEvent> getClientChanges() {
         return clientChanges;
     }
 }

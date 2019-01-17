@@ -4,7 +4,6 @@ import eu.phisikus.pivonia.pool.AddressPool;
 import io.reactivex.Observable;
 import io.reactivex.subjects.PublishSubject;
 import io.reactivex.subjects.Subject;
-import lombok.Getter;
 
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -15,18 +14,18 @@ class AddressPoolImpl implements AddressPool {
 
     private Set<Address> addresses = new HashSet<>();
 
-    private Subject<AddressChange> addressChanges = PublishSubject.create();
+    private Subject<AddressEvent> addressChanges = PublishSubject.create();
 
     public Address add(String hostname, int port) {
         var newAddress = new Address(hostname, port);
-        var changeEvent = new AddressChange(AddressChange.Operation.ADD, newAddress);
+        var changeEvent = new AddressEvent(AddressEvent.Operation.ADD, newAddress);
         addresses.add(newAddress);
         addressChanges.onNext(changeEvent);
         return newAddress;
     }
 
     public void remove(Address address) {
-        var changeEvent = new AddressChange(AddressChange.Operation.REMOVE, address);
+        var changeEvent = new AddressEvent(AddressEvent.Operation.REMOVE, address);
         addresses.remove(address);
         addressChanges.onNext(changeEvent);
     }
@@ -37,7 +36,7 @@ class AddressPoolImpl implements AddressPool {
     }
 
     @Override
-    public Observable<AddressChange> getAddressChanges() {
+    public Observable<AddressEvent> getAddressChanges() {
         return addressChanges;
     }
 

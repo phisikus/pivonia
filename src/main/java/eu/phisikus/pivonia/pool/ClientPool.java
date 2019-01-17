@@ -1,15 +1,17 @@
 package eu.phisikus.pivonia.pool;
 
 import eu.phisikus.pivonia.api.Client;
-import eu.phisikus.pivonia.pool.client.ClientChange;
+import eu.phisikus.pivonia.pool.client.ClientEvent;
 import io.reactivex.Observable;
 
 import java.util.List;
 import java.util.Optional;
 
 /**
- * Represents resource pool containing
- * @param <K>
+ * Represents resource pool containing clients with assigned node ID.
+ * The idea is to associate connected client with node of given ID.
+ *
+ * @param <K> type of node ID
  */
 public interface ClientPool<K> {
 
@@ -62,5 +64,5 @@ public interface ClientPool<K> {
      *
      * @return observable client changes
      */
-    Observable<ClientChange> getClientChanges();
+    Observable<ClientEvent> getClientChanges();
 }
