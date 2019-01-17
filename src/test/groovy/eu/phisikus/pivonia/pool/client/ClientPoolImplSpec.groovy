@@ -126,7 +126,8 @@ class ClientPoolImplSpec extends Specification {
         def changes = clientPool.getClientChanges()
         def changeListener = Mock(Observer)
         def firstEvent = new ClientChange(client, nodeId, ClientChange.Operation.ASSIGN)
-        def secondEvent = new ClientChange(secondClient, nodeId, ClientChange.Operation.ASSIGN)
+        def secondEvent = new ClientChange(client, nodeId, ClientChange.Operation.UNASSIGN)
+        def thirdEvent = new ClientChange(secondClient, nodeId, ClientChange.Operation.ASSIGN)
         changes.subscribe(changeListener)
 
         when: "assigning client with node ID"
@@ -141,6 +142,7 @@ class ClientPoolImplSpec extends Specification {
         and: "assignment events were emitted"
         1 * changeListener.onNext(firstEvent)
         1 * changeListener.onNext(secondEvent)
+        1 * changeListener.onNext(thirdEvent)
     }
 
 }
