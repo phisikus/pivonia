@@ -145,4 +145,30 @@ class ClientPoolImplSpec extends Specification {
         1 * changeListener.onNext(thirdEvent)
     }
 
+
+    def "Should update client to node ID assignment"() {
+        given: "there is a client pool"
+        def clientPool = new ClientPoolImpl()
+
+        and: "it contains one client"
+        def nodeId = "node"
+        def client = Mock(Client)
+        clientPool.add(client)
+
+        and: "change events are monitored"
+        def changes = clientPool.getClientChanges()
+        def changeListener = Mock(Observer)
+        def firstEvent = new ClientChange(client, nodeId, ClientChange.Operation.ASSIGN)
+        changes.subscribe(changeListener)
+
+        when: "assigning client with node ID"
+        clientPool.set(nodeId, client)
+
+        and: "assigning client with the same node ID as previously"
+        clientPool.set(nodeId, client)
+
+        then: "assignment event was emitted only once"
+        1 * changeListener.onNext(firstEvent)
+    }
+
 }
