@@ -17,7 +17,7 @@ import java.util.concurrent.TimeUnit;
 
 public class HeartbeatPoolImpl<K> implements HeartbeatPool<K> {
     private final ScheduledExecutorService heartbeatSender = Executors.newSingleThreadScheduledExecutor();
-    private final Queue<TimeClientPair> clients = new ConcurrentLinkedQueue<>();
+    private final Queue<HeartbeatEntry> clients = new ConcurrentLinkedQueue<>();
     private final Subject<HeartbeatEvent<K>> heartbeatChanges = PublishSubject.create();
     private final K nodeId;
     private final long neverSeen = 0L;
@@ -33,8 +33,10 @@ public class HeartbeatPoolImpl<K> implements HeartbeatPool<K> {
 
     @Override
     public void add(Client client) {
-        client.getMessages(HeartbeatMessage.class).subscribe(getHeartbeatMessageHandler());
-        clients.offer(new TimeClientPair(neverSeen, client));
+        var subscription = client
+                .getMessages(HeartbeatMessage.class)
+                .subscribe(getHeartbeatMessageHandler());
+        clients.offer(new HeartbeatEntry(neverSeen, client, subscription));
     }
 
     private Consumer<MessageWithClient<HeartbeatMessage>> getHeartbeatMessageHandler() {
@@ -52,7 +54,12 @@ public class HeartbeatPoolImpl<K> implements HeartbeatPool<K> {
 
     @Override
     public void remove(Client client) {
-        clients.remove(client);
+        clients.stream()
+                .filter(heartbeatEntry -> heartbeatEntry.getClient().equals(client))
+                .forEach(heartbeatEntry -> {
+                    heartbeatEntry.getSubscription().dispose();
+                    clients.remove(heartbeatEntry);
+                });
     }
 
     @Override
@@ -76,17 +83,17 @@ public class HeartbeatPoolImpl<K> implements HeartbeatPool<K> {
         };
     }
 
-    private void handleHeartbeatForClient(TimeClientPair timeClientPair) {
-        var isTimeoutClient = getCurrentTimestamp() - timeClientPair.getLastSeen() > timeoutDelay &&
-                timeClientPair.getLastSeen() != neverSeen;
+    private void handleHeartbeatForClient(HeartbeatEntry heartbeatEntry) {
+        var isTimeoutClient = getCurrentTimestamp() - heartbeatEntry.getLastSeen() > timeoutDelay &&
+                heartbeatEntry.getLastSeen() != neverSeen;
 
         if (isTimeoutClient) {
-            handleClientTimeout(timeClientPair.getClient());
+            handleClientTimeout(heartbeatEntry.getClient());
             return;
         }
 
-        clients.offer(timeClientPair);
-        sendHeartbeat(timeClientPair.getClient());
+        clients.offer(heartbeatEntry);
+        sendHeartbeat(heartbeatEntry.getClient());
     }
 
     private void handleClientTimeout(Client client) {
