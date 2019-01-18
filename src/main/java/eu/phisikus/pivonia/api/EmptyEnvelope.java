@@ -8,8 +8,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Data
 public class EmptyEnvelope<K> implements Envelope<K> {
-    private K senderId;
-    private K recipientId;
+    protected K senderId;
+    protected K recipientId;
 
     @Override
     public Envelope<K> readdress(K senderId, K recipientId) {
