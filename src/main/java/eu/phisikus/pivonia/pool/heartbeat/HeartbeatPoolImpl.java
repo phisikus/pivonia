@@ -16,6 +16,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Predicate;
 
 public class HeartbeatPoolImpl<K> implements HeartbeatPool<K> {
     private final ScheduledExecutorService heartbeatSender = Executors.newSingleThreadScheduledExecutor();
@@ -45,13 +46,31 @@ public class HeartbeatPoolImpl<K> implements HeartbeatPool<K> {
         return heartbeatMessageMessageWithClient -> {
             var message = heartbeatMessageMessageWithClient.getMessage();
             var client = heartbeatMessageMessageWithClient.getClient();
-            var event = new HeartbeatEvent<>(
-                    (K) message.getSenderId(),
-                    client,
-                    HeartbeatEvent.Operation.RECEIVED
-            );
-            heartbeatChanges.onNext(event);
+
+            Predicate<HeartbeatEntry> entriesContainClient = entry -> entry.getClient().equals(client);
+
+            clients.stream()
+                    .filter(entriesContainClient)
+                    .forEach(entry -> {
+                        clients.remove(entry);
+                        var newEntry = new HeartbeatEntry(
+                                getCurrentTimestamp(),
+                                client,
+                                entry.getSubscription()
+                        );
+                        sendReceivedEvent((K) message.getSenderId(), client);
+                        clients.offer(newEntry);
+                    });
         };
+    }
+
+    private void sendReceivedEvent(K senderId, Client client) {
+        var event = new HeartbeatEvent<>(
+                (K) senderId,
+                client,
+                HeartbeatEvent.Operation.RECEIVED
+        );
+        heartbeatChanges.onNext(event);
     }
 
     @Override
