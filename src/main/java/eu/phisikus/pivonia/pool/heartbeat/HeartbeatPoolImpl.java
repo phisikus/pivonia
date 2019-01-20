@@ -24,13 +24,13 @@ public class HeartbeatPoolImpl<K> implements HeartbeatPool<K> {
     private final Subject<HeartbeatEvent<K>> heartbeatChanges = PublishSubject.create();
     private final K nodeId;
     private final long neverSeen = 0L;
-    private final int timeoutDelay;
+    private final long timeoutDelay;
 
-    public HeartbeatPoolImpl(Long heartbeatDelay, int timeoutDelay, K nodeId) {
+    public HeartbeatPoolImpl(Long heartbeatDelay, long timeoutDelay, K nodeId) {
         this.nodeId = nodeId;
         this.timeoutDelay = timeoutDelay;
         heartbeatSender.scheduleWithFixedDelay(
-                getHeartbeatSenderTask(), 0L, heartbeatDelay, TimeUnit.SECONDS
+                getHeartbeatSenderTask(), 0L, heartbeatDelay, TimeUnit.MILLISECONDS
         );
     }
 
@@ -47,21 +47,34 @@ public class HeartbeatPoolImpl<K> implements HeartbeatPool<K> {
             var message = heartbeatMessageMessageWithClient.getMessage();
             var client = heartbeatMessageMessageWithClient.getClient();
 
-            Predicate<HeartbeatEntry> entriesContainClient = entry -> entry.getClient().equals(client);
+            if(message.getTimestamp() > 0L) {
+                processHeartbeatResponse(message, client);
+            } else {
+                sendHeartbeatResponse(client);
+            }
 
-            clients.stream()
-                    .filter(entriesContainClient)
-                    .forEach(entry -> {
-                        clients.remove(entry);
-                        var newEntry = new HeartbeatEntry(
-                                getCurrentTimestamp(),
-                                client,
-                                entry.getSubscription()
-                        );
-                        sendReceivedEvent((K) message.getSenderId(), client);
-                        clients.offer(newEntry);
-                    });
         };
+    }
+
+    private void sendHeartbeatResponse(Client client) {
+        client.send(new HeartbeatMessage<>(nodeId, getCurrentTimestamp()));
+    }
+
+    private void processHeartbeatResponse(HeartbeatMessage message, Client client) {
+        Predicate<HeartbeatEntry> entriesContainClient = entry -> entry.getClient().equals(client);
+
+        clients.stream()
+                .filter(entriesContainClient)
+                .forEach(entry -> {
+                    clients.remove(entry);
+                    var newEntry = new HeartbeatEntry(
+                            getCurrentTimestamp(),
+                            client,
+                            entry.getSubscription()
+                    );
+                    sendReceivedEvent((K) message.getSenderId(), client);
+                    clients.offer(newEntry);
+                });
     }
 
     private void sendReceivedEvent(K senderId, Client client) {
