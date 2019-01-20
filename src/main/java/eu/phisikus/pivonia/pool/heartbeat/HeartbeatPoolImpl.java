@@ -9,6 +9,8 @@ import io.reactivex.subjects.PublishSubject;
 import io.reactivex.subjects.Subject;
 
 import java.time.Instant;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Executors;
@@ -74,16 +76,23 @@ public class HeartbeatPoolImpl<K> implements HeartbeatPool<K> {
 
     private Runnable getHeartbeatSenderTask() {
         return () -> {
-            while (!clients.isEmpty()) {
-                var clientWithTime = clients.poll();
-                if (clientWithTime != null) {
-                    handleHeartbeatForClient(clientWithTime);
-                }
-            }
+            var processedClients = processCurrentQueue();
+            processedClients.forEach(clients::offer);
         };
     }
 
-    private void handleHeartbeatForClient(HeartbeatEntry heartbeatEntry) {
+    private List<HeartbeatEntry> processCurrentQueue() {
+        var processedClients = new LinkedList<HeartbeatEntry>();
+        while (!clients.isEmpty()) {
+            var clientWithTime = clients.poll();
+            if (clientWithTime != null) {
+                handleHeartbeatForClient(clientWithTime, processedClients);
+            }
+        }
+        return processedClients;
+    }
+
+    private void handleHeartbeatForClient(HeartbeatEntry heartbeatEntry, List<HeartbeatEntry> processedClients) {
         var isTimeoutClient = getCurrentTimestamp() - heartbeatEntry.getLastSeen() > timeoutDelay &&
                 heartbeatEntry.getLastSeen() != neverSeen;
 
@@ -92,7 +101,7 @@ public class HeartbeatPoolImpl<K> implements HeartbeatPool<K> {
             return;
         }
 
-        clients.offer(heartbeatEntry);
+        processedClients.add(heartbeatEntry);
         sendHeartbeat(heartbeatEntry.getClient());
     }
 
