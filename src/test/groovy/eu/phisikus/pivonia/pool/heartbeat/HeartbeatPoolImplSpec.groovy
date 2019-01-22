@@ -1,63 +1,58 @@
 package eu.phisikus.pivonia.pool.heartbeat
 
-import eu.phisikus.pivonia.api.Client
-import eu.phisikus.pivonia.api.MessageWithClient
-import io.reactivex.Observable
-import io.reactivex.subjects.PublishSubject
-import io.vavr.control.Try
-import org.junit.Ignore
+import eu.phisikus.pivonia.pool.heartbeat.test.HeartbeatLoopbackClient
+import spock.lang.Ignore
 import spock.lang.Specification
 
-import java.time.Instant
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
 class HeartbeatPoolImplSpec extends Specification {
 
-    class HeartbeatLoopbackClient implements Client {
-
-        def messages = PublishSubject.<MessageWithClient>create()
-
-        @Override
-        def <T> Try<Client> send(T message) {
-            return messages.onNext(new MessageWithClient<>(new HeartbeatMessage("server", Instant.now().toEpochMilli()), this))
-        }
-
-        @Override
-        Try<Client> connect(String address, int port) {
-            return Try.success(this)
-        }
-
-        @Override
-        <T> Observable<MessageWithClient<T>> getMessages(Class<T> messageType) {
-            return messages
-        }
-
-        @Override
-        void close() throws Exception {
-
-        }
-    }
-
-
-    @Ignore
-    def "Should send heartbeat message after adding client to the pool"() {
+    def "Should perform heartbeat protocol iteration after adding client to the pool"() {
         given: "there is a client"
-        def client = new HeartbeatLoopbackClient()
+        def client = new HeartbeatLoopbackClient(true)
 
         and: "empty heartbeat pool"
         final nodeId = UUID.randomUUID()
-        def pool = new HeartbeatPoolImpl(500L, 100L, nodeId)
+        def pool = new HeartbeatPoolImpl(50L, 500L, nodeId)
 
-        and: "client is configured to report sent message"
-        def messageReceived = new CountDownLatch(1)
-        pool.getHeartbeatChanges().subscribe({ event -> messageReceived.countDown() })
+        and: "heartbeat pool events are monitored"
+        def messageReceived = new CountDownLatch(3)
+        pool.getHeartbeatChanges()
+                .filter({ event -> event.getOperation() == HeartbeatEvent.Operation.RECEIVED })
+                .subscribe({ event -> messageReceived.countDown() })
 
         when: "adding client to the heartbeat pool"
         pool.add(client)
 
-        then: "heartbeat message is sent through the client"
-        messageReceived.await(10L, TimeUnit.SECONDS) == true
+        then: "heartbeat process is successful and event is emitted"
+        messageReceived.await(5L, TimeUnit.SECONDS)
+
+        cleanup: "close heartbeat pool"
+        pool.close()
+    }
+
+    @Ignore
+    def "Should perform heartbeat protocol and register timeout"() {
+        given: "there is a client connected to dead server"
+        def client = new HeartbeatLoopbackClient(false)
+
+        and: "empty heartbeat pool"
+        final nodeId = UUID.randomUUID()
+        def pool = new HeartbeatPoolImpl(50L, 500L, nodeId)
+
+        and: "heartbeat pool events are monitored"
+        def messageReceived = new CountDownLatch(1)
+        pool.getHeartbeatChanges()
+                .filter({ event -> event.getOperation() == HeartbeatEvent.Operation.TIMEOUT })
+                .subscribe({ event -> messageReceived.countDown() })
+
+        when: "adding client to the heartbeat pool"
+        pool.add(client)
+
+        then: "heartbeat process responds with timeout event"
+        messageReceived.await(5L, TimeUnit.SECONDS)
 
         cleanup: "close heartbeat pool"
         pool.close()

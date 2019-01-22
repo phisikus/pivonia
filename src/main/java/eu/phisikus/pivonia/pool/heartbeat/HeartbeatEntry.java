@@ -2,11 +2,13 @@ package eu.phisikus.pivonia.pool.heartbeat;
 
 import eu.phisikus.pivonia.api.Client;
 import io.reactivex.disposables.Disposable;
-import lombok.Value;
+import lombok.*;
 
-@Value
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 class HeartbeatEntry {
-    private final Long lastSeen;
-    private final Client client;
-    private final Disposable subscription;
+    private Long lastSeen;
+    private Client client;
+    private Disposable subscription;
 }
