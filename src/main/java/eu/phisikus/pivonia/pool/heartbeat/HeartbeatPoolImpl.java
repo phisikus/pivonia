@@ -7,6 +7,7 @@ import io.reactivex.Observable;
 import io.reactivex.functions.Consumer;
 import io.reactivex.subjects.PublishSubject;
 import io.reactivex.subjects.Subject;
+import lombok.extern.log4j.Log4j2;
 
 import java.time.Instant;
 import java.util.LinkedList;
@@ -18,7 +19,8 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 
-public class HeartbeatPoolImpl<K> implements HeartbeatPool<K> {
+@Log4j2
+public class HeartbeatPoolImpl<K> implements HeartbeatPool<K>, AutoCloseable {
     private final ScheduledExecutorService heartbeatSender = Executors.newSingleThreadScheduledExecutor();
     private final Queue<HeartbeatEntry> clients = new ConcurrentLinkedQueue<>();
     private final Subject<HeartbeatEvent<K>> heartbeatChanges = PublishSubject.create();
@@ -47,7 +49,8 @@ public class HeartbeatPoolImpl<K> implements HeartbeatPool<K> {
             var message = heartbeatMessageMessageWithClient.getMessage();
             var client = heartbeatMessageMessageWithClient.getClient();
 
-            if(message.getTimestamp() > 0L) {
+            log.info("Processing heartbeat message: {}", message);
+            if (message.getTimestamp() > 0L) {
                 processHeartbeatResponse(message, client);
             } else {
                 sendHeartbeatResponse(client);
@@ -139,11 +142,20 @@ public class HeartbeatPoolImpl<K> implements HeartbeatPool<K> {
 
     private void handleClientTimeout(Client client) {
         var timeoutEvent = new HeartbeatEvent<K>(null, client, HeartbeatEvent.Operation.TIMEOUT);
+        log.info("Sending timeout event: {}", timeoutEvent);
         heartbeatChanges.onNext(timeoutEvent);
     }
 
     private void sendHeartbeat(Client client) {
         var message = new HeartbeatMessage<>(nodeId, null);
+        log.info("Sending heartbeat message: {}", message);
         client.send(message);
+    }
+
+    @Override
+    public void close() throws Exception {
+        log.info("Closing heartbeat pool.");
+        heartbeatSender.shutdownNow();
+        clients.clear();
     }
 }
