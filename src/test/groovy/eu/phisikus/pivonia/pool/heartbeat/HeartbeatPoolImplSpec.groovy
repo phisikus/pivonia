@@ -33,7 +33,6 @@ class HeartbeatPoolImplSpec extends Specification {
         pool.close()
     }
 
-    @Ignore
     def "Should perform heartbeat protocol and register timeout"() {
         given: "there is a client connected to dead server"
         def client = new HeartbeatLoopbackClient(false)
@@ -52,7 +51,7 @@ class HeartbeatPoolImplSpec extends Specification {
         pool.add(client)
 
         then: "heartbeat process responds with timeout event"
-        messageReceived.await(5L, TimeUnit.SECONDS)
+        messageReceived.await(500L, TimeUnit.SECONDS)
 
         cleanup: "close heartbeat pool"
         pool.close()

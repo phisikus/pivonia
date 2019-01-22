@@ -25,7 +25,7 @@ class HeartbeatLoopbackClient implements Client {
             messages.onNext(new MessageWithClient<>(heartbeatResponse, this))
             return Try.success(this)
         }
-        return Try.failure(this)
+        return Try.failure(new RuntimeException("Could not send message."))
     }
 
     @Override

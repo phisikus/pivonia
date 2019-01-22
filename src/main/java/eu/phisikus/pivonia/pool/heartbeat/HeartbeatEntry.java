@@ -8,6 +8,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 class HeartbeatEntry {
+    private Boolean wasHeartbeatSent;
     private Long lastSeen;
     private Client client;
     private Disposable subscription;

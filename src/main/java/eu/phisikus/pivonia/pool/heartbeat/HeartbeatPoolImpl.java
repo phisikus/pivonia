@@ -41,7 +41,7 @@ public class HeartbeatPoolImpl<K> implements HeartbeatPool<K>, AutoCloseable {
         var subscription = client
                 .getMessages(HeartbeatMessage.class)
                 .subscribe(getHeartbeatMessageHandler());
-        clients.add(new HeartbeatEntry(neverSeen, client, subscription));
+        clients.add(new HeartbeatEntry(false, neverSeen, client, subscription));
     }
 
     private Consumer<MessageWithClient<HeartbeatMessage>> getHeartbeatMessageHandler() {
@@ -49,7 +49,7 @@ public class HeartbeatPoolImpl<K> implements HeartbeatPool<K>, AutoCloseable {
             var message = heartbeatMessageMessageWithClient.getMessage();
             var client = heartbeatMessageMessageWithClient.getClient();
 
-            log.info("Received heartbeat message: {}", message);
+            log.trace("Received heartbeat message: {}", message);
             if (message.getTimestamp() > 0L) {
                 processHeartbeatResponse(message, client);
             } else {
@@ -74,7 +74,7 @@ public class HeartbeatPoolImpl<K> implements HeartbeatPool<K>, AutoCloseable {
 
     private void sendReceivedEvent(K senderId, Client client) {
         var event = new HeartbeatEvent<>(
-                (K) senderId,
+                senderId,
                 client,
                 HeartbeatEvent.Operation.RECEIVED
         );
@@ -106,20 +106,21 @@ public class HeartbeatPoolImpl<K> implements HeartbeatPool<K>, AutoCloseable {
     }
 
     private void processCurrentQueue() {
-        log.info("Executing periodical heartbeat loop...");
+        log.trace("Executing periodical heartbeat loop...");
         clients.forEach(this::handleHeartbeatForClient);
-        log.info("Heartbeat loop complete.");
+        log.trace("Heartbeat loop complete.");
     }
 
     private void handleHeartbeatForClient(HeartbeatEntry heartbeatEntry) {
         var isTimeoutClient = getCurrentTimestamp() - heartbeatEntry.getLastSeen() > timeoutDelay &&
-                heartbeatEntry.getLastSeen() != neverSeen;
+                heartbeatEntry.getWasHeartbeatSent();
 
         if (isTimeoutClient) {
             handleClientTimeout(heartbeatEntry.getClient());
             return;
         }
 
+        heartbeatEntry.setWasHeartbeatSent(true);
         sendHeartbeat(heartbeatEntry.getClient());
     }
 
@@ -131,8 +132,8 @@ public class HeartbeatPoolImpl<K> implements HeartbeatPool<K>, AutoCloseable {
     }
 
     private void sendHeartbeat(Client client) {
-        var message = new HeartbeatMessage<>(nodeId, null);
-        log.info("Sending heartbeat message: {}", message);
+        var message = new HeartbeatMessage<>(nodeId, neverSeen);
+        log.trace("Sending heartbeat message: {}", message);
         client.send(message);
     }
 
