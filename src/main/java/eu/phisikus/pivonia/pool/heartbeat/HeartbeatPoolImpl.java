@@ -17,6 +17,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Log4j2
@@ -28,11 +29,11 @@ public class HeartbeatPoolImpl<K> implements HeartbeatPool<K>, AutoCloseable {
     private final long neverSeen = 0L;
     private final long timeoutDelay;
 
-    public HeartbeatPoolImpl(Long heartbeatDelay, long timeoutDelay, K nodeId) {
+    public HeartbeatPoolImpl(long heartbeatDelay, long timeoutDelay, K nodeId) {
         this.nodeId = nodeId;
         this.timeoutDelay = timeoutDelay;
         heartbeatSender.scheduleWithFixedDelay(
-                getHeartbeatSenderTask(), 0L, heartbeatDelay, TimeUnit.MILLISECONDS
+                getHeartbeatSenderTask(), heartbeatDelay, heartbeatDelay, TimeUnit.MILLISECONDS
         );
     }
 
@@ -139,8 +140,11 @@ public class HeartbeatPoolImpl<K> implements HeartbeatPool<K>, AutoCloseable {
 
     private Stream<HeartbeatEntry> getEntriesForClient(Client client) {
         Predicate<HeartbeatEntry> entriesContainClient = entry -> entry.getClient().equals(client);
-        return clients.stream()
-                .filter(entriesContainClient);
+        var clientsCopy = clients.toArray(new HeartbeatEntry[0]);
+        return Stream.of(clientsCopy)
+                .filter(entriesContainClient)
+                .collect(Collectors.toList())
+                .stream();
     }
 
     @Override

@@ -1,7 +1,6 @@
 package eu.phisikus.pivonia.pool.heartbeat
 
 import eu.phisikus.pivonia.pool.heartbeat.test.HeartbeatLoopbackClient
-import spock.lang.Ignore
 import spock.lang.Specification
 
 import java.util.concurrent.CountDownLatch
@@ -52,6 +51,24 @@ class HeartbeatPoolImplSpec extends Specification {
 
         then: "heartbeat process responds with timeout event"
         messageReceived.await(500L, TimeUnit.SECONDS)
+
+        cleanup: "close heartbeat pool"
+        pool.close()
+    }
+
+    def "Should remove client from heartbeat pool"() {
+        given: "there is a client"
+        def client = new HeartbeatLoopbackClient(false)
+
+        and: "empty heartbeat pool"
+        final nodeId = UUID.randomUUID()
+        def pool = new HeartbeatPoolImpl(1000L, 2000L, nodeId)
+
+        when: "adding client to the heartbeat pool"
+        pool.add(client)
+
+        then: "removing it from the pool is successful"
+        pool.remove(client)
 
         cleanup: "close heartbeat pool"
         pool.close()
