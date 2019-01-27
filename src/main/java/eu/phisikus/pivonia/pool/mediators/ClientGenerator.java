@@ -24,12 +24,10 @@ public class ClientGenerator implements Disposable {
     }
 
     private void bind(ClientPool clientPool, AddressPool addressPool, Provider<Client> clientProvider) {
-        subscription = addressPool.getAddressChanges()
-                .subscribe(addressEvent -> {
-                    if (addressEvent.getOperation() == AddressEvent.Operation.ADD) {
-                        handleAddressAddEvent(clientPool, clientProvider, addressEvent.getAddress());
-                    }
-                });
+        subscription = addressPool
+                .getAddressChanges()
+                .filter(addressEvent -> addressEvent.getOperation() == AddressEvent.Operation.ADD)
+                .subscribe(addressEvent -> handleAddressAddEvent(clientPool, clientProvider, addressEvent.getAddress()));
     }
 
     private void handleAddressAddEvent(ClientPool clientPool, Provider<Client> clientProvider, Address address) {
