@@ -25,8 +25,6 @@ class ClientGeneratorSpec extends Specification {
         when: "ClientGenerator is created"
         def generator = new ClientGenerator(clientPool, addressPool, provider)
 
-
-
-
+        then: "nothing" //TODO implement
     }
 }
