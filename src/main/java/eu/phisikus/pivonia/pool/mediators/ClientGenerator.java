@@ -13,20 +13,23 @@ import io.vavr.control.Try;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
+import java.util.*;
+import java.util.function.Supplier;
 
 /**
  * Connects address pool and client pool.
  * For each address added to the pool the manager will create a new connection and add the client to the client pool.
  */
 public class ClientGenerator implements Disposable {
-    private static String RETRY_ID = "client-generation-retry";
+    private int maxRetryAttempts = 10;
     private RetryConfig retryConfiguration;
     private Disposable subscription;
+    private List<Address> monitoredAddresses = Collections.synchronizedList(new LinkedList<>());
 
     @Inject
     public ClientGenerator(ClientPool clientPool, AddressPool addressPool, Provider<Client> clientProvider) {
         retryConfiguration = RetryConfig.<Try>custom()
-                .maxAttempts(10)
+                .maxAttempts(maxRetryAttempts)
                 .intervalFunction(IntervalFunction.ofExponentialBackoff())
                 .retryOnResult(Try::isFailure)
                 .build();
@@ -37,15 +40,34 @@ public class ClientGenerator implements Disposable {
     private void bind(ClientPool clientPool, AddressPool addressPool, Provider<Client> clientProvider) {
         subscription = addressPool
                 .getAddressChanges()
-                .filter(addressEvent -> addressEvent.getOperation() == AddressEvent.Operation.ADD)
-                .subscribe(addressEvent -> handleAddressAddEvent(clientPool, clientProvider, addressEvent.getAddress()));
+                .subscribe(addressEvent -> handleAddressEvent(clientPool, clientProvider, addressEvent));
     }
 
-    private void handleAddressAddEvent(ClientPool clientPool, Provider<Client> clientProvider, Address address) {
-        Retry.of(RETRY_ID, retryConfiguration)
-                .executeSupplier(() ->
-                        clientProvider.get().connect(address.getHostname(), address.getPort())
-                ).forEach(clientPool::add);
+    private void handleAddressEvent(ClientPool clientPool, Provider<Client> clientProvider, AddressEvent addressEvent) {
+        Address address = addressEvent.getAddress();
+        if (addressEvent.getOperation() == AddressEvent.Operation.REMOVE) {
+            monitoredAddresses.remove(address);
+        }
+
+        if (addressEvent.getOperation() == AddressEvent.Operation.ADD) {
+            connectWithRetry(clientPool, clientProvider, address);
+        }
+    }
+
+    private void connectWithRetry(ClientPool clientPool, Provider<Client> clientProvider, Address address) {
+        String retryId = UUID.randomUUID().toString();
+        Retry.of(retryId, retryConfiguration)
+                .executeSupplier(createClient(clientProvider, address))
+                .forEach(clientPool::add);
+    }
+
+    private Supplier<Try<Client>> createClient(Provider<Client> clientProvider, Address address) {
+        return () -> {
+            if (monitoredAddresses.contains(address)) {
+                return clientProvider.get().connect(address.getHostname(), address.getPort());
+            }
+            throw new NoSuchElementException();
+        };
     }
 
     @Override
