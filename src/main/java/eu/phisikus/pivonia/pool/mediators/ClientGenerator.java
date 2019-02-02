@@ -14,6 +14,7 @@ import io.vavr.control.Try;
 import javax.inject.Inject;
 import javax.inject.Provider;
 import java.util.*;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 /**
@@ -28,10 +29,15 @@ public class ClientGenerator implements Disposable {
 
     @Inject
     public ClientGenerator(ClientPool clientPool, AddressPool addressPool, Provider<Client> clientProvider) {
+        Predicate<Try> ifFailureButNotExitCode = result -> result.isFailure() &&
+                !result.getCause()
+                        .getClass()
+                        .equals(NoSuchElementException.class);
+
         retryConfiguration = RetryConfig.<Try>custom()
                 .maxAttempts(maxRetryAttempts)
                 .intervalFunction(IntervalFunction.ofExponentialBackoff())
-                .retryOnResult(Try::isFailure)
+                .retryOnResult(ifFailureButNotExitCode)
                 .build();
 
         bind(clientPool, addressPool, clientProvider);
@@ -50,6 +56,7 @@ public class ClientGenerator implements Disposable {
         }
 
         if (addressEvent.getOperation() == AddressEvent.Operation.ADD) {
+            monitoredAddresses.add(address);
             connectWithRetry(clientPool, clientProvider, address);
         }
     }
@@ -64,9 +71,11 @@ public class ClientGenerator implements Disposable {
     private Supplier<Try<Client>> createClient(Provider<Client> clientProvider, Address address) {
         return () -> {
             if (monitoredAddresses.contains(address)) {
-                return clientProvider.get().connect(address.getHostname(), address.getPort());
+                var newClient = clientProvider.get();
+                var connectedClient = newClient.connect(address.getHostname(), address.getPort());
+                return connectedClient;
             }
-            throw new NoSuchElementException();
+            return Try.failure(new NoSuchElementException());
         };
     }
 
