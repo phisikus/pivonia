@@ -22,17 +22,18 @@ import java.util.function.Supplier;
  * For each address added to the pool the manager will create a new connection and add the client to the client pool.
  */
 public class ClientGenerator implements Disposable {
-    private int maxRetryAttempts = 10;
     private RetryConfig retryConfiguration;
     private Disposable subscription;
     private List<Address> monitoredAddresses = Collections.synchronizedList(new LinkedList<>());
 
-    @Inject
-    public ClientGenerator(ClientPool clientPool, AddressPool addressPool, Provider<Client> clientProvider) {
+
+    public ClientGenerator(ClientPool clientPool,
+                           AddressPool addressPool,
+                           Provider<Client> clientProvider,
+                           int maxRetryAttempts) {
         Predicate<Try> ifFailureButNotExitCode = result -> result.isFailure() &&
-                !result.getCause()
-                        .getClass()
-                        .equals(NoSuchElementException.class);
+                !NoSuchElementException.class
+                        .equals(result.getCause().getClass());
 
         retryConfiguration = RetryConfig.<Try>custom()
                 .maxAttempts(maxRetryAttempts)

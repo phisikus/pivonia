@@ -27,7 +27,7 @@ class ClientGeneratorSpec extends Specification {
         addressPool.getAddressChanges() >> addressChanges
 
         when: "Client Generator is created"
-        def generator = new ClientGenerator(clientPool, addressPool, provider)
+        def generator = new ClientGenerator(clientPool, addressPool, provider, 3)
 
         and: "new Address is added to the Address Pool"
         def newAddress = new Address("localhost", 7070)
@@ -61,7 +61,7 @@ class ClientGeneratorSpec extends Specification {
         addressPool.getAddressChanges() >> addressChanges
 
         when: "Client Generator is created"
-        def generator = new ClientGenerator(clientPool, addressPool, provider)
+        def generator = new ClientGenerator(clientPool, addressPool, provider, 3)
 
         and: "new Address is added to the Address Pool"
         def newAddress = new Address("localhost", 7070)
@@ -76,6 +76,40 @@ class ClientGeneratorSpec extends Specification {
 
         and: "connected client should be added to the Client Pool in a finite time interval"
         1 * clientPool.add(client)
+
+        cleanup: "client generator is destroyed"
+        generator.dispose()
+    }
+
+    def "Should not add client if the connection never succeeded"() {
+        given: "Client Pool and Address Pool are provided"
+        def clientPool = Mock(ClientPool)
+        def addressPool = Mock(AddressPool)
+
+        and: "Client provider is prepared"
+        def client = Mock(Client)
+        def provider = Mock(Provider)
+
+        and: "Address Pool is configured to publish change events"
+        def addressChanges = PublishSubject.create()
+        addressPool.getAddressChanges() >> addressChanges
+
+        when: "Client Generator is created"
+        def generator = new ClientGenerator(clientPool, addressPool, provider, 3)
+
+        and: "new Address is added to the Address Pool"
+        def newAddress = new Address("localhost", 7070)
+        addressChanges.onNext(new AddressEvent(AddressEvent.Operation.ADD, newAddress))
+
+        then: "Client provider should be called multiple times"
+        3 * provider.get() >> client
+
+        and: "there should be multiple unsuccessful connection attempts"
+        def failureResult = Try.failure(new IOException())
+        3 * client.connect('localhost', 7070) >> failureResult
+
+        and: "connected client should be added to the Client Pool in a finite time interval"
+        0 * clientPool.add(client)
 
         cleanup: "client generator is destroyed"
         generator.dispose()
