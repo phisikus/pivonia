@@ -5,6 +5,7 @@ import eu.phisikus.pivonia.pool.AddressPool
 import eu.phisikus.pivonia.pool.ClientPool
 import eu.phisikus.pivonia.pool.address.Address
 import eu.phisikus.pivonia.pool.address.AddressEvent
+import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.PublishSubject
 import io.vavr.control.Try
 import spock.lang.Specification
@@ -108,7 +109,45 @@ class ClientGeneratorSpec extends Specification {
         def failureResult = Try.failure(new IOException())
         3 * client.connect('localhost', 7070) >> failureResult
 
-        and: "connected client should be added to the Client Pool in a finite time interval"
+        and: "client should not be added to the Client Pool"
+        0 * clientPool.add(client)
+
+        cleanup: "client generator is destroyed"
+        generator.dispose()
+    }
+
+
+    def "Should give up on connecting client if address was removed from the address pool"() {
+        given: "Client Pool and Address Pool are provided"
+        def clientPool = Mock(ClientPool)
+        def addressPool = Mock(AddressPool)
+
+        and: "Client provider is prepared"
+        def client = Mock(Client)
+        def provider = Mock(Provider)
+
+        and: "Address Pool is configured to publish change events in parallel"
+        def addressChanges = PublishSubject.create()
+        addressPool.getAddressChanges() >> addressChanges.observeOn(Schedulers.io())
+
+        when: "Client Generator is created"
+        def generator = new ClientGenerator(clientPool, addressPool, provider, 3)
+
+        and: "new Address is added to the Address Pool"
+        def newAddress = new Address("localhost", 7070)
+        addressChanges.onNext(new AddressEvent(AddressEvent.Operation.ADD, newAddress))
+
+        and: "Address is removed from the Address Pool"
+        addressChanges.onNext(new AddressEvent(AddressEvent.Operation.REMOVE, newAddress))
+
+        then: "Client provider could be called multiple times"
+        _ * provider.get() >> client
+
+        and: "there could be an unsuccessful connection attempt before successful one"
+        def failureResult = Try.failure(new IOException())
+        _ * client.connect('localhost', 7070) >>> [failureResult, failureResult, Try.success(client)]
+
+        and: "client will not be added because address was removed and it stopped connection retry process"
         0 * clientPool.add(client)
 
         cleanup: "client generator is destroyed"

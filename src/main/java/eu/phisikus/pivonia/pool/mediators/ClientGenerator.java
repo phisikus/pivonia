@@ -27,6 +27,17 @@ public class ClientGenerator implements Disposable {
     private Disposable subscription;
     private List<Address> monitoredAddresses = Collections.synchronizedList(new LinkedList<>());
 
+    /**
+     * Creates client generator that will add connected client to given Client Pool for each new Address.
+     * Client creation will be triggered by binding with Address Pool event stream.
+     * Provided client provider will be used to generate clients before connecting them.
+     * Exponential backoff algorithm will be used for retrying connection if it fails with defined maximum retry limit.
+     *
+     * @param clientPool client pool where new clients will be added
+     * @param addressPool source of address addition events
+     * @param clientProvider provider of new client instances
+     * @param maxRetryAttempts number of connection retry attemps
+     */
     public ClientGenerator(ClientPool clientPool,
                            AddressPool addressPool,
                            Provider<Client> clientProvider,
@@ -59,6 +70,7 @@ public class ClientGenerator implements Disposable {
         if (addressEvent.getOperation() == AddressEvent.Operation.ADD) {
             monitoredAddresses.add(address);
             connectWithRetry(clientPool, clientProvider, address);
+            monitoredAddresses.remove(address);
         }
     }
 
