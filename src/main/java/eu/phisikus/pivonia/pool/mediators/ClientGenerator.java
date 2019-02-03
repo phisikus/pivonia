@@ -10,8 +10,8 @@ import io.github.resilience4j.retry.Retry;
 import io.github.resilience4j.retry.RetryConfig;
 import io.reactivex.disposables.Disposable;
 import io.vavr.control.Try;
+import lombok.extern.log4j.Log4j2;
 
-import javax.inject.Inject;
 import javax.inject.Provider;
 import java.util.*;
 import java.util.function.Predicate;
@@ -21,11 +21,11 @@ import java.util.function.Supplier;
  * Connects address pool and client pool.
  * For each address added to the pool the manager will create a new connection and add the client to the client pool.
  */
+@Log4j2
 public class ClientGenerator implements Disposable {
     private RetryConfig retryConfiguration;
     private Disposable subscription;
     private List<Address> monitoredAddresses = Collections.synchronizedList(new LinkedList<>());
-
 
     public ClientGenerator(ClientPool clientPool,
                            AddressPool addressPool,
@@ -73,11 +73,20 @@ public class ClientGenerator implements Disposable {
         return () -> {
             if (monitoredAddresses.contains(address)) {
                 var newClient = clientProvider.get();
-                var connectedClient = newClient.connect(address.getHostname(), address.getPort());
-                return connectedClient;
+                var connectionResult = newClient.connect(address.getHostname(), address.getPort());
+                connectionResult.onFailure(throwable -> closeClient(newClient));
+                return connectionResult;
             }
             return Try.failure(new NoSuchElementException());
         };
+    }
+
+    private void closeClient(Client client) {
+        try {
+            client.close();
+        } catch (Exception e) {
+            log.error("Unexpected exception occurred when closing client that was unable to connect", e);
+        }
     }
 
     @Override
