@@ -31,11 +31,11 @@ public class ClientPoolImpl<K> implements ClientPool<K> {
         var isNewValue = previousClient != client;
         var wasPreviouslyAssigned = previousClient != null && isNewValue;
 
-        if(wasPreviouslyAssigned) {
+        if (wasPreviouslyAssigned) {
             notify(id, previousClient, ClientEvent.Operation.UNASSIGN);
         }
 
-        if(isNewValue) {
+        if (isNewValue) {
             notify(id, client, ClientEvent.Operation.ASSIGN);
         }
     }
@@ -48,9 +48,10 @@ public class ClientPoolImpl<K> implements ClientPool<K> {
 
     @Override
     public void remove(Client client) {
-        clients.remove(client);
-        removeMappings(client);
-        notify(null, client, ClientEvent.Operation.REMOVE);
+        if (clients.remove(client)) {
+            removeMappings(client);
+            notify(null, client, ClientEvent.Operation.REMOVE);
+        }
     }
 
     private void removeMappings(Client client) {

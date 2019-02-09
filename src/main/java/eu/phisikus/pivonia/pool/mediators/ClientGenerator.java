@@ -14,29 +14,33 @@ import lombok.extern.log4j.Log4j2;
 
 import javax.inject.Provider;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 /**
  * Connects address pool and client pool.
  * For each address added to the pool the manager will create a new connection and add the client to the client pool.
+ * Removal of address from the pool will trigger associated client to be removed from the pool and closed.
  */
 @Log4j2
 public class ClientGenerator implements Disposable {
     private RetryConfig retryConfiguration;
     private Disposable subscription;
-    private List<Address> monitoredAddresses = Collections.synchronizedList(new LinkedList<>());
+    private List<Address> processingAddresses = Collections.synchronizedList(new LinkedList<>());
+    private Map<Address, Client> clients = new ConcurrentHashMap<>();
 
     /**
      * Creates client generator that will add connected client to given Client Pool for each new Address.
      * Client creation will be triggered by binding with Address Pool event stream.
      * Provided client provider will be used to generate clients before connecting them.
      * Exponential backoff algorithm will be used for retrying connection if it fails with defined maximum retry limit.
+     * Each address removal will cause client to be removed from the Client Pool and closed.
      *
-     * @param clientPool client pool where new clients will be added
-     * @param addressPool source of address addition events
-     * @param clientProvider provider of new client instances
-     * @param maxRetryAttempts number of connection retry attemps
+     * @param clientPool       client pool where new clients will be added
+     * @param addressPool      source of address addition events
+     * @param clientProvider   provider of new client instances
+     * @param maxRetryAttempts number of connection retry attempts
      */
     public ClientGenerator(ClientPool clientPool,
                            AddressPool addressPool,
@@ -63,14 +67,24 @@ public class ClientGenerator implements Disposable {
 
     private void handleAddressEvent(ClientPool clientPool, Provider<Client> clientProvider, AddressEvent addressEvent) {
         Address address = addressEvent.getAddress();
-        if (addressEvent.getOperation() == AddressEvent.Operation.REMOVE) {
-            monitoredAddresses.remove(address);
-        }
+        handleAddressRemoval(clientPool, addressEvent, address);
+        handleAddressAddition(clientPool, clientProvider, addressEvent, address);
+    }
 
+    private void handleAddressRemoval(ClientPool clientPool, AddressEvent addressEvent, Address address) {
+        if (addressEvent.getOperation() == AddressEvent.Operation.REMOVE) {
+            processingAddresses.remove(address);
+            var removedClient = clients.remove(address);
+            clientPool.remove(removedClient);
+            closeClient(removedClient);
+        }
+    }
+
+    private void handleAddressAddition(ClientPool clientPool, Provider<Client> clientProvider, AddressEvent addressEvent, Address address) {
         if (addressEvent.getOperation() == AddressEvent.Operation.ADD) {
-            monitoredAddresses.add(address);
+            processingAddresses.add(address);
             connectWithRetry(clientPool, clientProvider, address);
-            monitoredAddresses.remove(address);
+            processingAddresses.remove(address);
         }
     }
 
@@ -78,12 +92,15 @@ public class ClientGenerator implements Disposable {
         String retryId = UUID.randomUUID().toString();
         Retry.of(retryId, retryConfiguration)
                 .executeSupplier(createClient(clientProvider, address))
-                .forEach(clientPool::add);
+                .forEach(client -> {
+                    clientPool.add(client);
+                    clients.put(address, client);
+                });
     }
 
     private Supplier<Try<Client>> createClient(Provider<Client> clientProvider, Address address) {
         return () -> {
-            if (monitoredAddresses.contains(address)) {
+            if (processingAddresses.contains(address)) {
                 var newClient = clientProvider.get();
                 var connectionResult = newClient.connect(address.getHostname(), address.getPort());
                 connectionResult.onFailure(throwable -> closeClient(newClient));
