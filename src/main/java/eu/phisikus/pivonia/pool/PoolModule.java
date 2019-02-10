@@ -7,8 +7,6 @@ import eu.phisikus.pivonia.pool.address.AddressPoolModule;
 import eu.phisikus.pivonia.pool.client.ClientPoolModule;
 import eu.phisikus.pivonia.pool.heartbeat.HeartbeatPoolModule;
 import eu.phisikus.pivonia.pool.mediators.ConnectionManagerImpl;
-import eu.phisikus.pivonia.qualifiers.Encrypted;
-import eu.phisikus.pivonia.qualifiers.PlainText;
 
 import javax.inject.Provider;
 
@@ -19,17 +17,18 @@ import javax.inject.Provider;
 })
 public class PoolModule {
 
+    private final Provider<Client> clientProvider;
     private final int maxConnectionRetryAttempts;
 
-    public PoolModule(int maxConnectionRetryAttempts) {
+    public PoolModule(Provider<Client> clientProvider, int maxConnectionRetryAttempts) {
+        this.clientProvider = clientProvider;
         this.maxConnectionRetryAttempts = maxConnectionRetryAttempts;
     }
 
     @Provides
     public ConnectionManager provideConnectionManager(ClientPool clientPool,
                                                       AddressPool addressPool,
-                                                      HeartbeatPool heartbeatPool,
-                                                      Provider<Client> clientProvider) {
+                                                      HeartbeatPool heartbeatPool) {
         return new ConnectionManagerImpl(clientPool, addressPool, heartbeatPool, clientProvider, maxConnectionRetryAttempts);
     }
 }
