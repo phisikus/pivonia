@@ -14,26 +14,22 @@ import javax.inject.Singleton;
 @Module
 public class TCPModule {
     @Provides
-    @Singleton
     public Client provideTCPClient(@PlainText BSONConverter bsonConverter) {
         return new TCPClient(bsonConverter);
     }
 
     @Provides
-    @Singleton
     public Server provideTCPServer(@PlainText BSONConverter bsonConverter) {
         return new TCPServer(bsonConverter);
     }
 
     @Provides
-    @Singleton
     @Encrypted
     public Client provideTCPClientWithEncryption(@Encrypted BSONConverter bsonConverter) {
         return new TCPClient(bsonConverter);
     }
 
     @Provides
-    @Singleton
     @Encrypted
     public Server provideTCPServerWithEncryption(@Encrypted BSONConverter bsonConverter) {
         return new TCPServer(bsonConverter);
