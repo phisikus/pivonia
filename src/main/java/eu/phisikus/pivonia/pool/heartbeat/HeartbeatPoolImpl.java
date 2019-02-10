@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Log4j2
-public class HeartbeatPoolImpl<K> implements HeartbeatPool<K>, AutoCloseable {
+class HeartbeatPoolImpl<K> implements HeartbeatPool<K>, AutoCloseable {
     private final ScheduledExecutorService heartbeatSender = Executors.newSingleThreadScheduledExecutor();
     private final List<HeartbeatEntry> clients = Collections.synchronizedList(new LinkedList<>());
     private final Subject<HeartbeatEvent<K>> heartbeatChanges = PublishSubject.create();

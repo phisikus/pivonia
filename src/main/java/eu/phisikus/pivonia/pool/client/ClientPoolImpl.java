@@ -13,7 +13,7 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-public class ClientPoolImpl<K> implements ClientPool<K> {
+class ClientPoolImpl<K> implements ClientPool<K> {
 
     @Getter
     private final List<Client> clients = new CopyOnWriteArrayList<>();
