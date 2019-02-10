@@ -12,7 +12,7 @@ import spock.lang.Specification
 
 import javax.inject.Provider
 
-class ClientGeneratorSpec extends Specification {
+class AddressClientPoolMediatorSpec extends Specification {
 
     def "Should successfully generate client"() {
         given: "Client Pool and Address Pool are provided"
@@ -27,8 +27,8 @@ class ClientGeneratorSpec extends Specification {
         def addressChanges = PublishSubject.create()
         addressPool.getAddressChanges() >> addressChanges
 
-        when: "Client Generator is created"
-        def generator = new ClientGenerator(clientPool, addressPool, provider, 3)
+        when: "mediator is created between Address Pool and Client Pool"
+        def mediator = new AddressClientPoolMediator(clientPool, addressPool, provider, 3)
 
         and: "new Address is added to the Address Pool"
         def newAddress = new Address("localhost", 7070)
@@ -43,8 +43,8 @@ class ClientGeneratorSpec extends Specification {
         and: "connected client should be added to the Client Pool in a finite time interval"
         1 * clientPool.add(client)
 
-        cleanup: "client generator is destroyed"
-        generator.dispose()
+        cleanup: "mediator is destroyed"
+        mediator.dispose()
     }
 
 
@@ -61,8 +61,8 @@ class ClientGeneratorSpec extends Specification {
         def addressChanges = PublishSubject.create()
         addressPool.getAddressChanges() >> addressChanges
 
-        when: "Client Generator is created"
-        def generator = new ClientGenerator(clientPool, addressPool, provider, 3)
+        when: "mediator is created between Address Pool and Client Pool"
+        def mediator = new AddressClientPoolMediator(clientPool, addressPool, provider, 3)
 
         and: "new Address is added to the Address Pool"
         def newAddress = new Address("localhost", 7070)
@@ -78,8 +78,8 @@ class ClientGeneratorSpec extends Specification {
         and: "connected client should be added to the Client Pool in a finite time interval"
         1 * clientPool.add(client)
 
-        cleanup: "client generator is destroyed"
-        generator.dispose()
+        cleanup: "mediator is destroyed"
+        mediator.dispose()
     }
 
     def "Should not add client if the connection never succeeded"() {
@@ -95,8 +95,8 @@ class ClientGeneratorSpec extends Specification {
         def addressChanges = PublishSubject.create()
         addressPool.getAddressChanges() >> addressChanges
 
-        when: "Client Generator is created"
-        def generator = new ClientGenerator(clientPool, addressPool, provider, 3)
+        when: "mediator is created between Address Pool and Client Pool"
+        def mediator = new AddressClientPoolMediator(clientPool, addressPool, provider, 3)
 
         and: "new Address is added to the Address Pool"
         def newAddress = new Address("localhost", 7070)
@@ -112,8 +112,8 @@ class ClientGeneratorSpec extends Specification {
         and: "client should not be added to the Client Pool"
         0 * clientPool.add(client)
 
-        cleanup: "client generator is destroyed"
-        generator.dispose()
+        cleanup: "mediator is destroyed"
+        mediator.dispose()
     }
 
 
@@ -130,8 +130,8 @@ class ClientGeneratorSpec extends Specification {
         def addressChanges = PublishSubject.create()
         addressPool.getAddressChanges() >> addressChanges.observeOn(Schedulers.io())
 
-        when: "Client Generator is created"
-        def generator = new ClientGenerator(clientPool, addressPool, provider, 3)
+        when: "mediator is created between Address Pool and Client Pool"
+        def mediator = new AddressClientPoolMediator(clientPool, addressPool, provider, 3)
 
         and: "new Address is added to the Address Pool"
         def newAddress = new Address("localhost", 7070)
@@ -150,8 +150,8 @@ class ClientGeneratorSpec extends Specification {
         and: "client will not be added because address was removed and it stopped connection retry process"
         0 * clientPool.add(client)
 
-        cleanup: "client generator is destroyed"
-        generator.dispose()
+        cleanup: "mediator is destroyed"
+        mediator.dispose()
     }
 
     def "Should successfully remove generated client on address removal"() {
@@ -167,8 +167,8 @@ class ClientGeneratorSpec extends Specification {
         def addressChanges = PublishSubject.create()
         addressPool.getAddressChanges() >> addressChanges
 
-        when: "Client Generator is created"
-        def generator = new ClientGenerator(clientPool, addressPool, provider, 3)
+        when: "mediator is created between Address Pool and Client Pool"
+        def mediator = new AddressClientPoolMediator(clientPool, addressPool, provider, 3)
 
         and: "Address is added to the Address Pool"
         1 * provider.get() >> client
@@ -185,7 +185,7 @@ class ClientGeneratorSpec extends Specification {
         and: "client was closed"
         1 * client.close()
 
-        cleanup: "client generator is destroyed"
-        generator.dispose()
+        cleanup: "mediator is destroyed"
+        mediator.dispose()
     }
 }

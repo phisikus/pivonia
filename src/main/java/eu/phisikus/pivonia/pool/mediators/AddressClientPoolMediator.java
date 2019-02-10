@@ -20,19 +20,19 @@ import java.util.function.Supplier;
 
 /**
  * Connects address pool and client pool.
- * For each address added to the pool the manager will create a new connection and add the client to the client pool.
+ * For each address added to the pool the mediator will create a new connection and add the client to the client pool.
  * Removal of address from the pool will trigger associated client to be removed from the pool and closed.
  */
 @Log4j2
-public class ClientGenerator implements Disposable {
+public class AddressClientPoolMediator implements Disposable {
     private RetryConfig retryConfiguration;
     private Disposable subscription;
     private List<Address> processingAddresses = Collections.synchronizedList(new LinkedList<>());
     private Map<Address, Client> clients = new ConcurrentHashMap<>();
 
     /**
-     * Creates client generator that will add connected client to given Client Pool for each new Address.
-     * Client creation will be triggered by binding with Address Pool event stream.
+     * Creates mediator that will add connected client to given Client Pool for each new Address.
+     * Client creation and destruction will be triggered by binding with Address Pool event stream.
      * Provided client provider will be used to generate clients before connecting them.
      * Exponential backoff algorithm will be used for retrying connection if it fails with defined maximum retry limit.
      * Each address removal will cause client to be removed from the Client Pool and closed.
@@ -42,10 +42,10 @@ public class ClientGenerator implements Disposable {
      * @param clientProvider   provider of new client instances
      * @param maxRetryAttempts number of connection retry attempts
      */
-    public ClientGenerator(ClientPool clientPool,
-                           AddressPool addressPool,
-                           Provider<Client> clientProvider,
-                           int maxRetryAttempts) {
+    public AddressClientPoolMediator(ClientPool clientPool,
+                                     AddressPool addressPool,
+                                     Provider<Client> clientProvider,
+                                     int maxRetryAttempts) {
         Predicate<Try> ifFailureButNotExitCode = result -> result.isFailure() &&
                 !NoSuchElementException.class
                         .equals(result.getCause().getClass());
