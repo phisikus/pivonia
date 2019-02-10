@@ -15,7 +15,7 @@ import lombok.extern.log4j.Log4j2;
  * Each heartbeat timeout will cause the client to be closed and removed from the Client Pool
  */
 @Log4j2
-public class ClientHeartbeatPoolMediator<K> implements Disposable {
+class ClientHeartbeatPoolMediator<K> implements Disposable {
 
     private Disposable additionSubscription;
     private Disposable removalSubscription;

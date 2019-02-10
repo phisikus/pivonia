@@ -11,7 +11,7 @@ import lombok.Getter;
 import javax.inject.Provider;
 
 @Getter
-public class ConnectionManagerImpl<K> implements ConnectionManager<K> {
+class ConnectionManagerImpl<K> implements ConnectionManager<K> {
     private final ClientPool<K> clientPool;
     private final AddressPool addressPool;
     private final HeartbeatPool<K> heartbeatPool;

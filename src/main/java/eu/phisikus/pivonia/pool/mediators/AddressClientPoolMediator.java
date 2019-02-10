@@ -24,7 +24,7 @@ import java.util.function.Supplier;
  * Removal of address from the pool will trigger associated client to be removed from the pool and closed.
  */
 @Log4j2
-public class AddressClientPoolMediator implements Disposable {
+class AddressClientPoolMediator implements Disposable {
     private RetryConfig retryConfiguration;
     private Disposable subscription;
     private List<Address> processingAddresses = Collections.synchronizedList(new LinkedList<>());
