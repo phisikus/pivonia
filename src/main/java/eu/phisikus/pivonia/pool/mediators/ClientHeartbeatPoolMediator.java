@@ -22,10 +22,6 @@ class ClientHeartbeatPoolMediator<K> implements Disposable {
     private Disposable assignmentSubscription;
     private Disposable timeoutSubscription;
 
-    /**
-     * @param clientPool
-     * @param heartbeatPool
-     */
     public ClientHeartbeatPoolMediator(ClientPool<K> clientPool, HeartbeatPool<K> heartbeatPool) {
         bind(clientPool, heartbeatPool);
     }
