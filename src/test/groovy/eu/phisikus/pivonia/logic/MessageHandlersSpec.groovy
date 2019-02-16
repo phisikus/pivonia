@@ -5,13 +5,7 @@ import eu.phisikus.pivonia.api.Server
 import io.reactivex.subjects.PublishSubject
 import spock.lang.Specification
 
-import java.util.concurrent.TimeUnit
-
 class MessageHandlersSpec extends Specification {
-
-    private class FirstType {}
-
-    private class SecondType {}
 
     def "Should create message handler with multiple handlers and register them in client"() {
         given: "there are two Message Handler definitions"
@@ -95,4 +89,8 @@ class MessageHandlersSpec extends Specification {
         cleanup: "Message Handlers is disposed"
         handlers.dispose()
     }
+
+    private class FirstType {}
+
+    private class SecondType {}
 }
