@@ -20,4 +20,20 @@ class MessageHandlerSpec extends Specification {
             getMessageHandler() == consumer
         }
     }
+
+    def "Should not create MessageHandler for null messageType"() {
+        when: "calling builder method of MessageHandler with null messageType"
+        MessageHandler.create(null, Mock(Consumer))
+
+        then: "exception should be thrown"
+        thrown IllegalArgumentException
+    }
+
+    def "Should not create MessageHandler for null consumer"() {
+        when: "calling builder method of MessageHandler with null consumer"
+        MessageHandler.create(Object, null)
+
+        then: "exception should be thrown"
+        thrown IllegalArgumentException
+    }
 }

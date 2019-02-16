@@ -1,5 +1,6 @@
 package eu.phisikus.pivonia.logic;
 
+import lombok.NonNull;
 import lombok.Value;
 
 import java.util.function.Consumer;
@@ -23,12 +24,12 @@ public class MessageHandler<T> {
     /**
      * Create message handler for given type and message consuming function.
      *
-     * @param messageType class type of message handled by this MessageHandler
+     * @param messageType    class type of message handled by this MessageHandler
      * @param messageHandler message consuming function for that type
-     * @param <T> generic type of message handled by this MessageHandler
+     * @param <T>            generic type of message handled by this MessageHandler
      * @return new and ready to use MessageHandler
      */
-    public static <T> MessageHandler<T> create(Class<T> messageType, Consumer<T> messageHandler) {
+    public static <T> MessageHandler<T> create(@NonNull Class<T> messageType, @NonNull Consumer<T> messageHandler) {
         return new MessageHandler<>(messageType, messageHandler);
     }
 }
