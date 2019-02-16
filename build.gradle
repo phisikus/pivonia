@@ -17,11 +17,11 @@ configurations {
  * Settings
  */
 rootProject.group = "eu.phisikus.pivonia"
-rootProject.version = '0.0.6'
+rootProject.version = '0.0.7'
 
 
-sourceCompatibility = JavaVersion.VERSION_1_10
-targetCompatibility = JavaVersion.VERSION_1_10
+sourceCompatibility = JavaVersion.VERSION_11
+targetCompatibility = JavaVersion.VERSION_11
 
 /**
  * Dependencies
