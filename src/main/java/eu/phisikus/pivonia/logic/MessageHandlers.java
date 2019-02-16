@@ -5,6 +5,7 @@ import eu.phisikus.pivonia.api.MessageWithClient;
 import eu.phisikus.pivonia.api.Server;
 import io.reactivex.Observable;
 import io.reactivex.disposables.Disposable;
+import lombok.NonNull;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -19,11 +20,11 @@ public class MessageHandlers implements Disposable {
         this.subscriptions = new LinkedList<>();
     }
 
-    public MessageHandlers create() {
+    public static MessageHandlers create() {
         return new MessageHandlers(new LinkedList<>());
     }
 
-    public <T> MessageHandlers withHandler(MessageHandler<T> messageHandler) {
+    public <T> MessageHandlers withHandler(@NonNull MessageHandler<T> messageHandler) {
         var newList = new LinkedList<>(this.messageHandlers);
         newList.add(messageHandler);
         return new MessageHandlers(newList);
@@ -33,11 +34,11 @@ public class MessageHandlers implements Disposable {
         return this;
     }
 
-    public void registerHandlers(Client client) {
+    public void registerHandlers(@NonNull Client client) {
         registerHandlers(client::getMessages);
     }
 
-    public void registerHandlers(Server server) {
+    public void registerHandlers(@NonNull Server server) {
         registerHandlers(server::getMessages);
     }
 
