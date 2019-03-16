@@ -1,6 +1,6 @@
 package eu.phisikus.pivonia.crypto
 
-import eu.phisikus.pivonia.test.CryptoUtils
+import eu.phisikus.pivonia.utils.CryptoUtils
 import org.apache.tools.ant.util.FileUtils
 import spock.lang.Specification
 import spock.lang.Subject
@@ -9,10 +9,10 @@ class SymmetricalEncryptorSpec extends Specification {
 
     @Subject
     def encryptor
-    def testKeyFilename
+    def testKeyFilename = UUID.randomUUID().toString() + ".json"
 
     void setup() {
-        testKeyFilename = CryptoUtils.buildRandomKeyset()
+        CryptoUtils.buildKeyset(testKeyFilename)
         def testKeyContent = CryptoUtils.getKeysetContent(testKeyFilename)
         encryptor = new SymmetricalEncryptor(testKeyContent)
     }
