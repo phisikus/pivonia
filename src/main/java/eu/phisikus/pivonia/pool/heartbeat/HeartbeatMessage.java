@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
-class HeartbeatMessage<K> {
+public class HeartbeatMessage<K> {
     private K senderId;
     private Long timestamp;
 }
