@@ -36,11 +36,11 @@ public class Pivonia implements TCPComponent {
 
     @Builder
     Pivonia(@NonNull String nodeId,
-                   @NonNull MessageHandlers messageHandlers,
-                   Long heartbeatDelay,
-                   Long timeoutDelay,
-                   Integer maxConnectionRetryAttempts,
-                   byte[] encryptionKey) {
+            @NonNull MessageHandlers messageHandlers,
+            Long heartbeatDelay,
+            Long timeoutDelay,
+            Integer maxConnectionRetryAttempts,
+            byte[] encryptionKey) {
         this.nodeId = nodeId;
         this.messageHandlers = messageHandlers;
         this.heartbeatDelay = heartbeatDelay == null ? 5000 : heartbeatDelay;
