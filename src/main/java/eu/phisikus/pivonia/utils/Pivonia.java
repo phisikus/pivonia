@@ -23,9 +23,9 @@ import lombok.NonNull;
 
 import javax.inject.Provider;
 
-public class Pivonia implements TCPComponent {
+public class Pivonia<K> implements TCPComponent {
 
-    private String nodeId;
+    private K nodeId;
     private MessageHandlers messageHandlers;
     private long heartbeatDelay;
     private long timeoutDelay;
@@ -35,7 +35,7 @@ public class Pivonia implements TCPComponent {
 
 
     @Builder
-    Pivonia(@NonNull String nodeId,
+    Pivonia(@NonNull K nodeId,
             @NonNull MessageHandlers messageHandlers,
             Long heartbeatDelay,
             Long timeoutDelay,
