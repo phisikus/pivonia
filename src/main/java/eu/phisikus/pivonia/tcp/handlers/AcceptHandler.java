@@ -14,8 +14,8 @@ import java.util.Map;
 @Log4j2
 public class AcceptHandler implements CompletionHandler<AsynchronousSocketChannel, Map<Class, Subject>> {
 
-    private AsynchronousServerSocketChannel serverSocket;
-    private BSONConverter bsonConverter;
+    private final AsynchronousServerSocketChannel serverSocket;
+    private final BSONConverter bsonConverter;
 
     public AcceptHandler(BSONConverter bsonConverter, AsynchronousServerSocketChannel serverSocket) {
         this.bsonConverter = bsonConverter;
