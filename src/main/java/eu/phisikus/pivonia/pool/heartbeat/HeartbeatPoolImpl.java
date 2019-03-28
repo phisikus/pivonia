@@ -142,9 +142,7 @@ class HeartbeatPoolImpl<K> implements HeartbeatPool<K>, AutoCloseable {
         Predicate<HeartbeatEntry> entriesContainClient = entry -> entry.getClient().equals(client);
         var clientsCopy = clients.toArray(new HeartbeatEntry[0]);
         return Stream.of(clientsCopy)
-                .filter(entriesContainClient)
-                .collect(Collectors.toList())
-                .stream();
+                .filter(entriesContainClient);
     }
 
     @Override
