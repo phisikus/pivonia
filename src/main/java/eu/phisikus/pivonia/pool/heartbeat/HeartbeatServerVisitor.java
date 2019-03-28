@@ -13,7 +13,7 @@ public class HeartbeatServerVisitor {
      *
      * @param nodeId ID that will be used to identify the server in outgoing responses
      * @param server server instance used to register heartbeat listener
-     * @param <K> type of node ID
+     * @param <K>    type of node ID
      * @return disposable subscription
      */
     public static <K> Disposable registerHeartbeatListener(K nodeId, Server server) {

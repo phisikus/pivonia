@@ -77,7 +77,7 @@ class PivoniaSpec extends Specification {
         and: "it can provide Server instances"
         pivonia.getServer() != null
         pivonia.getServerWithEncryption() != null
-        
+
         cleanup: "dispose of Connection Manager and encryption key"
         connectionManager.dispose()
         Files.delete(Path.of(keyFilename))

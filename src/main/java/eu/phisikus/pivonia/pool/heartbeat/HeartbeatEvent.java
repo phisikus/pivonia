@@ -8,6 +8,7 @@ public class HeartbeatEvent<K> {
     private final K id;
     private final Client client;
     private final Operation operation;
+
     public enum Operation {
         RECEIVED, TIMEOUT
     }

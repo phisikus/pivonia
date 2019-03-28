@@ -8,6 +8,7 @@ import io.reactivex.Observable;
  * Each client added to the pool will be asked to send greeting messages to connected nodes.
  * Once the response is received and node ID is returned an event will be emitted.
  * This process will be performed periodically to keep information about clients and nodes that they are connected to.
+ *
  * @param <K> type of node ID
  */
 public interface HeartbeatPool<K> {

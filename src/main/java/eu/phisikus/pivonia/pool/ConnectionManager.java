@@ -12,6 +12,8 @@ import io.reactivex.disposables.Disposable;
  */
 public interface ConnectionManager<K> extends Disposable {
     ClientPool<K> getClientPool();
+
     AddressPool getAddressPool();
+
     HeartbeatPool<K> getHeartbeatPool();
 }

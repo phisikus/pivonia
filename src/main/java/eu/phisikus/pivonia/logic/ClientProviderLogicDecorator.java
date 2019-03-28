@@ -7,7 +7,6 @@ import javax.inject.Provider;
 /**
  * This class provides Client instance decorated with message handlers.
  * The purpose of this class is to act as a source of properly configured clients for other components.
- *
  */
 public class ClientProviderLogicDecorator implements Provider<Client> {
 

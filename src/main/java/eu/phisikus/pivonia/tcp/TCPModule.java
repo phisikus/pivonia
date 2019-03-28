@@ -9,8 +9,6 @@ import eu.phisikus.pivonia.converter.BSONConverter;
 import eu.phisikus.pivonia.qualifiers.Encrypted;
 import eu.phisikus.pivonia.qualifiers.PlainText;
 
-import javax.inject.Singleton;
-
 @Module
 public class TCPModule {
     @Provides

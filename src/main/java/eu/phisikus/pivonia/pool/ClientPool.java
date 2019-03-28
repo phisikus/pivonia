@@ -34,7 +34,7 @@ public interface ClientPool<K> {
      * Associate client with given ID.
      * The client should be already a part of the pool before assignment.
      *
-     * @param id node id
+     * @param id     node id
      * @param client client instance that will be associated with new id
      */
     void set(K id, Client client);

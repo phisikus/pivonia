@@ -2,7 +2,9 @@ package eu.phisikus.pivonia.pool.heartbeat;
 
 import eu.phisikus.pivonia.api.Client;
 import io.reactivex.disposables.Disposable;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
