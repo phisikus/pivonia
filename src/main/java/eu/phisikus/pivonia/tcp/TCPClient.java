@@ -1,7 +1,7 @@
 package eu.phisikus.pivonia.tcp;
 
 import eu.phisikus.pivonia.api.Client;
-import eu.phisikus.pivonia.api.MessageWithClient;
+import eu.phisikus.pivonia.api.MessageWithTransmitter;
 import eu.phisikus.pivonia.converter.BSONConverter;
 import eu.phisikus.pivonia.utils.BufferUtils;
 import io.reactivex.Observable;
@@ -49,7 +49,7 @@ public class TCPClient implements Client {
     }
 
     @Override
-    public <T> Observable<MessageWithClient<T>> getMessages(Class<T> messageType) {
+    public <T> Observable<MessageWithTransmitter<T>> getMessages(Class<T> messageType) {
         bsonConverter.enableType(messageType);
         listeners.putIfAbsent(messageType, PublishSubject.create());
         return listeners.get(messageType);
@@ -90,7 +90,7 @@ public class TCPClient implements Client {
         var messageType = incomingMessage.getClass();
         var listener = listeners.get(messageType);
         if (listener != null) {
-            listener.onNext(new MessageWithClient<>(incomingMessage, this));
+            listener.onNext(new MessageWithTransmitter<>(incomingMessage, this));
         }
     }
 

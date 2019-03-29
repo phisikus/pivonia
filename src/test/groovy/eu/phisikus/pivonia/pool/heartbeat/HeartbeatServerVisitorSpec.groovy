@@ -1,7 +1,7 @@
 package eu.phisikus.pivonia.pool.heartbeat
 
 import eu.phisikus.pivonia.api.Client
-import eu.phisikus.pivonia.api.MessageWithClient
+import eu.phisikus.pivonia.api.MessageWithTransmitter
 import eu.phisikus.pivonia.api.Server
 import io.reactivex.subjects.PublishSubject
 import spock.lang.Specification
@@ -24,7 +24,7 @@ class HeartbeatServerVisitorSpec extends Specification {
 
         and: "heartbeat message is sent to the server"
         def heartbeatRequest = new HeartbeatMessage<>("001", 0)
-        def heartbeat = new MessageWithClient(heartbeatRequest, client)
+        def heartbeat = new MessageWithTransmitter(heartbeatRequest, client)
         messageSource.onNext(heartbeat)
 
         then: "message listener is registered"

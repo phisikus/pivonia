@@ -1,6 +1,6 @@
 package eu.phisikus.pivonia.pool.heartbeat;
 
-import eu.phisikus.pivonia.api.MessageWithClient;
+import eu.phisikus.pivonia.api.MessageWithTransmitter;
 import eu.phisikus.pivonia.api.Server;
 import io.reactivex.disposables.Disposable;
 
@@ -21,7 +21,7 @@ public class HeartbeatServerVisitor {
                 .subscribe(event -> sendResponse(nodeId, event));
     }
 
-    private static <K> void sendResponse(K nodeId, MessageWithClient<HeartbeatMessage> event) {
+    private static <K> void sendResponse(K nodeId, MessageWithTransmitter<HeartbeatMessage> event) {
         var client = event.getClient();
         var currentTime = Instant.now().toEpochMilli();
         var response = new HeartbeatMessage<>(nodeId, currentTime);

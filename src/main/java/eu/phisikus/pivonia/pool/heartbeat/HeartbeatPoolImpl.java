@@ -1,7 +1,7 @@
 package eu.phisikus.pivonia.pool.heartbeat;
 
 import eu.phisikus.pivonia.api.Client;
-import eu.phisikus.pivonia.api.MessageWithClient;
+import eu.phisikus.pivonia.api.MessageWithTransmitter;
 import eu.phisikus.pivonia.pool.HeartbeatPool;
 import io.reactivex.Observable;
 import io.reactivex.functions.Consumer;
@@ -44,7 +44,7 @@ class HeartbeatPoolImpl<K> implements HeartbeatPool<K>, AutoCloseable {
         clients.add(new HeartbeatEntry(false, neverSeen, client, subscription));
     }
 
-    private Consumer<MessageWithClient<HeartbeatMessage>> getHeartbeatMessageHandler() {
+    private Consumer<MessageWithTransmitter<HeartbeatMessage>> getHeartbeatMessageHandler() {
         return heartbeatMessageMessageWithClient -> {
             var message = heartbeatMessageMessageWithClient.getMessage();
             var client = heartbeatMessageMessageWithClient.getClient();

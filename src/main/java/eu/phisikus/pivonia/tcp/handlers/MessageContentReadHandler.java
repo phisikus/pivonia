@@ -1,6 +1,6 @@
 package eu.phisikus.pivonia.tcp.handlers;
 
-import eu.phisikus.pivonia.api.MessageWithClient;
+import eu.phisikus.pivonia.api.MessageWithTransmitter;
 import eu.phisikus.pivonia.converter.BSONConverter;
 import eu.phisikus.pivonia.utils.BufferUtils;
 import io.reactivex.subjects.Subject;
@@ -61,7 +61,7 @@ class MessageContentReadHandler implements CompletionHandler<Integer, Map<Class,
         var listener = listeners.get(messageType);
         if (listener != null) {
             listener.onNext(
-                    new MessageWithClient<>(incomingMessage,
+                    new MessageWithTransmitter<>(incomingMessage,
                             new ClientConnectedThroughServer(bsonConverter, clientChannel)
                     )
             );

@@ -1,6 +1,6 @@
 package eu.phisikus.pivonia.tcp;
 
-import eu.phisikus.pivonia.api.MessageWithClient;
+import eu.phisikus.pivonia.api.MessageWithTransmitter;
 import eu.phisikus.pivonia.api.Server;
 import eu.phisikus.pivonia.converter.BSONConverter;
 import eu.phisikus.pivonia.tcp.handlers.AcceptHandler;
@@ -55,7 +55,7 @@ public class TCPServer implements Server {
     }
 
     @Override
-    public <T> Observable<MessageWithClient<T>> getMessages(Class<T> messageType) {
+    public <T> Observable<MessageWithTransmitter<T>> getMessages(Class<T> messageType) {
         bsonConverter.enableType(messageType);
         listeners.putIfAbsent(messageType, PublishSubject.create());
         return listeners.get(messageType);

@@ -1,7 +1,7 @@
 package eu.phisikus.pivonia.pool.heartbeat.test
 
 import eu.phisikus.pivonia.api.Client
-import eu.phisikus.pivonia.api.MessageWithClient
+import eu.phisikus.pivonia.api.MessageWithTransmitter
 import eu.phisikus.pivonia.pool.heartbeat.HeartbeatMessage
 import io.reactivex.Observable
 import io.reactivex.subjects.PublishSubject
@@ -11,7 +11,7 @@ import java.time.Instant
 
 class HeartbeatLoopbackClient implements Client {
 
-    def messages = PublishSubject.<MessageWithClient> create()
+    def messages = PublishSubject.<MessageWithTransmitter> create()
     def isAlive = false
 
     HeartbeatLoopbackClient(isAlive) {
@@ -22,7 +22,7 @@ class HeartbeatLoopbackClient implements Client {
     <T> Try<Client> send(T message) {
         if (isAlive) {
             def heartbeatResponse = new HeartbeatMessage("node1", Instant.now().toEpochMilli())
-            messages.onNext(new MessageWithClient<>(heartbeatResponse, this))
+            messages.onNext(new MessageWithTransmitter<>(heartbeatResponse, this))
             return Try.success(this)
         }
         return Try.failure(new RuntimeException("Could not send message."))
@@ -34,7 +34,7 @@ class HeartbeatLoopbackClient implements Client {
     }
 
     @Override
-    <T> Observable<MessageWithClient<T>> getMessages(Class<T> messageType) {
+    <T> Observable<MessageWithTransmitter<T>> getMessages(Class<T> messageType) {
         return messages
     }
 

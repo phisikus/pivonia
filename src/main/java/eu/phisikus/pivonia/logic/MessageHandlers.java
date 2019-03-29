@@ -1,7 +1,7 @@
 package eu.phisikus.pivonia.logic;
 
 import eu.phisikus.pivonia.api.Client;
-import eu.phisikus.pivonia.api.MessageWithClient;
+import eu.phisikus.pivonia.api.MessageWithTransmitter;
 import eu.phisikus.pivonia.api.Server;
 import io.reactivex.Observable;
 import io.reactivex.disposables.Disposable;
@@ -42,7 +42,7 @@ public class MessageHandlers implements Disposable {
         registerHandlers(server::getMessages);
     }
 
-    private <T> void registerHandlers(Function<Class<T>, Observable<MessageWithClient<T>>> messageSource) {
+    private <T> void registerHandlers(Function<Class<T>, Observable<MessageWithTransmitter<T>>> messageSource) {
         messageHandlers.forEach(handler -> {
             var messageType = handler.getMessageType();
             var messageHandler = handler.getMessageHandler();

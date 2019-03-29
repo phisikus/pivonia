@@ -31,6 +31,6 @@ public interface Server extends AutoCloseable {
      * @param <T>         type of message
      * @return observable stream of incoming messages paired with client instance that can be used to send response
      */
-    <T> Observable<MessageWithClient<T>> getMessages(Class<T> messageType);
+    <T> Observable<MessageWithTransmitter<T>> getMessages(Class<T> messageType);
 
 }

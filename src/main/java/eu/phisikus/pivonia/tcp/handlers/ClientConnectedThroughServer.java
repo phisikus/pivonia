@@ -1,7 +1,7 @@
 package eu.phisikus.pivonia.tcp.handlers;
 
 import eu.phisikus.pivonia.api.Client;
-import eu.phisikus.pivonia.api.MessageWithClient;
+import eu.phisikus.pivonia.api.MessageWithTransmitter;
 import eu.phisikus.pivonia.converter.BSONConverter;
 import io.reactivex.Observable;
 import io.vavr.control.Try;
@@ -37,7 +37,7 @@ class ClientConnectedThroughServer implements Client {
     }
 
     @Override
-    public <T> Observable<MessageWithClient<T>> getMessages(Class<T> messageType) {
+    public <T> Observable<MessageWithTransmitter<T>> getMessages(Class<T> messageType) {
         throw new IllegalStateException("This client does not return any messages, associated server does");
     }
 
