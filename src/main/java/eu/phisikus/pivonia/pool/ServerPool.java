@@ -28,12 +28,14 @@ public interface ServerPool {
 
     /**
      * Return list of all Servers that belong to this server pool
+     *
      * @return list of Server instances
      */
     List<Server> getServers();
 
     /**
      * Observable source of change events for this server pool
+     *
      * @return observable server pool changes
      */
     Observable<ServerEvent> getServerChanges();
