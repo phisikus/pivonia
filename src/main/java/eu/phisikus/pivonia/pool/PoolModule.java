@@ -7,13 +7,15 @@ import eu.phisikus.pivonia.pool.address.AddressPoolModule;
 import eu.phisikus.pivonia.pool.client.ClientPoolModule;
 import eu.phisikus.pivonia.pool.heartbeat.HeartbeatPoolModule;
 import eu.phisikus.pivonia.pool.mediators.ConnectionManagerImpl;
+import eu.phisikus.pivonia.pool.server.ServerPoolModule;
 
 import javax.inject.Provider;
 
 @Module(includes = {
         HeartbeatPoolModule.class,
         ClientPoolModule.class,
-        AddressPoolModule.class
+        AddressPoolModule.class,
+        ServerPoolModule.class
 })
 public class PoolModule {
 
