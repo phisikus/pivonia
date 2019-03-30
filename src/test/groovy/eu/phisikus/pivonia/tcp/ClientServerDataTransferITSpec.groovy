@@ -5,8 +5,10 @@ import eu.phisikus.pivonia.converter.plaintext.JacksonBSONConverter
 import eu.phisikus.pivonia.test.ServerTestUtils
 import spock.lang.Shared
 import spock.lang.Specification
+import spock.lang.Timeout
 
 import java.util.concurrent.CompletableFuture
+import java.util.concurrent.TimeUnit
 
 class ClientServerDataTransferITSpec extends Specification {
 
@@ -14,7 +16,7 @@ class ClientServerDataTransferITSpec extends Specification {
     @Shared
     def bsonConverter = new JacksonBSONConverter()
 
-
+    @Timeout(value = 30, unit = TimeUnit.SECONDS)
     def "Message with a lot of data should be sent by client and received by server"() {
         given: "server is running"
         def testMessage = new TestMessage(1L, "bigTopic", getBigMessage())
@@ -41,6 +43,7 @@ class ClientServerDataTransferITSpec extends Specification {
         client.close()
     }
 
+    @Timeout(value = 30, unit = TimeUnit.SECONDS)
     def "Message with a lot of data should be sent by client to the server and back"() {
         given: "the server is running"
         def testMessage = new TestMessage(4L, "bigTopic", getBigMessage())
@@ -51,7 +54,7 @@ class ClientServerDataTransferITSpec extends Specification {
                 .get()
 
         and: "it is set up to send back incoming messages"
-        def echoHandler = { event -> event.getClient().send(event.getMessage()) }
+        def echoHandler = { event -> event.getTransmitter().send(event.getMessage()) }
         server.getMessages(TestMessage)
                 .subscribe(echoHandler)
 

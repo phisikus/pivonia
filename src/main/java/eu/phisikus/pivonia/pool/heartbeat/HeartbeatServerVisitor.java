@@ -22,9 +22,9 @@ public class HeartbeatServerVisitor {
     }
 
     private static <K> void sendResponse(K nodeId, MessageWithTransmitter<HeartbeatMessage> event) {
-        var client = event.getClient();
+        var transmitter = event.getTransmitter();
         var currentTime = Instant.now().toEpochMilli();
         var response = new HeartbeatMessage<>(nodeId, currentTime);
-        client.send(response);
+        transmitter.send(response);
     }
 }

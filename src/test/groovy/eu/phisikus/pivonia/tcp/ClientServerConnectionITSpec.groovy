@@ -91,7 +91,7 @@ class ClientServerConnectionITSpec extends Specification {
                 .bind(port)
                 .get()
         server.getMessages(TestMessage)
-                .subscribe({ event -> event.getClient().send(event.getMessage()) })
+                .subscribe({ event -> event.getTransmitter().send(event.getMessage()) })
         return server
     }
 }

@@ -4,6 +4,7 @@ import eu.phisikus.pivonia.api.EmptyEnvelope
 import eu.phisikus.pivonia.logic.MessageHandler
 import eu.phisikus.pivonia.logic.MessageHandlers
 import eu.phisikus.pivonia.pool.heartbeat.HeartbeatMessage
+import eu.phisikus.pivonia.pool.heartbeat.HeartbeatServerVisitor
 import eu.phisikus.pivonia.test.ServerTestUtils
 import eu.phisikus.pivonia.utils.Pivonia
 import spock.lang.Specification
@@ -42,8 +43,7 @@ class PoolConnectionITSpec extends Specification {
         def server = pivonia.getServer()
                 .bind(port)
                 .get()
-        server.getMessages(HeartbeatMessage)
-                .subscribe({ it -> it.getClient().send(it.getMessage()) }) // TODO make part of the system
+        HeartbeatServerVisitor.registerHeartbeatListener(nodeId, server)
 
         and: "address is added to the pool"
         def addressPool = connectionManager.getAddressPool()

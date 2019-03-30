@@ -2,6 +2,7 @@ package eu.phisikus.pivonia.pool.heartbeat;
 
 import eu.phisikus.pivonia.api.Client;
 import eu.phisikus.pivonia.api.MessageWithTransmitter;
+import eu.phisikus.pivonia.api.Transmitter;
 import eu.phisikus.pivonia.pool.HeartbeatPool;
 import io.reactivex.Observable;
 import io.reactivex.functions.Consumer;
@@ -47,27 +48,27 @@ class HeartbeatPoolImpl<K> implements HeartbeatPool<K>, AutoCloseable {
     private Consumer<MessageWithTransmitter<HeartbeatMessage>> getHeartbeatMessageHandler() {
         return heartbeatMessageMessageWithClient -> {
             var message = heartbeatMessageMessageWithClient.getMessage();
-            var client = heartbeatMessageMessageWithClient.getClient();
+            var transmitter = heartbeatMessageMessageWithClient.getTransmitter();
 
             log.trace("Received heartbeat message: {}", message);
             if (message.getTimestamp() > 0L) {
-                processHeartbeatResponse(message, client);
+                processHeartbeatResponse(message, transmitter);
             } else {
-                sendHeartbeatResponse(client);
+                sendHeartbeatResponse(transmitter);
             }
 
         };
     }
 
-    private void sendHeartbeatResponse(Client client) {
-        client.send(new HeartbeatMessage<>(nodeId, getCurrentTimestamp()));
+    private void sendHeartbeatResponse(Transmitter transmitter) {
+        transmitter.send(new HeartbeatMessage<>(nodeId, getCurrentTimestamp()));
     }
 
-    private void processHeartbeatResponse(HeartbeatMessage message, Client client) {
-        getEntriesForClient(client)
+    private void processHeartbeatResponse(HeartbeatMessage message, Transmitter transmitter) {
+        getEntriesForClient((Client) transmitter)
                 .forEach(entry -> {
                     entry.setLastSeen(getCurrentTimestamp());
-                    sendReceivedEvent((K) message.getSenderId(), client);
+                    sendReceivedEvent((K) message.getSenderId(), (Client) transmitter);
                 });
 
     }

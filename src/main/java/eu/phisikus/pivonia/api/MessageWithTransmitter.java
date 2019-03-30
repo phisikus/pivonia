@@ -5,5 +5,5 @@ import lombok.Value;
 @Value
 public class MessageWithTransmitter<T> {
     private final T message;
-    private final Client client;
+    private final Transmitter transmitter;
 }
