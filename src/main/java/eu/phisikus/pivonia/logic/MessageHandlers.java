@@ -1,15 +1,11 @@
 package eu.phisikus.pivonia.logic;
 
-import eu.phisikus.pivonia.api.Client;
-import eu.phisikus.pivonia.api.MessageWithTransmitter;
-import eu.phisikus.pivonia.api.Server;
-import io.reactivex.Observable;
+import eu.phisikus.pivonia.api.Receiver;
 import io.reactivex.disposables.Disposable;
 import lombok.NonNull;
 
 import java.util.LinkedList;
 import java.util.List;
-import java.util.function.Function;
 
 public class MessageHandlers implements Disposable {
     private final List<MessageHandler> messageHandlers;
@@ -34,20 +30,11 @@ public class MessageHandlers implements Disposable {
         return this;
     }
 
-    public void registerHandlers(@NonNull Client client) {
-        registerHandlers(client::getMessages);
-    }
-
-    public void registerHandlers(@NonNull Server server) {
-        registerHandlers(server::getMessages);
-    }
-
-    private <T> void registerHandlers(Function<Class<T>, Observable<MessageWithTransmitter<T>>> messageSource) {
+    public void registerHandlers(@NonNull Receiver receiver) {
         messageHandlers.forEach(handler -> {
             var messageType = handler.getMessageType();
             var messageHandler = handler.getMessageHandler();
-            var subscription = messageSource
-                    .apply(messageType)
+            var subscription = receiver.getMessages(messageType)
                     .subscribe(messageHandler::accept);
             subscriptions.add(subscription);
         });
