@@ -1,4 +1,4 @@
-package eu.phisikus.pivonia
+package eu.phisikus.pivonia.it
 
 import eu.phisikus.pivonia.api.EmptyEnvelope
 import eu.phisikus.pivonia.logic.MessageHandler
@@ -8,7 +8,7 @@ import eu.phisikus.pivonia.utils.Pivonia
 import spock.lang.Specification
 import spock.util.concurrent.PollingConditions
 
-class PivoniaITSpec extends Specification {
+class PivoniaClientServerITSpec extends Specification {
 
     def pollingConditions = new PollingConditions(delay: 1, timeout: 10)
 

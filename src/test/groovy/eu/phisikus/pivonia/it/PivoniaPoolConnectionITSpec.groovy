@@ -3,14 +3,14 @@ package eu.phisikus.pivonia.it
 import eu.phisikus.pivonia.api.EmptyEnvelope
 import eu.phisikus.pivonia.logic.MessageHandler
 import eu.phisikus.pivonia.logic.MessageHandlers
-import eu.phisikus.pivonia.pool.heartbeat.HeartbeatMessage
+import eu.phisikus.pivonia.pool.client.ClientEvent
 import eu.phisikus.pivonia.pool.heartbeat.HeartbeatServerVisitor
 import eu.phisikus.pivonia.test.ServerTestUtils
 import eu.phisikus.pivonia.utils.Pivonia
 import spock.lang.Specification
 import spock.util.concurrent.PollingConditions
 
-class PoolConnectionITSpec extends Specification {
+class PivoniaPoolConnectionITSpec extends Specification {
 
     def pollingConditions = new PollingConditions(delay: 1, timeout: 10)
 
@@ -38,25 +38,26 @@ class PoolConnectionITSpec extends Specification {
         and: "connection manager is created"
         def connectionManager = pivonia.getConnectionManager()
 
-        when: "server is created"
+        and: "server is created"
         def port = ServerTestUtils.getRandomPort()
         def server = pivonia.getServer()
                 .bind(port)
                 .get()
         HeartbeatServerVisitor.registerHeartbeatListener(nodeId, server)
 
-        and: "address is added to the pool"
+        and: "message is to be sent when client pool associates it with node"
+        connectionManager.getClientPool()
+                .getClientChanges()
+                .filter({ it.id == nodeId })
+                .filter({ it.operation == ClientEvent.Operation.ASSIGN })
+                .map({ it.client })
+                .forEach({ it.send(message) })
+
+        when: "address is added to the pool"
         def addressPool = connectionManager.getAddressPool()
         addressPool.add("localhost", port)
 
-        and: "message is sent"
-        Thread.sleep(5000) // TODO make awaitabiliy
-        connectionManager.getClientPool()
-                .get(nodeId)
-                .get()
-                .send(message)
-
-        then: "message is received"
+        then: "message is sent and received by the server"
         pollingConditions.eventually {
             isMessageReceived
         }
