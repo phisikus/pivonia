@@ -7,9 +7,8 @@ import eu.phisikus.pivonia.converter.DaggerConverterComponent;
 import eu.phisikus.pivonia.crypto.CryptoComponent;
 import eu.phisikus.pivonia.crypto.CryptoModule;
 import eu.phisikus.pivonia.crypto.DaggerCryptoComponent;
-import eu.phisikus.pivonia.logic.ClientProviderLogicDecorator;
+import eu.phisikus.pivonia.logic.LogicProviderDecorator;
 import eu.phisikus.pivonia.logic.MessageHandlers;
-import eu.phisikus.pivonia.logic.ServerProviderLogicDecorator;
 import eu.phisikus.pivonia.pool.ConnectionManager;
 import eu.phisikus.pivonia.pool.DaggerPoolComponent;
 import eu.phisikus.pivonia.pool.PoolComponent;
@@ -71,7 +70,7 @@ public class Pivonia<K> implements TCPComponent {
     private Provider<Client> getClientProvider(TCPComponent tcpComponent) {
         Provider<Client> baseClientProvider = () ->
                 encryptionKey == null ? tcpComponent.getClient() : tcpComponent.getClientWithEncryption();
-        return new ClientProviderLogicDecorator(baseClientProvider, messageHandlers);
+        return new LogicProviderDecorator<>(baseClientProvider, messageHandlers);
     }
 
     private TCPComponent getTcpComponent(ConverterComponent converterComponent) {
@@ -95,24 +94,24 @@ public class Pivonia<K> implements TCPComponent {
     @Override
     public Client getClient() {
         Provider<Client> clientProvider = () -> tcpComponent.get().getClient();
-        return new ClientProviderLogicDecorator(clientProvider, messageHandlers).get();
+        return new LogicProviderDecorator<>(clientProvider, messageHandlers).get();
     }
 
     @Override
     public Server getServer() {
         Provider<Server> serverProvider = () -> tcpComponent.get().getServer();
-        return new ServerProviderLogicDecorator(serverProvider, messageHandlers).get();
+        return new LogicProviderDecorator<>(serverProvider, messageHandlers).get();
     }
 
     @Override
     public Client getClientWithEncryption() {
         Provider<Client> encryptedClientProvider = () -> tcpComponent.get().getClientWithEncryption();
-        return new ClientProviderLogicDecorator(encryptedClientProvider, messageHandlers).get();
+        return new LogicProviderDecorator<>(encryptedClientProvider, messageHandlers).get();
     }
 
     @Override
     public Server getServerWithEncryption() {
-        Provider<Server> encryptedServerPovider = () -> tcpComponent.get().getServerWithEncryption();
-        return new ServerProviderLogicDecorator(encryptedServerPovider, messageHandlers).get();
+        Provider<Server> encryptedServerProvider = () -> tcpComponent.get().getServerWithEncryption();
+        return new LogicProviderDecorator<>(encryptedServerProvider, messageHandlers).get();
     }
 }
