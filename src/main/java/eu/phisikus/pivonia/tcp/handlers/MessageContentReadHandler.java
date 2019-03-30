@@ -1,6 +1,7 @@
 package eu.phisikus.pivonia.tcp.handlers;
 
 import eu.phisikus.pivonia.api.MessageWithTransmitter;
+import eu.phisikus.pivonia.api.Transmitter;
 import eu.phisikus.pivonia.converter.BSONConverter;
 import eu.phisikus.pivonia.utils.BufferUtils;
 import io.reactivex.subjects.Subject;
@@ -16,15 +17,17 @@ import java.util.Map;
 class MessageContentReadHandler implements CompletionHandler<Integer, Map<Class, Subject>> {
 
     private final AsynchronousSocketChannel clientChannel;
-    private final ByteBuffer communicationBuffer;
     private final BSONConverter bsonConverter;
+    private final ByteBuffer communicationBuffer;
     private final int expectedMessageSize;
+    private final ClientConnectedToServer clientConnectedToServer;
 
-    MessageContentReadHandler(BSONConverter bsonConverter, AsynchronousSocketChannel clientChannel, ByteBuffer communicationBuffer, int expectedMessageSize) {
-        this.bsonConverter = bsonConverter;
-        this.clientChannel = clientChannel;
+    MessageContentReadHandler(ClientConnectedToServer clientConnectedToServer, ByteBuffer communicationBuffer, int expectedMessageSize) {
         this.communicationBuffer = communicationBuffer;
         this.expectedMessageSize = expectedMessageSize;
+        this.clientConnectedToServer = clientConnectedToServer;
+        this.clientChannel = clientConnectedToServer.getClientChannel();
+        this.bsonConverter = clientConnectedToServer.getBsonConverter();
     }
 
     @Override
@@ -40,7 +43,7 @@ class MessageContentReadHandler implements CompletionHandler<Integer, Map<Class,
 
     private void orderNextMessageSizeRead(Map<Class, Subject> listeners) {
         var messageSizeReadBuffer = BufferUtils.getBufferForMessageSize();
-        var readCallback = new MessageSizeReadHandler(bsonConverter, clientChannel, messageSizeReadBuffer);
+        var readCallback = new MessageSizeReadHandler(clientConnectedToServer, messageSizeReadBuffer);
         clientChannel.read(messageSizeReadBuffer, listeners, readCallback);
     }
 
@@ -61,9 +64,7 @@ class MessageContentReadHandler implements CompletionHandler<Integer, Map<Class,
         var listener = listeners.get(messageType);
         if (listener != null) {
             listener.onNext(
-                    new MessageWithTransmitter<>(incomingMessage,
-                            new ClientConnectedToServer(bsonConverter, clientChannel)
-                    )
+                    new MessageWithTransmitter<>(incomingMessage, clientConnectedToServer)
             );
         }
     }

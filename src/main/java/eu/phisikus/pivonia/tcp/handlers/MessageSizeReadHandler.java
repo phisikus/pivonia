@@ -1,6 +1,5 @@
 package eu.phisikus.pivonia.tcp.handlers;
 
-import eu.phisikus.pivonia.converter.BSONConverter;
 import eu.phisikus.pivonia.utils.BufferUtils;
 import io.reactivex.subjects.Subject;
 import lombok.extern.log4j.Log4j2;
@@ -16,12 +15,12 @@ class MessageSizeReadHandler implements CompletionHandler<Integer, Map<Class, Su
 
     private final AsynchronousSocketChannel clientChannel;
     private final ByteBuffer communicationBuffer;
-    private final BSONConverter bsonConverter;
+    private final ClientConnectedToServer clientConnectedToServer;
 
-    MessageSizeReadHandler(BSONConverter bsonConverter, AsynchronousSocketChannel clientChannel, ByteBuffer communicationBuffer) {
-        this.bsonConverter = bsonConverter;
-        this.clientChannel = clientChannel;
+    MessageSizeReadHandler(ClientConnectedToServer clientConnectedToServer, ByteBuffer communicationBuffer) {
+        this.clientConnectedToServer = clientConnectedToServer;
         this.communicationBuffer = communicationBuffer;
+        this.clientChannel = clientConnectedToServer.getClientChannel();
     }
 
     @Override
@@ -40,7 +39,7 @@ class MessageSizeReadHandler implements CompletionHandler<Integer, Map<Class, Su
         int messageSize = BufferUtils.readMessageSizeFromBuffer(communicationBuffer);
         if (messageSize > 0) {
             var messageBuffer = ByteBuffer.allocate(messageSize);
-            var contentReadHandler = new MessageContentReadHandler(bsonConverter, clientChannel, messageBuffer, messageSize);
+            var contentReadHandler = new MessageContentReadHandler(clientConnectedToServer, messageBuffer, messageSize);
             clientChannel.read(messageBuffer, listeners, contentReadHandler);
         } else {
             closeCommunication();
