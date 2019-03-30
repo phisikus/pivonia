@@ -62,7 +62,7 @@ class MessageContentReadHandler implements CompletionHandler<Integer, Map<Class,
         if (listener != null) {
             listener.onNext(
                     new MessageWithTransmitter<>(incomingMessage,
-                            new ClientConnectedThroughServer(bsonConverter, clientChannel)
+                            new ClientConnectedToServer(bsonConverter, clientChannel)
                     )
             );
         }
