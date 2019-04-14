@@ -17,11 +17,11 @@ class ClientFailureITSpec extends Specification {
 
     @Timeout(value = 10, unit = TimeUnit.SECONDS)
     def "Client should report failure to send message when unconnected"() {
-        given: "test message and unconnected client are defined"
+        given: "test message and unconnected transmitter are defined"
         def testMessage = new TestMessage()
         def client = new TCPClient(bsonConverter)
 
-        when: "sending the message using client"
+        when: "sending the message using transmitter"
         def sendResult = client.send(testMessage)
 
         then: "failure is reported"
@@ -30,29 +30,29 @@ class ClientFailureITSpec extends Specification {
 
     @Timeout(value = 10, unit = TimeUnit.SECONDS)
     def "Client should report failure to connect when server is unreachable"() {
-        given: "client is defined"
+        given: "transmitter is defined"
         def client = new TCPClient(bsonConverter)
 
         when: "connection to some random port is preformed"
         def connectedClient = client.connect("localhost", ServerTestUtils.getRandomPort())
 
-        then: "client reports failure"
+        then: "transmitter reports failure"
         connectedClient.isFailure()
     }
 
     @Timeout(value = 5, unit = TimeUnit.SECONDS)
     def "Client should fail to send message when it was closed"() {
-        given: "server and client are created"
+        given: "server and transmitter are created"
         def testMessage = new TestMessage()
         def port = ServerTestUtils.getRandomPort()
         def server = new TCPServer(bsonConverter).bind(port).get()
         def client = new TCPClient(bsonConverter).connect("localhost", port).get()
 
-        when: "client is closed and message sent"
+        when: "transmitter is closed and message sent"
         client.close()
         def sendResult = client.send(testMessage)
 
-        then: "client should report failure"
+        then: "transmitter should report failure"
         sendResult.isFailure()
 
         cleanup:

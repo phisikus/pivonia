@@ -28,11 +28,11 @@ class AddressPoolImplSpec extends Specification {
         def address = pool.add("host4", 4040)
 
         and: "defined expected deletion event"
-        def expectedEvent = new AddressEvent(AddressEvent.Operation.REMOVE, address)
+        def expectedEvent = new AddressPoolEvent(AddressPoolEvent.Operation.REMOVE, address)
 
         and: "pool is monitored"
         def listener = Mock(Observer)
-        pool.getAddressChanges().subscribe(listener)
+        pool.getChanges().subscribe(listener)
 
         when: "address is removed"
         pool.remove(address)
@@ -50,11 +50,11 @@ class AddressPoolImplSpec extends Specification {
 
         and: "expected addition event is defined"
         def expectedAddress = new Address("host4", 4040)
-        def expectedEvent = new AddressEvent(AddressEvent.Operation.ADD, expectedAddress)
+        def expectedEvent = new AddressPoolEvent(AddressPoolEvent.Operation.ADD, expectedAddress)
 
         and: "pool is monitored"
         def listener = Mock(Observer)
-        pool.getAddressChanges().subscribe(listener)
+        pool.getChanges().subscribe(listener)
 
         when: "address is added to the pool"
         def actualAddress = pool.add(expectedAddress.getHostname(), expectedAddress.getPort())

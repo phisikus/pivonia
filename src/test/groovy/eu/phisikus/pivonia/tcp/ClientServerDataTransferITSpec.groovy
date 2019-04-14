@@ -30,7 +30,7 @@ class ClientServerDataTransferITSpec extends Specification {
         server.getMessages(TestMessage)
                 .subscribe({ event -> actualMessage.complete(event.getMessage()) })
 
-        when: "client is connected and message is sent"
+        when: "transmitter is connected and message is sent"
         def client = new TCPClient(bsonConverter).connect("localhost", port).get()
         def sendResult = client.send(testMessage)
 
@@ -38,7 +38,7 @@ class ClientServerDataTransferITSpec extends Specification {
         sendResult.isSuccess()
         actualMessage.get() == testMessage
 
-        cleanup: "close the server and client"
+        cleanup: "close the server and transmitter"
         server.close()
         client.close()
     }
@@ -58,12 +58,12 @@ class ClientServerDataTransferITSpec extends Specification {
         server.getMessages(TestMessage)
                 .subscribe(echoHandler)
 
-        when: "client is connected"
+        when: "transmitter is connected"
         def client = new TCPClient(bsonConverter)
                 .connect("localhost", port)
                 .get()
 
-        and: "client is configured to monitor incoming messages"
+        and: "transmitter is configured to monitor incoming messages"
         client.getMessages(TestMessage)
                 .subscribe({ event -> actualMessage.complete(event.getMessage()) })
 
@@ -74,7 +74,7 @@ class ClientServerDataTransferITSpec extends Specification {
         sendResult.isSuccess()
         actualMessage.get() == testMessage
 
-        cleanup: "close the server and client"
+        cleanup: "close the server and transmitter"
         server.close()
         client.close()
     }

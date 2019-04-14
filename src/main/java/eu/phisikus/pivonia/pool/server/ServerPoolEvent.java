@@ -4,7 +4,7 @@ import eu.phisikus.pivonia.api.Server;
 import lombok.Value;
 
 @Value
-public class ServerEvent {
+public class ServerPoolEvent {
     private final Server server;
     private final Operation operation;
 

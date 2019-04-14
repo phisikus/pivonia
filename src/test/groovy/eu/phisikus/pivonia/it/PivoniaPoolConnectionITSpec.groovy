@@ -3,8 +3,8 @@ package eu.phisikus.pivonia.it
 import eu.phisikus.pivonia.api.EmptyEnvelope
 import eu.phisikus.pivonia.logic.MessageHandler
 import eu.phisikus.pivonia.logic.MessageHandlers
-import eu.phisikus.pivonia.pool.client.ClientEvent
 import eu.phisikus.pivonia.pool.heartbeat.HeartbeatServerVisitor
+import eu.phisikus.pivonia.pool.transmitter.TransmitterPoolEvent
 import eu.phisikus.pivonia.test.ServerTestUtils
 import eu.phisikus.pivonia.utils.Pivonia
 import spock.lang.Specification
@@ -45,12 +45,12 @@ class PivoniaPoolConnectionITSpec extends Specification {
                 .get()
         HeartbeatServerVisitor.registerHeartbeatListener(nodeId, server)
 
-        and: "message is to be sent when client pool associates it with node"
-        connectionManager.getClientPool()
-                .getClientChanges()
+        and: "message is to be sent when transmitter pool associates it with node"
+        connectionManager.getTransmitterPool()
+                .getChanges()
                 .filter({ it.id == nodeId })
-                .filter({ it.operation == ClientEvent.Operation.ASSIGN })
-                .map({ it.client })
+                .filter({ it.operation == TransmitterPoolEvent.Operation.ASSIGN })
+                .map({ it.transmitter })
                 .forEach({ it.send(message) })
 
         when: "address is added to the pool"

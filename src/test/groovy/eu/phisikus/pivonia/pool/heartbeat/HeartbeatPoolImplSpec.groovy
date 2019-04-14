@@ -19,7 +19,7 @@ class HeartbeatPoolImplSpec extends Specification {
         and: "heartbeat pool events are monitored"
         def messageReceived = new CountDownLatch(3)
         pool.getHeartbeatChanges()
-                .filter({ event -> event.getOperation() == HeartbeatEvent.Operation.RECEIVED })
+                .filter({ event -> event.getOperation() == HeartbeatPoolEvent.Operation.RECEIVED })
                 .subscribe({ event -> messageReceived.countDown() })
 
         when: "adding client to the heartbeat pool"
@@ -43,7 +43,7 @@ class HeartbeatPoolImplSpec extends Specification {
         and: "heartbeat pool events are monitored"
         def messageReceived = new CountDownLatch(1)
         pool.getHeartbeatChanges()
-                .filter({ event -> event.getOperation() == HeartbeatEvent.Operation.TIMEOUT })
+                .filter({ event -> event.getOperation() == HeartbeatPoolEvent.Operation.TIMEOUT })
                 .subscribe({ event -> messageReceived.countDown() })
 
         when: "adding client to the heartbeat pool"

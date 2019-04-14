@@ -1,7 +1,7 @@
 package eu.phisikus.pivonia.pool;
 
 import eu.phisikus.pivonia.api.Server;
-import eu.phisikus.pivonia.pool.server.ServerEvent;
+import eu.phisikus.pivonia.pool.server.ServerPoolEvent;
 import io.reactivex.Observable;
 
 import java.util.List;
@@ -38,5 +38,5 @@ public interface ServerPool {
      *
      * @return observable server pool changes
      */
-    Observable<ServerEvent> getServerChanges();
+    Observable<ServerPoolEvent> getChanges();
 }

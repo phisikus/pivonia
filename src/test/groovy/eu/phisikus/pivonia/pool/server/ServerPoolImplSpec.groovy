@@ -15,7 +15,7 @@ class ServerPoolImplSpec extends Specification {
 
         and: "event changes are monitored"
         def actualEvent = _
-        def eventSubscription = serverPool.getServerChanges().subscribe({ actualEvent = it })
+        def eventSubscription = serverPool.getChanges().subscribe({ actualEvent = it })
 
         when: "addition is performed"
         serverPool.add(server)
@@ -24,7 +24,7 @@ class ServerPoolImplSpec extends Specification {
         serverPool.getServers().contains(server)
 
         and: "addition event was emitted"
-        actualEvent == new ServerEvent(server, ServerEvent.Operation.ADD)
+        actualEvent == new ServerPoolEvent(server, ServerPoolEvent.Operation.ADD)
 
         cleanup:
         eventSubscription.dispose()
@@ -39,7 +39,7 @@ class ServerPoolImplSpec extends Specification {
 
         and: "event changes are monitored"
         def actualEvent = _
-        def eventSubscription = serverPool.getServerChanges().subscribe({ actualEvent = it })
+        def eventSubscription = serverPool.getChanges().subscribe({ actualEvent = it })
 
         when: "removal operation is performed"
         serverPool.remove(server)
@@ -48,7 +48,7 @@ class ServerPoolImplSpec extends Specification {
         !serverPool.getServers().contains(server)
 
         and: "deletion event was emitted"
-        actualEvent == new ServerEvent(server, ServerEvent.Operation.REMOVE)
+        actualEvent == new ServerPoolEvent(server, ServerPoolEvent.Operation.REMOVE)
 
         cleanup:
         eventSubscription.dispose()

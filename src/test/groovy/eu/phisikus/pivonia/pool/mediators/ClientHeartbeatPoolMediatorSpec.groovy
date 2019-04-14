@@ -1,33 +1,33 @@
 package eu.phisikus.pivonia.pool.mediators
 
 import eu.phisikus.pivonia.api.Client
-import eu.phisikus.pivonia.pool.ClientPool
 import eu.phisikus.pivonia.pool.HeartbeatPool
-import eu.phisikus.pivonia.pool.client.ClientEvent
-import eu.phisikus.pivonia.pool.heartbeat.HeartbeatEvent
+import eu.phisikus.pivonia.pool.TransmitterPool
+import eu.phisikus.pivonia.pool.heartbeat.HeartbeatPoolEvent
+import eu.phisikus.pivonia.pool.transmitter.TransmitterPoolEvent
 import io.reactivex.subjects.PublishSubject
 import spock.lang.Specification
 
 class ClientHeartbeatPoolMediatorSpec extends Specification {
 
-    def "Should add new client to the heartbeat pool on client pool event"() {
-        given: "ClientPool and HeartbeatPool are defined"
-        final clientPool = Mock(ClientPool)
+    def "Should add new client to the heartbeat pool on transmitter pool event"() {
+        given: "Transmitter Pool and Heartbeat Pool are defined"
+        final transmitterPool = Mock(TransmitterPool)
         final heartbeatPool = Mock(HeartbeatPool)
         heartbeatPool.getHeartbeatChanges() >> PublishSubject.create()
 
-        and: "Client addition event is defined"
+        and: "Transmitter addition event is defined"
         final client = Mock(Client)
-        final additionEvent = new ClientEvent<>(client, null, ClientEvent.Operation.ADD)
+        final additionEvent = new TransmitterPoolEvent<>(client, null, TransmitterPoolEvent.Operation.ADD)
 
-        and: "Client Pool is configured to publish change events"
+        and: "Transmitter Pool is configured to publish change events"
         final clientChanges = PublishSubject.create()
-        clientPool.getClientChanges() >> clientChanges
+        transmitterPool.getChanges() >> clientChanges
 
-        and: "mediator is created between Client Pool and Heartbeat Pool"
-        final mediator = new ClientHeartbeatPoolMediator(clientPool, heartbeatPool)
+        and: "mediator is created between Transmitter Pool and Heartbeat Pool"
+        final mediator = new ClientHeartbeatPoolMediator(transmitterPool, heartbeatPool)
 
-        when: "new Client is added to the Client Pool"
+        when: "new Client is added to the Transmitter Pool"
         clientChanges.onNext(additionEvent)
 
         then: "Client is added to the Heartbeat Pool"
@@ -37,25 +37,25 @@ class ClientHeartbeatPoolMediatorSpec extends Specification {
         mediator.dispose()
     }
 
-    def "Should remove client from the heartbeat pool on client pool event"() {
-        given: "ClientPool and HeartbeatPool are defined"
-        final clientPool = Mock(ClientPool)
+    def "Should remove client from the heartbeat pool on transmitter Pool event"() {
+        given: "TransmitterPool and HeartbeatPool are defined"
+        final transmitterPool = Mock(TransmitterPool)
         final heartbeatPool = Mock(HeartbeatPool)
         heartbeatPool.getHeartbeatChanges() >> PublishSubject.create()
 
         and: "Client removal event is defined"
         final client = Mock(Client)
-        final removalEvent = new ClientEvent<>(client, null, ClientEvent.Operation.REMOVE)
+        final removalEvent = new TransmitterPoolEvent<>(client, null, TransmitterPoolEvent.Operation.REMOVE)
 
-        and: "Client Pool is configured to publish change events"
-        final clientChanges = PublishSubject.create()
-        clientPool.getClientChanges() >> clientChanges
+        and: "Transmitter Pool is configured to publish change events"
+        final transmitterPoolEvents = PublishSubject.create()
+        transmitterPool.getChanges() >> transmitterPoolEvents
 
-        and: "mediator is created between Client Pool and Heartbeat Pool"
-        final mediator = new ClientHeartbeatPoolMediator(clientPool, heartbeatPool)
+        and: "mediator is created between Transmitter Pool and Heartbeat Pool"
+        final mediator = new ClientHeartbeatPoolMediator(transmitterPool, heartbeatPool)
 
-        when: "Client is removed from the Client Pool"
-        clientChanges.onNext(removalEvent)
+        when: "Client is removed from the Transmitter Pool"
+        transmitterPoolEvents.onNext(removalEvent)
 
         then: "Client is removed from the Heartbeat Pool"
         1 * heartbeatPool.remove(client)
@@ -65,59 +65,59 @@ class ClientHeartbeatPoolMediatorSpec extends Specification {
     }
 
     def "Should assign client to node ID on heartbeat response retrieval"() {
-        given: "ClientPool and HeartbeatPool are defined"
-        final clientPool = Mock(ClientPool)
+        given: "TransmitterPool and HeartbeatPool are defined"
+        final transmitterPool = Mock(TransmitterPool)
         final heartbeatPool = Mock(HeartbeatPool)
-        clientPool.getClientChanges() >> PublishSubject.create()
+        transmitterPool.getChanges() >> PublishSubject.create()
 
         and: "Heartbeat response event is defined"
         final client = Mock(Client)
         final nodeId = UUID.randomUUID()
-        final heartbeatEvent = new HeartbeatEvent<>(nodeId, client, HeartbeatEvent.Operation.RECEIVED)
+        final heartbeatEvent = new HeartbeatPoolEvent<>(nodeId, client, HeartbeatPoolEvent.Operation.RECEIVED)
 
         and: "Heartbeat Pool is configured to publish change events"
-        final heartbeatChanges = PublishSubject.create()
-        heartbeatPool.getHeartbeatChanges() >> heartbeatChanges
+        final heartbeatPoolEvents = PublishSubject.create()
+        heartbeatPool.getHeartbeatChanges() >> heartbeatPoolEvents
 
-        and: "mediator is created between Client Pool and Heartbeat Pool"
-        final mediator = new ClientHeartbeatPoolMediator(clientPool, heartbeatPool)
+        and: "mediator is created between Transmitter Pool and Heartbeat Pool"
+        final mediator = new ClientHeartbeatPoolMediator(transmitterPool, heartbeatPool)
 
         when: "heartbeat response was received by the Heartbeat Pool"
-        heartbeatChanges.onNext(heartbeatEvent)
+        heartbeatPoolEvents.onNext(heartbeatEvent)
 
-        then: "assignment between node ID and Client is set in the Client Pool"
-        1 * clientPool.set(nodeId, client)
+        then: "assignment between node ID and Client is set in the Transmitter Pool"
+        1 * transmitterPool.set(nodeId, client)
 
         cleanup: "mediator is destroyed"
         mediator.dispose()
     }
 
-    def "Should remove client from the Client Pool on heartbeat timeout"() {
-        given: "ClientPool and HeartbeatPool are defined"
-        final clientPool = Mock(ClientPool)
+    def "Should remove client from the Transmitter Pool on heartbeat timeout"() {
+        given: "TransmitterPool and HeartbeatPool are defined"
+        final transmitterPool = Mock(TransmitterPool)
         final heartbeatPool = Mock(HeartbeatPool)
-        clientPool.getClientChanges() >> PublishSubject.create()
+        transmitterPool.getChanges() >> PublishSubject.create()
 
         and: "Heartbeat timeout event is defined"
         final client = Mock(Client)
         final nodeId = UUID.randomUUID()
-        final heartbeatEvent = new HeartbeatEvent<>(nodeId, client, HeartbeatEvent.Operation.TIMEOUT)
+        final heartbeatEvent = new HeartbeatPoolEvent<>(nodeId, client, HeartbeatPoolEvent.Operation.TIMEOUT)
 
         and: "Heartbeat Pool is configured to publish change events"
-        final heartbeatChanges = PublishSubject.create()
-        heartbeatPool.getHeartbeatChanges() >> heartbeatChanges
+        final heartbeatPoolEvents = PublishSubject.create()
+        heartbeatPool.getHeartbeatChanges() >> heartbeatPoolEvents
 
-        and: "mediator is created between Client Pool and Heartbeat Pool"
-        final mediator = new ClientHeartbeatPoolMediator(clientPool, heartbeatPool)
+        and: "mediator is created between Transmitter Pool and Heartbeat Pool"
+        final mediator = new ClientHeartbeatPoolMediator(transmitterPool, heartbeatPool)
 
         when: "heartbeat timeout occurred"
-        heartbeatChanges.onNext(heartbeatEvent)
+        heartbeatPoolEvents.onNext(heartbeatEvent)
 
         then: "client is closed"
         1 * client.close()
 
-        and: "removed from the Client Pool"
-        1 * clientPool.remove(client)
+        and: "removed from the Transmitter Pool"
+        1 * transmitterPool.remove(client)
 
         cleanup: "mediator is destroyed"
         mediator.dispose()

@@ -4,7 +4,7 @@ import eu.phisikus.pivonia.api.Client;
 import lombok.Value;
 
 @Value
-public class HeartbeatEvent<K> {
+public class HeartbeatPoolEvent<K> {
     private final K id;
     private final Client client;
     private final Operation operation;

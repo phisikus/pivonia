@@ -4,10 +4,10 @@ import dagger.Module;
 import dagger.Provides;
 import eu.phisikus.pivonia.api.Client;
 import eu.phisikus.pivonia.pool.address.AddressPoolModule;
-import eu.phisikus.pivonia.pool.client.ClientPoolModule;
 import eu.phisikus.pivonia.pool.heartbeat.HeartbeatPoolModule;
 import eu.phisikus.pivonia.pool.mediators.ConnectionManagerImpl;
 import eu.phisikus.pivonia.pool.server.ServerPoolModule;
+import eu.phisikus.pivonia.pool.transmitter.ClientPoolModule;
 
 import javax.inject.Provider;
 
@@ -28,9 +28,9 @@ public class PoolModule {
     }
 
     @Provides
-    public ConnectionManager provideConnectionManager(ClientPool clientPool,
+    public ConnectionManager provideConnectionManager(TransmitterPool transmitterPool,
                                                       AddressPool addressPool,
                                                       HeartbeatPool heartbeatPool) {
-        return new ConnectionManagerImpl(clientPool, addressPool, heartbeatPool, clientProvider, maxConnectionRetryAttempts);
+        return new ConnectionManagerImpl(transmitterPool, addressPool, heartbeatPool, clientProvider, maxConnectionRetryAttempts);
     }
 }

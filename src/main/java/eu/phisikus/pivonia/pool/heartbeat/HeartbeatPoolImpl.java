@@ -24,7 +24,7 @@ import java.util.stream.Stream;
 class HeartbeatPoolImpl<K> implements HeartbeatPool<K>, AutoCloseable {
     private final ScheduledExecutorService heartbeatSender = Executors.newSingleThreadScheduledExecutor();
     private final List<HeartbeatEntry> clients = Collections.synchronizedList(new LinkedList<>());
-    private final Subject<HeartbeatEvent<K>> heartbeatChanges = PublishSubject.create();
+    private final Subject<HeartbeatPoolEvent<K>> heartbeatChanges = PublishSubject.create();
     private final K nodeId;
     private final long neverSeen = 0L;
     private final long timeoutDelay;
@@ -74,10 +74,10 @@ class HeartbeatPoolImpl<K> implements HeartbeatPool<K>, AutoCloseable {
     }
 
     private void sendReceivedEvent(K senderId, Client client) {
-        var event = new HeartbeatEvent<>(
+        var event = new HeartbeatPoolEvent<>(
                 senderId,
                 client,
-                HeartbeatEvent.Operation.RECEIVED
+                HeartbeatPoolEvent.Operation.RECEIVED
         );
         log.info("Emitting RECEIVED event: {}", event);
         heartbeatChanges.onNext(event);
@@ -93,7 +93,7 @@ class HeartbeatPoolImpl<K> implements HeartbeatPool<K>, AutoCloseable {
     }
 
     @Override
-    public Observable<HeartbeatEvent<K>> getHeartbeatChanges() {
+    public Observable<HeartbeatPoolEvent<K>> getHeartbeatChanges() {
         return heartbeatChanges;
     }
 
@@ -126,7 +126,7 @@ class HeartbeatPoolImpl<K> implements HeartbeatPool<K>, AutoCloseable {
     }
 
     private void handleClientTimeout(Client client) {
-        var timeoutEvent = new HeartbeatEvent<K>(null, client, HeartbeatEvent.Operation.TIMEOUT);
+        var timeoutEvent = new HeartbeatPoolEvent<K>(null, client, HeartbeatPoolEvent.Operation.TIMEOUT);
         log.info("Emitting TIMEOUT event: {}", timeoutEvent);
         clients.removeIf(entry -> client.equals(entry.getClient()));
         heartbeatChanges.onNext(timeoutEvent);

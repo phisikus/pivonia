@@ -1,7 +1,7 @@
 package eu.phisikus.pivonia.pool;
 
 import eu.phisikus.pivonia.pool.address.Address;
-import eu.phisikus.pivonia.pool.address.AddressEvent;
+import eu.phisikus.pivonia.pool.address.AddressPoolEvent;
 import io.reactivex.Observable;
 
 import java.util.List;
@@ -39,6 +39,6 @@ public interface AddressPool {
      *
      * @return observable address changes
      */
-    Observable<AddressEvent> getAddressChanges();
+    Observable<AddressPoolEvent> getChanges();
 
 }
