@@ -4,7 +4,7 @@ import eu.phisikus.pivonia.api.EmptyEnvelope
 import eu.phisikus.pivonia.logic.MessageHandler
 import eu.phisikus.pivonia.logic.MessageHandlers
 import eu.phisikus.pivonia.pool.heartbeat.HeartbeatServerVisitor
-import eu.phisikus.pivonia.pool.transmitter.TransmitterPoolEvent
+import eu.phisikus.pivonia.pool.transmitter.events.TransmitterPoolEvent
 import eu.phisikus.pivonia.test.ServerTestUtils
 import eu.phisikus.pivonia.utils.Pivonia
 import spock.lang.Specification

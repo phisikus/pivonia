@@ -2,6 +2,7 @@ package eu.phisikus.pivonia.pool.transmitter;
 
 import eu.phisikus.pivonia.api.Transmitter;
 import eu.phisikus.pivonia.pool.TransmitterPool;
+import eu.phisikus.pivonia.pool.transmitter.events.*;
 import io.reactivex.Observable;
 import io.reactivex.subjects.PublishSubject;
 import io.reactivex.subjects.Subject;
@@ -32,25 +33,25 @@ class TransmitterPoolImpl<K> implements TransmitterPool<K> {
         var wasPreviouslyAssigned = previousTransmitter != null && isNewValue;
 
         if (wasPreviouslyAssigned) {
-            notify(id, previousTransmitter, TransmitterPoolEvent.Operation.UNASSIGN);
+            notify(new UnassignmentEvent<>(id, previousTransmitter));
         }
 
         if (isNewValue) {
-            notify(id, transmitter, TransmitterPoolEvent.Operation.ASSIGN);
+            notify(new AssignmentEvent<>(id, transmitter));
         }
     }
 
     @Override
     public void add(Transmitter transmitter) {
         transmitters.add(transmitter);
-        notify(null, transmitter, TransmitterPoolEvent.Operation.ADD);
+        notify(new AdditionEvent(transmitter));
     }
 
     @Override
     public void remove(Transmitter transmitter) {
         if (transmitters.remove(transmitter)) {
             removeMappings(transmitter);
-            notify(null, transmitter, TransmitterPoolEvent.Operation.REMOVE);
+            notify(new RemovalEvent(transmitter));
         }
     }
 
@@ -60,12 +61,12 @@ class TransmitterPoolImpl<K> implements TransmitterPool<K> {
                 .filter(entry -> entry.getValue().equals(transmitter))
                 .forEach(entry -> {
                     mappings.remove(entry.getKey(), entry.getValue());
-                    notify(entry.getKey(), entry.getValue(), TransmitterPoolEvent.Operation.UNASSIGN);
+                    var changeEvent = new UnassignmentEvent<>(entry.getKey(), entry.getValue());
+                    notify(changeEvent);
                 });
     }
 
-    private void notify(K id, Transmitter transmitter, TransmitterPoolEvent.Operation assign) {
-        var changeEvent = new TransmitterPoolEvent<>(transmitter, id, assign);
+    private void notify(TransmitterPoolEvent changeEvent) {
         poolChanges.onNext(changeEvent);
     }
 

@@ -4,7 +4,8 @@ import eu.phisikus.pivonia.api.Client
 import eu.phisikus.pivonia.pool.HeartbeatPool
 import eu.phisikus.pivonia.pool.TransmitterPool
 import eu.phisikus.pivonia.pool.heartbeat.HeartbeatPoolEvent
-import eu.phisikus.pivonia.pool.transmitter.TransmitterPoolEvent
+import eu.phisikus.pivonia.pool.transmitter.events.AdditionEvent
+import eu.phisikus.pivonia.pool.transmitter.events.RemovalEvent
 import io.reactivex.subjects.PublishSubject
 import spock.lang.Specification
 
@@ -18,7 +19,7 @@ class ClientHeartbeatPoolMediatorSpec extends Specification {
 
         and: "Transmitter addition event is defined"
         final client = Mock(Client)
-        final additionEvent = new TransmitterPoolEvent<>(client, null, TransmitterPoolEvent.Operation.ADD)
+        final additionEvent = new AdditionEvent(client)
 
         and: "Transmitter Pool is configured to publish change events"
         final clientChanges = PublishSubject.create()
@@ -45,7 +46,7 @@ class ClientHeartbeatPoolMediatorSpec extends Specification {
 
         and: "Client removal event is defined"
         final client = Mock(Client)
-        final removalEvent = new TransmitterPoolEvent<>(client, null, TransmitterPoolEvent.Operation.REMOVE)
+        final removalEvent = new RemovalEvent(client)
 
         and: "Transmitter Pool is configured to publish change events"
         final transmitterPoolEvents = PublishSubject.create()

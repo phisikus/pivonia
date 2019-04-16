@@ -4,7 +4,7 @@ import eu.phisikus.pivonia.api.Client;
 import eu.phisikus.pivonia.pool.HeartbeatPool;
 import eu.phisikus.pivonia.pool.TransmitterPool;
 import eu.phisikus.pivonia.pool.heartbeat.HeartbeatPoolEvent;
-import eu.phisikus.pivonia.pool.transmitter.TransmitterPoolEvent;
+import eu.phisikus.pivonia.pool.transmitter.events.TransmitterPoolEvent;
 import io.reactivex.disposables.Disposable;
 import lombok.extern.log4j.Log4j2;
 

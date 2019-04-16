@@ -1,7 +1,7 @@
 package eu.phisikus.pivonia.pool;
 
 import eu.phisikus.pivonia.api.Transmitter;
-import eu.phisikus.pivonia.pool.transmitter.TransmitterPoolEvent;
+import eu.phisikus.pivonia.pool.transmitter.events.TransmitterPoolEvent;
 import io.reactivex.Observable;
 
 import java.util.List;

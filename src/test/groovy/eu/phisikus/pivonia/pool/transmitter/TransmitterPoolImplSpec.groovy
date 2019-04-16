@@ -1,6 +1,10 @@
 package eu.phisikus.pivonia.pool.transmitter
 
 import eu.phisikus.pivonia.api.Client
+import eu.phisikus.pivonia.pool.transmitter.events.AdditionEvent
+import eu.phisikus.pivonia.pool.transmitter.events.AssignmentEvent
+import eu.phisikus.pivonia.pool.transmitter.events.RemovalEvent
+import eu.phisikus.pivonia.pool.transmitter.events.UnassignmentEvent
 import io.reactivex.Observer
 import spock.lang.Specification
 
@@ -14,7 +18,7 @@ class TransmitterPoolImplSpec extends Specification {
         def transmitterPool = new TransmitterPoolImpl()
 
         and: "change events are monitored"
-        def expectedEvent = new TransmitterPoolEvent<>(transmitter, null, TransmitterPoolEvent.Operation.ADD)
+        def expectedEvent = new AdditionEvent(transmitter)
         def changes = transmitterPool.getChanges()
         def changeListener = Mock(Observer)
         changes.subscribe(changeListener)
@@ -38,7 +42,7 @@ class TransmitterPoolImplSpec extends Specification {
         transmitterPool.add(transmitter)
 
         and: "change events are monitored"
-        def expectedEvent = new TransmitterPoolEvent<>(transmitter, null, TransmitterPoolEvent.Operation.REMOVE)
+        def expectedEvent = new RemovalEvent(transmitter)
         def changes = transmitterPool.getChanges()
         def changeListener = Mock(Observer)
         changes.subscribe(changeListener)
@@ -65,7 +69,7 @@ class TransmitterPoolImplSpec extends Specification {
         and: "change events are monitored"
         def changes = transmitterPool.getChanges()
         def changeListener = Mock(Observer)
-        def expectedEvent = new TransmitterPoolEvent(transmitter, nodeId, TransmitterPoolEvent.Operation.ASSIGN)
+        def expectedEvent = new AssignmentEvent<>(nodeId, transmitter)
         changes.subscribe(changeListener)
 
         when: "assigning transmitter with node ID"
@@ -91,9 +95,9 @@ class TransmitterPoolImplSpec extends Specification {
         and: "change events are monitored"
         def transmitterPoolEvents = transmitterPool.getChanges()
         def changeListener = Mock(Observer)
-        def assignEvent = new TransmitterPoolEvent(transmitter, nodeId, TransmitterPoolEvent.Operation.ASSIGN)
-        def unassignEvent = new TransmitterPoolEvent(transmitter, nodeId, TransmitterPoolEvent.Operation.UNASSIGN)
-        def deleteEvent = new TransmitterPoolEvent(transmitter, null, TransmitterPoolEvent.Operation.REMOVE)
+        def assignEvent = new AssignmentEvent(nodeId, transmitter)
+        def unassignEvent = new UnassignmentEvent(nodeId, transmitter)
+        def deleteEvent = new RemovalEvent(transmitter)
         transmitterPoolEvents.subscribe(changeListener)
 
         when: "assigning transmitter with node ID"
@@ -125,9 +129,9 @@ class TransmitterPoolImplSpec extends Specification {
         and: "change events are monitored"
         def changes = transmitterPool.getChanges()
         def changeListener = Mock(Observer)
-        def firstEvent = new TransmitterPoolEvent(firstTransmitter, nodeId, TransmitterPoolEvent.Operation.ASSIGN)
-        def secondEvent = new TransmitterPoolEvent(firstTransmitter, nodeId, TransmitterPoolEvent.Operation.UNASSIGN)
-        def thirdEvent = new TransmitterPoolEvent(secondTransmitter, nodeId, TransmitterPoolEvent.Operation.ASSIGN)
+        def firstEvent = new AssignmentEvent(nodeId, firstTransmitter)
+        def secondEvent = new UnassignmentEvent(nodeId, firstTransmitter)
+        def thirdEvent = new AssignmentEvent(nodeId, secondTransmitter)
         changes.subscribe(changeListener)
 
         when: "assigning transmitter with node ID"
@@ -158,7 +162,7 @@ class TransmitterPoolImplSpec extends Specification {
         and: "change events are monitored"
         def changes = transmitterPool.getChanges()
         def changeListener = Mock(Observer)
-        def firstEvent = new TransmitterPoolEvent(transmitter, nodeId, TransmitterPoolEvent.Operation.ASSIGN)
+        def firstEvent = new AssignmentEvent<>(nodeId, transmitter)
         changes.subscribe(changeListener)
 
         when: "assigning transmitter with node ID"
