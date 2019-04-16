@@ -3,7 +3,8 @@ package eu.phisikus.pivonia.pool.mediators;
 import eu.phisikus.pivonia.api.Client;
 import eu.phisikus.pivonia.pool.HeartbeatPool;
 import eu.phisikus.pivonia.pool.TransmitterPool;
-import eu.phisikus.pivonia.pool.heartbeat.HeartbeatPoolEvent;
+import eu.phisikus.pivonia.pool.heartbeat.events.HeartbeatPoolEvent;
+import eu.phisikus.pivonia.pool.heartbeat.events.ReceivedEvent;
 import eu.phisikus.pivonia.pool.transmitter.events.TransmitterPoolEvent;
 import io.reactivex.disposables.Disposable;
 import lombok.extern.log4j.Log4j2;
@@ -42,6 +43,7 @@ class ClientHeartbeatPoolMediator<K> implements Disposable {
 
         assignmentSubscription = heartbeatChanges
                 .filter(heartbeatPoolEvent -> heartbeatPoolEvent.getOperation() == HeartbeatPoolEvent.Operation.RECEIVED)
+                .map(heartbeatPoolEvent -> (ReceivedEvent<K>) heartbeatPoolEvent)
                 .subscribe(heartbeatPoolEvent -> transmitterPool.set(heartbeatPoolEvent.getId(), heartbeatPoolEvent.getClient()));
 
         timeoutSubscription = heartbeatChanges

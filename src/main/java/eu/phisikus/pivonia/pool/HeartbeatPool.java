@@ -1,7 +1,7 @@
 package eu.phisikus.pivonia.pool;
 
 import eu.phisikus.pivonia.api.Client;
-import eu.phisikus.pivonia.pool.heartbeat.HeartbeatPoolEvent;
+import eu.phisikus.pivonia.pool.heartbeat.events.HeartbeatPoolEvent;
 import io.reactivex.Observable;
 
 /**
@@ -37,5 +37,5 @@ public interface HeartbeatPool<K> {
      *
      * @return observable heartbeat events
      */
-    Observable<HeartbeatPoolEvent<K>> getHeartbeatChanges();
+    Observable<HeartbeatPoolEvent> getHeartbeatChanges();
 }

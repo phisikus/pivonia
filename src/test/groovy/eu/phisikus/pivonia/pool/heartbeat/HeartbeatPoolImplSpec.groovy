@@ -1,5 +1,6 @@
 package eu.phisikus.pivonia.pool.heartbeat
 
+import eu.phisikus.pivonia.pool.heartbeat.events.HeartbeatPoolEvent
 import eu.phisikus.pivonia.pool.heartbeat.test.HeartbeatLoopbackClient
 import spock.lang.Specification
 

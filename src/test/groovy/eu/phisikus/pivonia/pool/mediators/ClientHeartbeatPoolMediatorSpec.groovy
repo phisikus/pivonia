@@ -3,7 +3,9 @@ package eu.phisikus.pivonia.pool.mediators
 import eu.phisikus.pivonia.api.Client
 import eu.phisikus.pivonia.pool.HeartbeatPool
 import eu.phisikus.pivonia.pool.TransmitterPool
-import eu.phisikus.pivonia.pool.heartbeat.HeartbeatPoolEvent
+import eu.phisikus.pivonia.pool.heartbeat.events.HeartbeatPoolEvent
+import eu.phisikus.pivonia.pool.heartbeat.events.ReceivedEvent
+import eu.phisikus.pivonia.pool.heartbeat.events.TimeoutEvent
 import eu.phisikus.pivonia.pool.transmitter.events.AdditionEvent
 import eu.phisikus.pivonia.pool.transmitter.events.RemovalEvent
 import io.reactivex.subjects.PublishSubject
@@ -74,7 +76,7 @@ class ClientHeartbeatPoolMediatorSpec extends Specification {
         and: "Heartbeat response event is defined"
         final client = Mock(Client)
         final nodeId = UUID.randomUUID()
-        final heartbeatEvent = new HeartbeatPoolEvent<>(nodeId, client, HeartbeatPoolEvent.Operation.RECEIVED)
+        final heartbeatEvent = new ReceivedEvent<UUID>(nodeId, client)
 
         and: "Heartbeat Pool is configured to publish change events"
         final heartbeatPoolEvents = PublishSubject.create()
@@ -101,8 +103,7 @@ class ClientHeartbeatPoolMediatorSpec extends Specification {
 
         and: "Heartbeat timeout event is defined"
         final client = Mock(Client)
-        final nodeId = UUID.randomUUID()
-        final heartbeatEvent = new HeartbeatPoolEvent<>(nodeId, client, HeartbeatPoolEvent.Operation.TIMEOUT)
+        final heartbeatEvent = new TimeoutEvent(client)
 
         and: "Heartbeat Pool is configured to publish change events"
         final heartbeatPoolEvents = PublishSubject.create()

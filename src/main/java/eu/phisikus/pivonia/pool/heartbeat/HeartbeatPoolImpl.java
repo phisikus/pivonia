@@ -4,6 +4,9 @@ import eu.phisikus.pivonia.api.Client;
 import eu.phisikus.pivonia.api.MessageWithTransmitter;
 import eu.phisikus.pivonia.api.Transmitter;
 import eu.phisikus.pivonia.pool.HeartbeatPool;
+import eu.phisikus.pivonia.pool.heartbeat.events.HeartbeatPoolEvent;
+import eu.phisikus.pivonia.pool.heartbeat.events.ReceivedEvent;
+import eu.phisikus.pivonia.pool.heartbeat.events.TimeoutEvent;
 import io.reactivex.Observable;
 import io.reactivex.functions.Consumer;
 import io.reactivex.subjects.PublishSubject;
@@ -24,7 +27,7 @@ import java.util.stream.Stream;
 class HeartbeatPoolImpl<K> implements HeartbeatPool<K>, AutoCloseable {
     private final ScheduledExecutorService heartbeatSender = Executors.newSingleThreadScheduledExecutor();
     private final List<HeartbeatEntry> clients = Collections.synchronizedList(new LinkedList<>());
-    private final Subject<HeartbeatPoolEvent<K>> heartbeatChanges = PublishSubject.create();
+    private final Subject<HeartbeatPoolEvent> heartbeatChanges = PublishSubject.create();
     private final K nodeId;
     private final long neverSeen = 0L;
     private final long timeoutDelay;
@@ -74,11 +77,7 @@ class HeartbeatPoolImpl<K> implements HeartbeatPool<K>, AutoCloseable {
     }
 
     private void sendReceivedEvent(K senderId, Client client) {
-        var event = new HeartbeatPoolEvent<>(
-                senderId,
-                client,
-                HeartbeatPoolEvent.Operation.RECEIVED
-        );
+        var event = new ReceivedEvent<>(senderId, client);
         log.info("Emitting RECEIVED event: {}", event);
         heartbeatChanges.onNext(event);
     }
@@ -93,7 +92,7 @@ class HeartbeatPoolImpl<K> implements HeartbeatPool<K>, AutoCloseable {
     }
 
     @Override
-    public Observable<HeartbeatPoolEvent<K>> getHeartbeatChanges() {
+    public Observable<HeartbeatPoolEvent> getHeartbeatChanges() {
         return heartbeatChanges;
     }
 
@@ -126,7 +125,7 @@ class HeartbeatPoolImpl<K> implements HeartbeatPool<K>, AutoCloseable {
     }
 
     private void handleClientTimeout(Client client) {
-        var timeoutEvent = new HeartbeatPoolEvent<K>(null, client, HeartbeatPoolEvent.Operation.TIMEOUT);
+        var timeoutEvent = new TimeoutEvent(client);
         log.info("Emitting TIMEOUT event: {}", timeoutEvent);
         clients.removeIf(entry -> client.equals(entry.getClient()));
         heartbeatChanges.onNext(timeoutEvent);
