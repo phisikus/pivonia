@@ -3,7 +3,6 @@ package eu.phisikus.pivonia.pool.mediators
 import eu.phisikus.pivonia.api.Client
 import eu.phisikus.pivonia.pool.HeartbeatPool
 import eu.phisikus.pivonia.pool.TransmitterPool
-import eu.phisikus.pivonia.pool.heartbeat.events.HeartbeatPoolEvent
 import eu.phisikus.pivonia.pool.heartbeat.events.ReceivedEvent
 import eu.phisikus.pivonia.pool.heartbeat.events.TimeoutEvent
 import eu.phisikus.pivonia.pool.transmitter.events.AdditionEvent
