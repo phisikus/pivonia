@@ -30,7 +30,15 @@ public class PoolModule {
     @Provides
     public ConnectionManager provideConnectionManager(TransmitterPool transmitterPool,
                                                       AddressPool addressPool,
-                                                      HeartbeatPool heartbeatPool) {
-        return new ConnectionManagerImpl(transmitterPool, addressPool, heartbeatPool, clientProvider, maxConnectionRetryAttempts);
+                                                      HeartbeatPool heartbeatPool,
+                                                      ServerPool serverPool) {
+        return new ConnectionManagerImpl(
+                transmitterPool,
+                addressPool,
+                heartbeatPool,
+                serverPool,
+                clientProvider,
+                maxConnectionRetryAttempts
+        );
     }
 }

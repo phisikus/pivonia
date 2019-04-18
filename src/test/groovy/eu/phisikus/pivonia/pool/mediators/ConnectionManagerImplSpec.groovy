@@ -2,6 +2,7 @@ package eu.phisikus.pivonia.pool.mediators
 
 import eu.phisikus.pivonia.pool.AddressPool
 import eu.phisikus.pivonia.pool.HeartbeatPool
+import eu.phisikus.pivonia.pool.ServerPool
 import eu.phisikus.pivonia.pool.TransmitterPool
 import io.reactivex.subjects.PublishSubject
 import spock.lang.Specification
@@ -9,7 +10,8 @@ import spock.lang.Specification
 class ConnectionManagerImplSpec extends Specification {
 
     def "Should return encapsulated pools and dispose resources properly"() {
-        given: "Transmitter, Address and Heartbeat pools are defined"
+        given: "Server, Transmitter, Address and Heartbeat pools are defined"
+        def serverPool = Mock(ServerPool)
         def transmitterPool = Mock(TransmitterPool)
         def addressPool = Mock(AddressPool)
         def heartbeatPool = Mock(HeartbeatPool)
@@ -20,12 +22,20 @@ class ConnectionManagerImplSpec extends Specification {
         1 * heartbeatPool.getHeartbeatChanges() >> PublishSubject.create()
 
         and: "connection manager is created"
-        def manager = new ConnectionManagerImpl(transmitterPool, addressPool, heartbeatPool, null, 1)
+        def manager = new ConnectionManagerImpl(
+                transmitterPool,
+                addressPool,
+                heartbeatPool,
+                serverPool,
+                null,
+                1
+        )
 
         expect: "correct instances to be returned by getters"
         manager.getTransmitterPool() == transmitterPool
         manager.getAddressPool() == addressPool
         manager.getHeartbeatPool() == heartbeatPool
+        manager.getServerPool() == serverPool
 
         and: "manager to be disposed properly when requested"
         manager.dispose()
