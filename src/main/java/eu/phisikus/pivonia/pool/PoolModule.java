@@ -7,13 +7,13 @@ import eu.phisikus.pivonia.pool.address.AddressPoolModule;
 import eu.phisikus.pivonia.pool.heartbeat.HeartbeatPoolModule;
 import eu.phisikus.pivonia.pool.mediators.ConnectionManagerImpl;
 import eu.phisikus.pivonia.pool.server.ServerPoolModule;
-import eu.phisikus.pivonia.pool.transmitter.ClientPoolModule;
+import eu.phisikus.pivonia.pool.transmitter.TransmitterPoolModule;
 
 import javax.inject.Provider;
 
 @Module(includes = {
         HeartbeatPoolModule.class,
-        ClientPoolModule.class,
+        TransmitterPoolModule.class,
         AddressPoolModule.class,
         ServerPoolModule.class
 })
@@ -30,12 +30,12 @@ public class PoolModule {
     @Provides
     public ConnectionManager provideConnectionManager(TransmitterPool transmitterPool,
                                                       AddressPool addressPool,
-                                                      HeartbeatPool heartbeatPool,
+                                                      ClientHeartbeatPool clientHeartbeatPool,
                                                       ServerPool serverPool) {
         return new ConnectionManagerImpl(
                 transmitterPool,
                 addressPool,
-                heartbeatPool,
+                clientHeartbeatPool,
                 serverPool,
                 clientProvider,
                 maxConnectionRetryAttempts

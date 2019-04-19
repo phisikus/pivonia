@@ -3,7 +3,7 @@ package eu.phisikus.pivonia.pool.heartbeat;
 import eu.phisikus.pivonia.api.Client;
 import eu.phisikus.pivonia.api.MessageWithTransmitter;
 import eu.phisikus.pivonia.api.Transmitter;
-import eu.phisikus.pivonia.pool.HeartbeatPool;
+import eu.phisikus.pivonia.pool.ClientHeartbeatPool;
 import eu.phisikus.pivonia.pool.heartbeat.events.HeartbeatPoolEvent;
 import eu.phisikus.pivonia.pool.heartbeat.events.ReceivedEvent;
 import eu.phisikus.pivonia.pool.heartbeat.events.TimeoutEvent;
@@ -24,7 +24,7 @@ import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 @Log4j2
-class HeartbeatPoolImpl<K> implements HeartbeatPool<K>, AutoCloseable {
+class ClientHeartbeatPoolImpl<K> implements ClientHeartbeatPool<K>, AutoCloseable {
     private final ScheduledExecutorService heartbeatSender = Executors.newSingleThreadScheduledExecutor();
     private final List<HeartbeatEntry> clients = Collections.synchronizedList(new LinkedList<>());
     private final Subject<HeartbeatPoolEvent> heartbeatChanges = PublishSubject.create();
@@ -32,7 +32,7 @@ class HeartbeatPoolImpl<K> implements HeartbeatPool<K>, AutoCloseable {
     private final long neverSeen = 0L;
     private final long timeoutDelay;
 
-    public HeartbeatPoolImpl(long heartbeatDelay, long timeoutDelay, K nodeId) {
+    public ClientHeartbeatPoolImpl(long heartbeatDelay, long timeoutDelay, K nodeId) {
         this.nodeId = nodeId;
         this.timeoutDelay = timeoutDelay;
         heartbeatSender.scheduleWithFixedDelay(
@@ -146,7 +146,7 @@ class HeartbeatPoolImpl<K> implements HeartbeatPool<K>, AutoCloseable {
 
     @Override
     public void close() throws Exception {
-        log.info("Closing heartbeat pool.");
+        log.info("Closing client heartbeat pool.");
         heartbeatSender.shutdownNow();
         clients.clear();
     }

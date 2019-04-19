@@ -1,7 +1,7 @@
 package eu.phisikus.pivonia.pool.mediators
 
 import eu.phisikus.pivonia.pool.AddressPool
-import eu.phisikus.pivonia.pool.HeartbeatPool
+import eu.phisikus.pivonia.pool.ClientHeartbeatPool
 import eu.phisikus.pivonia.pool.ServerPool
 import eu.phisikus.pivonia.pool.TransmitterPool
 import io.reactivex.subjects.PublishSubject
@@ -14,18 +14,18 @@ class ConnectionManagerImplSpec extends Specification {
         def serverPool = Mock(ServerPool)
         def transmitterPool = Mock(TransmitterPool)
         def addressPool = Mock(AddressPool)
-        def heartbeatPool = Mock(HeartbeatPool)
+        def clientHeartbeatPool = Mock(ClientHeartbeatPool)
 
         and: "event streams are monitored"
         1 * transmitterPool.getChanges() >> PublishSubject.create()
         1 * addressPool.getChanges() >> PublishSubject.create()
-        1 * heartbeatPool.getHeartbeatChanges() >> PublishSubject.create()
+        1 * clientHeartbeatPool.getHeartbeatChanges() >> PublishSubject.create()
 
         and: "connection manager is created"
         def manager = new ConnectionManagerImpl(
                 transmitterPool,
                 addressPool,
-                heartbeatPool,
+                clientHeartbeatPool,
                 serverPool,
                 null,
                 1
@@ -34,7 +34,7 @@ class ConnectionManagerImplSpec extends Specification {
         expect: "correct instances to be returned by getters"
         manager.getTransmitterPool() == transmitterPool
         manager.getAddressPool() == addressPool
-        manager.getHeartbeatPool() == heartbeatPool
+        manager.getClientHeartbeatPool() == clientHeartbeatPool
         manager.getServerPool() == serverPool
 
         and: "manager to be disposed properly when requested"

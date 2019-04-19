@@ -11,7 +11,7 @@ import io.reactivex.Observable;
  *
  * @param <K> type of node ID
  */
-public interface HeartbeatPool<K> {
+public interface ClientHeartbeatPool<K> {
 
     /**
      * Add client to heartbeat pool.

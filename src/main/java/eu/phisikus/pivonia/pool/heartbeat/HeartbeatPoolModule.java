@@ -2,7 +2,7 @@ package eu.phisikus.pivonia.pool.heartbeat;
 
 import dagger.Module;
 import dagger.Provides;
-import eu.phisikus.pivonia.pool.HeartbeatPool;
+import eu.phisikus.pivonia.pool.ClientHeartbeatPool;
 
 @Module
 public class HeartbeatPoolModule {
@@ -18,7 +18,7 @@ public class HeartbeatPoolModule {
     }
 
     @Provides
-    public HeartbeatPool provideHeartbeatPool() {
-        return new HeartbeatPoolImpl(heartbeatDelay, timeoutDelay, nodeId);
+    public ClientHeartbeatPool provideHeartbeatPool() {
+        return new ClientHeartbeatPoolImpl(heartbeatDelay, timeoutDelay, nodeId);
     }
 }

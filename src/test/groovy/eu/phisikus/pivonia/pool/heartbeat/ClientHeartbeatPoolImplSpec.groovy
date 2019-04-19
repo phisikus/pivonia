@@ -7,7 +7,7 @@ import spock.lang.Specification
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
-class HeartbeatPoolImplSpec extends Specification {
+class ClientHeartbeatPoolImplSpec extends Specification {
 
     def "Should perform heartbeat protocol iteration after adding client to the pool"() {
         given: "there is a client"
@@ -15,7 +15,7 @@ class HeartbeatPoolImplSpec extends Specification {
 
         and: "empty heartbeat pool"
         final nodeId = UUID.randomUUID()
-        def pool = new HeartbeatPoolImpl(50L, 500L, nodeId)
+        def pool = new ClientHeartbeatPoolImpl(50L, 500L, nodeId)
 
         and: "heartbeat pool events are monitored"
         def messageReceived = new CountDownLatch(3)
@@ -39,7 +39,7 @@ class HeartbeatPoolImplSpec extends Specification {
 
         and: "empty heartbeat pool"
         final nodeId = UUID.randomUUID()
-        def pool = new HeartbeatPoolImpl(50L, 500L, nodeId)
+        def pool = new ClientHeartbeatPoolImpl(50L, 500L, nodeId)
 
         and: "heartbeat pool events are monitored"
         def messageReceived = new CountDownLatch(1)
@@ -63,7 +63,7 @@ class HeartbeatPoolImplSpec extends Specification {
 
         and: "empty heartbeat pool"
         final nodeId = UUID.randomUUID()
-        def pool = new HeartbeatPoolImpl(1000L, 2000L, nodeId)
+        def pool = new ClientHeartbeatPoolImpl(1000L, 2000L, nodeId)
 
         when: "adding client to the heartbeat pool"
         pool.add(client)

@@ -5,10 +5,10 @@ import dagger.Provides;
 import eu.phisikus.pivonia.pool.TransmitterPool;
 
 @Module
-public class ClientPoolModule {
+public class TransmitterPoolModule {
 
     @Provides
-    public TransmitterPool provideClientPool() {
+    public TransmitterPool provideTransmitterPool() {
         return new TransmitterPoolImpl();
     }
 }
