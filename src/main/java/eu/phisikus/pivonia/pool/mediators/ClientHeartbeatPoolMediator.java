@@ -49,7 +49,6 @@ class ClientHeartbeatPoolMediator<K> implements Disposable {
                 .map(heartbeatPoolEvent -> (ReceivedEvent<K>) heartbeatPoolEvent)
                 .subscribe(heartbeatPoolEvent -> transmitterPool.set(heartbeatPoolEvent.getId(), heartbeatPoolEvent.getClient()));
 
-        // TODO make sure that client closing is ok here
         timeoutSubscription = heartbeatChanges
                 .filter(heartbeatPoolEvent -> heartbeatPoolEvent.getOperation() == HeartbeatPoolEvent.Operation.TIMEOUT)
                 .subscribe(heartbeatPoolEvent -> {
