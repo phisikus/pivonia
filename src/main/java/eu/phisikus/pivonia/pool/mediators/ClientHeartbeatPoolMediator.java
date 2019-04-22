@@ -7,7 +7,9 @@ import eu.phisikus.pivonia.pool.heartbeat.events.HeartbeatPoolEvent;
 import eu.phisikus.pivonia.pool.heartbeat.events.ReceivedEvent;
 import eu.phisikus.pivonia.pool.transmitter.events.TransmitterPoolEvent;
 import io.reactivex.disposables.Disposable;
+import io.reactivex.functions.Predicate;
 import lombok.extern.log4j.Log4j2;
+
 
 /**
  * Connects TransmitterPool with ClientHeartbeatPool.
@@ -30,15 +32,16 @@ class ClientHeartbeatPoolMediator<K> implements Disposable {
     private void bind(TransmitterPool<K> transmitterPool, ClientHeartbeatPool<K> clientHeartbeatPool) {
         var transmitterChanges = transmitterPool.getChanges();
         var heartbeatChanges = clientHeartbeatPool.getHeartbeatChanges();
+        Predicate<TransmitterPoolEvent> transmitterIsClient = event -> event.getTransmitter() instanceof Client;
 
-        // TODO Instead of casting, add type detection
         additionSubscription = transmitterChanges
                 .filter(transmitterPoolEvent -> transmitterPoolEvent.getOperation() == TransmitterPoolEvent.Operation.ADD)
+                .filter(transmitterIsClient)
                 .subscribe(transmitterPoolEvent -> clientHeartbeatPool.add((Client) transmitterPoolEvent.getTransmitter()));
 
-        // TODO Instead of casting add type detection
         removalSubscription = transmitterChanges
                 .filter(transmitterPoolEvent -> transmitterPoolEvent.getOperation() == TransmitterPoolEvent.Operation.REMOVE)
+                .filter(transmitterIsClient)
                 .subscribe(transmitterPoolEvent -> clientHeartbeatPool.remove((Client) transmitterPoolEvent.getTransmitter()));
 
         assignmentSubscription = heartbeatChanges
