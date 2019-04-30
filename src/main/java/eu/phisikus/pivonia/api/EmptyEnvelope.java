@@ -1,12 +1,8 @@
 package eu.phisikus.pivonia.api;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.Value;
 
-@AllArgsConstructor
-@NoArgsConstructor
-@Data
+@Value
 public class EmptyEnvelope<K> implements Envelope<K> {
     protected K senderId;
     protected K recipientId;

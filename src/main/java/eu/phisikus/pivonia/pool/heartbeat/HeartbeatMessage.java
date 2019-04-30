@@ -1,12 +1,8 @@
 package eu.phisikus.pivonia.pool.heartbeat;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.Value;
 
-@NoArgsConstructor
-@AllArgsConstructor
-@Data
+@Value
 class HeartbeatMessage<K> {
     private K senderId;
     private Long timestamp;
