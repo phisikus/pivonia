@@ -1,16 +1,12 @@
 package eu.phisikus.pivonia.converter.plaintext;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.Value;
 
 /**
  * Object that wraps around another objects and stores class name for deserialization
  */
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
+@Value
 class ObjectWrapper {
     @JsonProperty("t")
     String type;
