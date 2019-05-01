@@ -1,9 +1,9 @@
 package eu.phisikus.pivonia.pool.heartbeat
 
+import eu.phisikus.pivonia.api.MessageWithTransmitter
 import eu.phisikus.pivonia.api.Server
+import eu.phisikus.pivonia.api.Transmitter
 import io.reactivex.Observable
-import io.reactivex.disposables.Disposable
-import io.reactivex.functions.Consumer
 import spock.lang.Specification
 import spock.lang.Subject
 
@@ -29,12 +29,21 @@ class ServerHeartbeatPoolImplSpec extends Specification {
     }
 
     def "Should remove server from the pool and dispose of heartbeat listener properly"() {
-        given: "there is server in the heartbeat pool"
+        given: "there is a server"
         def server = Mock(Server)
-        def subscription = Mock(Disposable)
-        def messages = Observable.just(subscription) // TODO set mock value, observe disposable
+
+        and: "heartbeat message stream is defined"
+        def isDisposed = false
+        def message = GroovyMock(MessageWithTransmitter)
+
+        and: "it contains only one test message"
+        def messages = Observable
+                .just(message)
+                .doOnDispose({ isDisposed = true })
+        message.getTransmitter() >> Mock(Transmitter)
         server.getMessages(HeartbeatMessage) >> messages
-        messages.subscribe(_ as Consumer) >> subscription
+
+        and: "server is added to the pool"
         pool.add(server)
 
         when: "removing server from the pool"
@@ -42,5 +51,8 @@ class ServerHeartbeatPoolImplSpec extends Specification {
 
         then: "server is no longer part of the pool"
         !pool.getServers().contains(server)
+
+        and: "message subscription is disposed"
+        isDisposed
     }
 }
