@@ -3,6 +3,7 @@ package eu.phisikus.pivonia.pool.heartbeat
 import eu.phisikus.pivonia.api.Server
 import io.reactivex.Observable
 import io.reactivex.disposables.Disposable
+import io.reactivex.functions.Consumer
 import spock.lang.Specification
 import spock.lang.Subject
 
@@ -32,7 +33,7 @@ class ServerHeartbeatPoolImplSpec extends Specification {
         def messages = Mock(Observable)
         def subscription = Mock(Disposable)
         server.getMessages(HeartbeatMessage) >> messages
-        messages.subscribe(_) >> subscription
+        messages.subscribe(_ as Consumer) >> subscription
         pool.add(server)
 
         when: "removing server from the pool"
@@ -40,8 +41,5 @@ class ServerHeartbeatPoolImplSpec extends Specification {
 
         then: "server is no longer part of the pool"
         !pool.getServers().contains(server)
-
-        and: "listener is disposed"
-        1 * subscription.dispose()
     }
 }
