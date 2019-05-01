@@ -1,6 +1,6 @@
 package eu.phisikus.pivonia.pool.heartbeat.events;
 
-import eu.phisikus.pivonia.api.Client;
+import eu.phisikus.pivonia.api.Transmitter;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 
@@ -8,13 +8,13 @@ import lombok.Getter;
 public abstract class HeartbeatPoolEvent {
 
     @Getter
-    private final Client client;
+    private final Transmitter transmitter;
 
     @Getter
     private final Operation operation;
 
-    HeartbeatPoolEvent(Client client, Operation operation) {
-        this.client = client;
+    HeartbeatPoolEvent(Transmitter transmitter, Operation operation) {
+        this.transmitter = transmitter;
         this.operation = operation;
     }
 

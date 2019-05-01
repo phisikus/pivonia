@@ -1,6 +1,7 @@
 package eu.phisikus.pivonia.pool.mediators;
 
 import eu.phisikus.pivonia.api.Client;
+import eu.phisikus.pivonia.api.Transmitter;
 import eu.phisikus.pivonia.pool.ClientHeartbeatPool;
 import eu.phisikus.pivonia.pool.TransmitterPool;
 import eu.phisikus.pivonia.pool.heartbeat.events.HeartbeatPoolEvent;
@@ -47,23 +48,27 @@ class ClientHeartbeatPoolMediator<K> implements Disposable {
         assignmentSubscription = heartbeatChanges
                 .filter(heartbeatPoolEvent -> heartbeatPoolEvent.getOperation() == HeartbeatPoolEvent.Operation.RECEIVED)
                 .map(heartbeatPoolEvent -> (ReceivedEvent<K>) heartbeatPoolEvent)
-                .subscribe(heartbeatPoolEvent -> transmitterPool.set(heartbeatPoolEvent.getId(), heartbeatPoolEvent.getClient()));
+                .subscribe(heartbeatPoolEvent -> transmitterPool.set(heartbeatPoolEvent.getId(), heartbeatPoolEvent.getTransmitter()));
 
         timeoutSubscription = heartbeatChanges
                 .filter(heartbeatPoolEvent -> heartbeatPoolEvent.getOperation() == HeartbeatPoolEvent.Operation.TIMEOUT)
                 .subscribe(heartbeatPoolEvent -> {
-                    var client = heartbeatPoolEvent.getClient();
-                    transmitterPool.remove(client);
-                    closeClient(client);
+                    var transmitter = heartbeatPoolEvent.getTransmitter();
+                    transmitterPool.remove(transmitter);
+                    closeClient(transmitter);
                 });
     }
 
 
-    private void closeClient(Client client) {
+    private void closeClient(Transmitter transmitter) {
         try {
-            client.close();
+            if(transmitter instanceof Client) {
+                var client = (Client) transmitter;
+                client.close();
+            }
+
         } catch (Exception e) {
-            log.error("Unexpected exception occurred when closing client that timed out on heartbeat", e);
+            log.error("Unexpected exception occurred when closing transmitter that timed out on heartbeat", e);
         }
     }
 
