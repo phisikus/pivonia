@@ -16,6 +16,7 @@ class ServerHeartbeatPoolImplSpec extends Specification {
     def "Should add server to the pool and register heartbeat listener properly"() {
         given: "there is server"
         def server = Mock(Server)
+        def messages = Observable.empty()
 
         when: "adding the server to the pool"
         pool.add(server)
@@ -24,14 +25,14 @@ class ServerHeartbeatPoolImplSpec extends Specification {
         pool.getServers().contains(server)
 
         and: "listener is registered"
-        1 * server.getMessages(HeartbeatMessage) >> Mock(Observable)
+        1 * server.getMessages(HeartbeatMessage) >> messages
     }
 
     def "Should remove server from the pool and dispose of heartbeat listener properly"() {
         given: "there is server in the heartbeat pool"
         def server = Mock(Server)
-        def messages = Mock(Observable)
         def subscription = Mock(Disposable)
+        def messages = Observable.just(subscription) // TODO set mock value, observe disposable
         server.getMessages(HeartbeatMessage) >> messages
         messages.subscribe(_ as Consumer) >> subscription
         pool.add(server)
