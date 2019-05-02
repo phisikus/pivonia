@@ -1,6 +1,6 @@
 package eu.phisikus.pivonia.pool.heartbeat;
 
-import eu.phisikus.pivonia.api.Client;
+import eu.phisikus.pivonia.api.Transmitter;
 import io.reactivex.disposables.Disposable;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -12,6 +12,6 @@ import lombok.NoArgsConstructor;
 class HeartbeatEntry {
     private Boolean wasHeartbeatSent;
     private Long lastSeen;
-    private Client client;
+    private Transmitter transmitter;
     private Disposable subscription;
 }

@@ -1,6 +1,7 @@
 package eu.phisikus.pivonia.pool.heartbeat.events;
 
 import eu.phisikus.pivonia.api.Client;
+import eu.phisikus.pivonia.api.Transmitter;
 import lombok.EqualsAndHashCode;
 
 /**
@@ -8,7 +9,7 @@ import lombok.EqualsAndHashCode;
  */
 @EqualsAndHashCode(callSuper = true)
 public class TimeoutEvent extends HeartbeatPoolEvent {
-    public TimeoutEvent(Client client) {
-        super(client, Operation.TIMEOUT);
+    public TimeoutEvent(Transmitter transmitter) {
+        super(transmitter, Operation.TIMEOUT);
     }
 }

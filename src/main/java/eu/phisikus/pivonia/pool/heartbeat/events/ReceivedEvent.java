@@ -1,6 +1,7 @@
 package eu.phisikus.pivonia.pool.heartbeat.events;
 
 import eu.phisikus.pivonia.api.Client;
+import eu.phisikus.pivonia.api.Transmitter;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 
@@ -15,8 +16,8 @@ public class ReceivedEvent<K> extends HeartbeatPoolEvent {
     @Getter
     private final K id;
 
-    public ReceivedEvent(K id, Client client) {
-        super(client, Operation.RECEIVED);
+    public ReceivedEvent(K id, Transmitter transmitter) {
+        super(transmitter, Operation.RECEIVED);
         this.id = id;
     }
 }

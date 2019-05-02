@@ -116,36 +116,36 @@ class ClientHeartbeatPoolImpl<K> implements ClientHeartbeatPool<K>, AutoCloseabl
                 heartbeatEntry.getWasHeartbeatSent();
 
         if (isTimeoutClient) {
-            handleClientTimeout(heartbeatEntry.getClient());
+            handleClientTimeout(heartbeatEntry.getTransmitter());
             return;
         }
 
         heartbeatEntry.setWasHeartbeatSent(true);
-        sendHeartbeat(heartbeatEntry.getClient());
+        sendHeartbeat(heartbeatEntry.getTransmitter());
     }
 
-    private void handleClientTimeout(Client client) {
-        var timeoutEvent = new TimeoutEvent(client);
+    private void handleClientTimeout(Transmitter transmitter) {
+        var timeoutEvent = new TimeoutEvent(transmitter);
         log.info("Emitting TIMEOUT event: {}", timeoutEvent);
-        clients.removeIf(entry -> client.equals(entry.getClient()));
+        clients.removeIf(entry -> transmitter.equals(entry.getTransmitter()));
         heartbeatChanges.onNext(timeoutEvent);
     }
 
-    private void sendHeartbeat(Client client) {
+    private void sendHeartbeat(Transmitter transmitter) {
         var message = new HeartbeatMessage<>(nodeId, neverSeen);
         log.trace("Sending heartbeat message: {}", message);
-        client.send(message);
+        transmitter.send(message);
     }
 
     private Stream<HeartbeatEntry> getEntriesForClient(Client client) {
-        Predicate<HeartbeatEntry> entriesContainClient = entry -> entry.getClient().equals(client);
+        Predicate<HeartbeatEntry> entriesContainClient = entry -> entry.getTransmitter().equals(client);
         var clientsCopy = clients.toArray(new HeartbeatEntry[0]);
         return Stream.of(clientsCopy)
                 .filter(entriesContainClient);
     }
 
     @Override
-    public void close() throws Exception {
+    public void close() {
         log.info("Closing client heartbeat pool.");
         heartbeatSender.shutdownNow();
         clients.clear();
