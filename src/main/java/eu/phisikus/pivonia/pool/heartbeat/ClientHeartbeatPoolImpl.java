@@ -26,7 +26,7 @@ import java.util.stream.Stream;
 @Log4j2
 class ClientHeartbeatPoolImpl<K> implements ClientHeartbeatPool<K>, AutoCloseable {
     private final ScheduledExecutorService heartbeatSender = Executors.newSingleThreadScheduledExecutor();
-    private final List<HeartbeatEntry> clients = Collections.synchronizedList(new LinkedList<>());
+    private final List<ClientHeartbeatEntry> clients = Collections.synchronizedList(new LinkedList<>());
     private final Subject<HeartbeatPoolEvent> heartbeatChanges = PublishSubject.create();
     private final K nodeId;
     private final long neverSeen = 0L;
@@ -45,7 +45,7 @@ class ClientHeartbeatPoolImpl<K> implements ClientHeartbeatPool<K>, AutoCloseabl
         var subscription = client
                 .getMessages(HeartbeatMessage.class)
                 .subscribe(getHeartbeatMessageHandler());
-        clients.add(new HeartbeatEntry(false, neverSeen, client, subscription));
+        clients.add(new ClientHeartbeatEntry(false, neverSeen, client, subscription));
     }
 
     private Consumer<MessageWithTransmitter<HeartbeatMessage>> getHeartbeatMessageHandler() {
@@ -85,9 +85,9 @@ class ClientHeartbeatPoolImpl<K> implements ClientHeartbeatPool<K>, AutoCloseabl
     @Override
     public void remove(Client client) {
         getEntriesForClient(client)
-                .forEach(heartbeatEntry -> {
-                    heartbeatEntry.getSubscription().dispose();
-                    clients.remove(heartbeatEntry);
+                .forEach(clientHeartbeatEntry -> {
+                    clientHeartbeatEntry.getSubscription().dispose();
+                    clients.remove(clientHeartbeatEntry);
                 });
     }
 
@@ -111,23 +111,23 @@ class ClientHeartbeatPoolImpl<K> implements ClientHeartbeatPool<K>, AutoCloseabl
         log.trace("Heartbeat loop complete.");
     }
 
-    private void handleHeartbeatForClient(HeartbeatEntry heartbeatEntry) {
-        var isTimeoutClient = getCurrentTimestamp() - heartbeatEntry.getLastSeen() > timeoutDelay &&
-                heartbeatEntry.getWasHeartbeatSent();
+    private void handleHeartbeatForClient(ClientHeartbeatEntry clientHeartbeatEntry) {
+        var isTimeoutClient = getCurrentTimestamp() - clientHeartbeatEntry.getLastSeen() > timeoutDelay &&
+                clientHeartbeatEntry.getWasHeartbeatSent();
 
         if (isTimeoutClient) {
-            handleClientTimeout(heartbeatEntry.getTransmitter());
+            handleClientTimeout(clientHeartbeatEntry.getClient());
             return;
         }
 
-        heartbeatEntry.setWasHeartbeatSent(true);
-        sendHeartbeat(heartbeatEntry.getTransmitter());
+        clientHeartbeatEntry.setWasHeartbeatSent(true);
+        sendHeartbeat(clientHeartbeatEntry.getClient());
     }
 
-    private void handleClientTimeout(Transmitter transmitter) {
-        var timeoutEvent = new TimeoutEvent(transmitter);
+    private void handleClientTimeout(Client client) {
+        var timeoutEvent = new TimeoutEvent(client);
         log.info("Emitting TIMEOUT event: {}", timeoutEvent);
-        clients.removeIf(entry -> transmitter.equals(entry.getTransmitter()));
+        clients.removeIf(entry -> client.equals(entry.getClient()));
         heartbeatChanges.onNext(timeoutEvent);
     }
 
@@ -137,9 +137,9 @@ class ClientHeartbeatPoolImpl<K> implements ClientHeartbeatPool<K>, AutoCloseabl
         transmitter.send(message);
     }
 
-    private Stream<HeartbeatEntry> getEntriesForClient(Client client) {
-        Predicate<HeartbeatEntry> entriesContainClient = entry -> entry.getTransmitter().equals(client);
-        var clientsCopy = clients.toArray(new HeartbeatEntry[0]);
+    private Stream<ClientHeartbeatEntry> getEntriesForClient(Client client) {
+        Predicate<ClientHeartbeatEntry> entriesContainClient = entry -> entry.getClient().equals(client);
+        var clientsCopy = clients.toArray(new ClientHeartbeatEntry[0]);
         return Stream.of(clientsCopy)
                 .filter(entriesContainClient);
     }
