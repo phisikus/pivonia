@@ -11,7 +11,7 @@ class ServerHeartbeatPoolImplSpec extends Specification {
 
     def nodeId = UUID.randomUUID()
     @Subject
-    def pool = new ServerHeartbeatPoolImpl(nodeId)
+    def pool = new ServerHeartbeatPoolImpl(50L, 500L, nodeId)
 
     def "Should add server to the pool and register heartbeat listener properly"() {
         given: "there is server"
@@ -55,4 +55,5 @@ class ServerHeartbeatPoolImplSpec extends Specification {
         and: "message subscription is disposed"
         isDisposed
     }
+    //TODO implement and add tests for events
 }
