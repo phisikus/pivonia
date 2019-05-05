@@ -1,9 +1,9 @@
 package eu.phisikus.pivonia.pool.heartbeat.events;
 
-import eu.phisikus.pivonia.api.Client;
 import eu.phisikus.pivonia.api.Transmitter;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.ToString;
 
 /**
  * It represents heartbeat being received from node of given ID through provided Client.
@@ -11,6 +11,7 @@ import lombok.Getter;
  * @param <K> type of node ID
  */
 @EqualsAndHashCode(callSuper = true)
+@ToString
 public class ReceivedEvent<K> extends HeartbeatPoolEvent {
 
     @Getter

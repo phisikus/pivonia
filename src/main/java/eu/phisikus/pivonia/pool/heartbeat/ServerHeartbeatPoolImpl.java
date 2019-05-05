@@ -7,22 +7,21 @@ import eu.phisikus.pivonia.pool.ServerHeartbeatPool;
 import eu.phisikus.pivonia.pool.heartbeat.events.HeartbeatPoolEvent;
 import eu.phisikus.pivonia.pool.heartbeat.events.ReceivedEvent;
 import eu.phisikus.pivonia.pool.heartbeat.events.TimeoutEvent;
+import io.reactivex.Observable;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.subjects.PublishSubject;
 import io.reactivex.subjects.Subject;
 import lombok.Getter;
+import lombok.extern.log4j.Log4j2;
 
 import java.time.Instant;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
+@Log4j2
 public class ServerHeartbeatPoolImpl<K> implements ServerHeartbeatPool<K> {
     @Getter
     private final List<Server> servers = new CopyOnWriteArrayList<>();
@@ -30,24 +29,26 @@ public class ServerHeartbeatPoolImpl<K> implements ServerHeartbeatPool<K> {
     private final ScheduledExecutorService timeoutSender = Executors.newSingleThreadScheduledExecutor();
     private final Map<Server, Disposable> listeners = new ConcurrentHashMap<>();
     private final Subject<HeartbeatPoolEvent> poolChanges = PublishSubject.create();
-    private long heartbeatDelay;
-    private long timeoutDelay;
     private final K nodeId;
+    private long timeoutDelay;
 
     public ServerHeartbeatPoolImpl(long heartbeatDelay, long timeoutDelay, K nodeId) {
-        this.heartbeatDelay = heartbeatDelay;
         this.timeoutDelay = timeoutDelay;
         this.nodeId = nodeId;
         timeoutSender.scheduleWithFixedDelay(getTimeoutTask(), heartbeatDelay, heartbeatDelay, TimeUnit.MILLISECONDS);
     }
 
     private Runnable getTimeoutTask() {
-        return () -> clients.forEach(this::checkAndSendTimeout);
+        return () -> {
+            log.trace("Executing periodical heartbeat loop...");
+            clients.forEach(this::checkAndSendTimeout);
+            log.trace("Heartbeat loop complete.");
+        };
     }
 
     private void checkAndSendTimeout(ServerHeartbeatEntry serverHeartbeatEntry) {
         var currentTime = Instant.now().toEpochMilli();
-        var isTimeout = serverHeartbeatEntry.getLastSeen() - currentTime > timeoutDelay;
+        var isTimeout = currentTime - serverHeartbeatEntry.getLastSeen() > timeoutDelay;
         if (isTimeout) {
             clients.remove(serverHeartbeatEntry);
             removeListener(serverHeartbeatEntry.getServer());
@@ -57,6 +58,7 @@ public class ServerHeartbeatPoolImpl<K> implements ServerHeartbeatPool<K> {
 
     private void sendTimeoutEvent(ServerHeartbeatEntry serverHeartbeatEntry) {
         var timeoutEvent = new TimeoutEvent(serverHeartbeatEntry.getTransmitter());
+        log.info("Emitting TIMEOUT event: {}", timeoutEvent);
         poolChanges.onNext(timeoutEvent);
     }
 
@@ -76,6 +78,7 @@ public class ServerHeartbeatPoolImpl<K> implements ServerHeartbeatPool<K> {
         var transmitter = event.getTransmitter();
         var message = event.getMessage();
         var currentTime = Instant.now().toEpochMilli();
+        log.trace("Received heartbeat message: {}", message);
         saveHeartbeatReceptionEntry(currentTime, server, event.getTransmitter());
         sendHeartbeatResponse(currentTime, nodeId, transmitter);
         sendReceivedEvent(transmitter, message.getSenderId());
@@ -83,6 +86,7 @@ public class ServerHeartbeatPoolImpl<K> implements ServerHeartbeatPool<K> {
 
     private void sendHeartbeatResponse(long currentTime, K nodeId, Transmitter transmitter) {
         var response = new HeartbeatMessage<>(nodeId, currentTime);
+        log.trace("Sending heartbeat response: {}", response);
         transmitter.send(response);
     }
 
@@ -106,6 +110,7 @@ public class ServerHeartbeatPoolImpl<K> implements ServerHeartbeatPool<K> {
 
     private void sendReceivedEvent(Transmitter transmitter, Object senderId) {
         var receivedEvent = new ReceivedEvent<>(senderId, transmitter);
+        log.info("Emitting RECEIVED event: {}", receivedEvent);
         poolChanges.onNext(receivedEvent);
     }
 
@@ -113,6 +118,11 @@ public class ServerHeartbeatPoolImpl<K> implements ServerHeartbeatPool<K> {
     public void remove(Server server) {
         removeListener(server);
         servers.remove(server);
+    }
+
+    @Override
+    public Observable<HeartbeatPoolEvent> getHeartbeatChanges() {
+        return poolChanges;
     }
 
     private void removeListener(Server server) {

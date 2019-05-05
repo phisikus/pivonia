@@ -1,6 +1,8 @@
 package eu.phisikus.pivonia.pool;
 
 import eu.phisikus.pivonia.api.Server;
+import eu.phisikus.pivonia.pool.heartbeat.events.HeartbeatPoolEvent;
+import io.reactivex.Observable;
 
 import java.util.List;
 
@@ -33,4 +35,12 @@ public interface ServerHeartbeatPool<K> {
      * @return all servers that belong to the pool
      */
     List<Server> getServers();
+
+    /**
+     * Observable source of heartbeat events.
+     * Every time some client returns response or timeout condition happens, event is emitted.
+     *
+     * @return observable heartbeat events
+     */
+    Observable<HeartbeatPoolEvent> getHeartbeatChanges();
 }
