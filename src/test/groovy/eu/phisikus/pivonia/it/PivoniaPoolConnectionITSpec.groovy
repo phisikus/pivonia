@@ -4,7 +4,7 @@ import eu.phisikus.pivonia.api.EmptyEnvelope
 import eu.phisikus.pivonia.logic.MessageHandler
 import eu.phisikus.pivonia.logic.MessageHandlers
 import eu.phisikus.pivonia.pool.heartbeat.HeartbeatServerVisitor
-import eu.phisikus.pivonia.pool.transmitter.events.TransmitterPoolEvent
+import eu.phisikus.pivonia.pool.transmitter.events.AssignmentEvent
 import eu.phisikus.pivonia.test.ServerTestUtils
 import eu.phisikus.pivonia.utils.Pivonia
 import spock.lang.Specification
@@ -48,10 +48,10 @@ class PivoniaPoolConnectionITSpec extends Specification {
         and: "message is to be sent when transmitter pool associates it with node"
         connectionManager.getTransmitterPool()
                 .getChanges()
+                .filter({ it instanceof AssignmentEvent })
+                .map({ (AssignmentEvent) it })
                 .filter({ it.id == nodeId })
-                .filter({ it.operation == TransmitterPoolEvent.Operation.ASSIGN })
-                .map({ it.transmitter })
-                .forEach({ it.send(message) })
+                .forEach({ it.transmitter.send(message) })
 
         when: "address is added to the pool"
         def addressPool = connectionManager.getAddressPool()

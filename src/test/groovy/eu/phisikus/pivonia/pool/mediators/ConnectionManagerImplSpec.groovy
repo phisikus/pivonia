@@ -21,7 +21,9 @@ class ConnectionManagerImplSpec extends Specification {
         and: "event streams are monitored"
         1 * transmitterPool.getChanges() >> PublishSubject.create()
         1 * addressPool.getChanges() >> PublishSubject.create()
+        1 * serverPool.getChanges() >> PublishSubject.create()
         1 * clientHeartbeatPool.getHeartbeatChanges() >> PublishSubject.create()
+        1 * serverHeartbeatPool.getHeartbeatChanges() >> PublishSubject.create()
 
         and: "connection manager is created"
         def manager = new ConnectionManagerImpl(

@@ -19,6 +19,8 @@ public class ConnectionManagerImpl<K> implements ConnectionManager<K> {
     private final AddressTransmitterPoolMediator addressTransmitterPoolMediator;
     @Getter(AccessLevel.NONE)
     private final ClientHeartbeatPoolMediator<K> clientHeartbeatPoolMediator;
+    @Getter(AccessLevel.NONE)
+    private final ServerHeartbeatPoolMediator<K> serverHeartbeatPoolMediator;
 
     public ConnectionManagerImpl(TransmitterPool<K> transmitterPool,
                                  AddressPool addressPool,
@@ -34,17 +36,20 @@ public class ConnectionManagerImpl<K> implements ConnectionManager<K> {
         this.serverPool = serverPool;
         this.addressTransmitterPoolMediator = new AddressTransmitterPoolMediator(transmitterPool, addressPool, clientProvider, maxRetryAttempts);
         this.clientHeartbeatPoolMediator = new ClientHeartbeatPoolMediator<>(transmitterPool, clientHeartbeatPool);
+        this.serverHeartbeatPoolMediator = new ServerHeartbeatPoolMediator<>(serverPool, transmitterPool, serverHeartbeatPool);
     }
 
     @Override
     public void dispose() {
         addressTransmitterPoolMediator.dispose();
         clientHeartbeatPoolMediator.dispose();
+        serverHeartbeatPoolMediator.dispose();
     }
 
     @Override
     public boolean isDisposed() {
         return addressTransmitterPoolMediator.isDisposed() &&
-                clientHeartbeatPoolMediator.isDisposed();
+                clientHeartbeatPoolMediator.isDisposed() &&
+                serverHeartbeatPoolMediator.isDisposed();
     }
 }
