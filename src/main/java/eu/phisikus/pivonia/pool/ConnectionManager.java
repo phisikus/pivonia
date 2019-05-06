@@ -18,5 +18,7 @@ public interface ConnectionManager<K> extends Disposable {
 
     ClientHeartbeatPool<K> getClientHeartbeatPool();
 
+    ServerHeartbeatPool<K> getServerHeartbeatPool();
+
     ServerPool getServerPool();
 }

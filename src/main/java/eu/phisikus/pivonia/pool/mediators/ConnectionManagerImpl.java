@@ -1,11 +1,7 @@
 package eu.phisikus.pivonia.pool.mediators;
 
 import eu.phisikus.pivonia.api.Client;
-import eu.phisikus.pivonia.pool.AddressPool;
-import eu.phisikus.pivonia.pool.ClientHeartbeatPool;
-import eu.phisikus.pivonia.pool.ConnectionManager;
-import eu.phisikus.pivonia.pool.ServerPool;
-import eu.phisikus.pivonia.pool.TransmitterPool;
+import eu.phisikus.pivonia.pool.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 
@@ -16,6 +12,7 @@ public class ConnectionManagerImpl<K> implements ConnectionManager<K> {
     private final TransmitterPool<K> transmitterPool;
     private final AddressPool addressPool;
     private final ClientHeartbeatPool<K> clientHeartbeatPool;
+    private final ServerHeartbeatPool<K> serverHeartbeatPool;
     private final ServerPool serverPool;
 
     @Getter(AccessLevel.NONE)
@@ -26,12 +23,14 @@ public class ConnectionManagerImpl<K> implements ConnectionManager<K> {
     public ConnectionManagerImpl(TransmitterPool<K> transmitterPool,
                                  AddressPool addressPool,
                                  ClientHeartbeatPool<K> clientHeartbeatPool,
+                                 ServerHeartbeatPool<K> serverHeartbeatPool,
                                  ServerPool serverPool,
                                  Provider<Client> clientProvider,
                                  int maxRetryAttempts) {
         this.transmitterPool = transmitterPool;
         this.addressPool = addressPool;
         this.clientHeartbeatPool = clientHeartbeatPool;
+        this.serverHeartbeatPool = serverHeartbeatPool;
         this.serverPool = serverPool;
         this.addressTransmitterPoolMediator = new AddressTransmitterPoolMediator(transmitterPool, addressPool, clientProvider, maxRetryAttempts);
         this.clientHeartbeatPoolMediator = new ClientHeartbeatPoolMediator<>(transmitterPool, clientHeartbeatPool);

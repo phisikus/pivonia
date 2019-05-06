@@ -31,11 +31,13 @@ public class PoolModule {
     public ConnectionManager provideConnectionManager(TransmitterPool transmitterPool,
                                                       AddressPool addressPool,
                                                       ClientHeartbeatPool clientHeartbeatPool,
+                                                      ServerHeartbeatPool serverHeartbeatPool,
                                                       ServerPool serverPool) {
         return new ConnectionManagerImpl(
                 transmitterPool,
                 addressPool,
                 clientHeartbeatPool,
+                serverHeartbeatPool,
                 serverPool,
                 clientProvider,
                 maxConnectionRetryAttempts

@@ -22,7 +22,7 @@ import java.util.Map;
 import java.util.concurrent.*;
 
 @Log4j2
-public class ServerHeartbeatPoolImpl<K> implements ServerHeartbeatPool<K> {
+class ServerHeartbeatPoolImpl<K> implements ServerHeartbeatPool<K> {
     @Getter
     private final List<Server> servers = new CopyOnWriteArrayList<>();
     private final List<ServerHeartbeatEntry> clients = Collections.synchronizedList(new LinkedList<>());
