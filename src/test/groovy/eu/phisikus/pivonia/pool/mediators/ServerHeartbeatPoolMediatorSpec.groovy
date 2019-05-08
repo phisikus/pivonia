@@ -18,15 +18,15 @@ class ServerHeartbeatPoolMediatorSpec extends Specification {
      * 2. Use the server heartbeat pool in IT tests - prove that it works?
      * 3. Unify naming of classes in javadocs & test step comments
      */
+    def serverPool = Mock(ServerPool)
+    def serverHeartbeatPool = Mock(ServerHeartbeatPool)
+    def transmitterPool = Mock(TransmitterPool)
 
     def "Should add server to heartbeat pool once it is added in the server pool"() {
         given: "there is a server"
         def server = Mock(Server)
 
         and: "server and heartbeat pools"
-        def serverPool = Mock(ServerPool)
-        def serverHeartbeatPool = Mock(ServerHeartbeatPool)
-        def transmitterPool = Mock(TransmitterPool)
         def serverEvents = PublishSubject.create()
         def heartbeatEvents = PublishSubject.create()
         1 * serverPool.getChanges() >> serverEvents
@@ -51,9 +51,6 @@ class ServerHeartbeatPoolMediatorSpec extends Specification {
         def server = Mock(Server)
 
         and: "server and heartbeat pools"
-        def serverPool = Mock(ServerPool)
-        def serverHeartbeatPool = Mock(ServerHeartbeatPool)
-        def transmitterPool = Mock(TransmitterPool)
         def serverEvents = PublishSubject.create()
         def heartbeatEvents = PublishSubject.create()
         1 * serverPool.getChanges() >> serverEvents
@@ -79,9 +76,6 @@ class ServerHeartbeatPoolMediatorSpec extends Specification {
         def nodeId = "node0"
 
         and: "transmitter and heartbeat pools"
-        def serverPool = Mock(ServerPool)
-        def serverHeartbeatPool = Mock(ServerHeartbeatPool)
-        def transmitterPool = Mock(TransmitterPool)
         def heartbeatEvents = PublishSubject.create()
         def serverEvents = PublishSubject.create()
         1 * serverPool.getChanges() >> serverEvents
@@ -105,9 +99,6 @@ class ServerHeartbeatPoolMediatorSpec extends Specification {
         def transmitter = Mock(Transmitter)
 
         and: "transmitter and heartbeat pools"
-        def serverPool = Mock(ServerPool)
-        def serverHeartbeatPool = Mock(ServerHeartbeatPool)
-        def transmitterPool = Mock(TransmitterPool)
         def heartbeatEvents = PublishSubject.create()
         def serverEvents = PublishSubject.create()
         1 * serverPool.getChanges() >> serverEvents
