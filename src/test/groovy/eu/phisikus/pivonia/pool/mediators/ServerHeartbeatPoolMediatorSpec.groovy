@@ -12,12 +12,7 @@ import io.reactivex.subjects.PublishSubject
 import spock.lang.Specification
 
 class ServerHeartbeatPoolMediatorSpec extends Specification {
-    /**
-     * TODO
-     * 1. Check IT tests - remove visitor usage? check if needed
-     * 2. Use the server heartbeat pool in IT tests - prove that it works?
-     * 3. Unify naming of classes in javadocs & test step comments
-     */
+
     def serverPool = Mock(ServerPool)
     def serverHeartbeatPool = Mock(ServerHeartbeatPool)
     def transmitterPool = Mock(TransmitterPool)
