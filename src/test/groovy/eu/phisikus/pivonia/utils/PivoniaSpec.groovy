@@ -10,7 +10,7 @@ class PivoniaSpec extends Specification {
 
     def "Should provide default connection manager"() {
         given: "application algorithm is defined"
-        def messageHandlers = MessageHandlers.create().build()
+        def messageHandlers = MessageHandlers.create()
 
         and: "node ID is defined"
         def nodeId = UUID.randomUUID().toString()
@@ -40,7 +40,7 @@ class PivoniaSpec extends Specification {
 
     def "Should provide configured connection manager, clients and servers"() {
         given: "application algorithm is defined"
-        def messageHandlers = MessageHandlers.create().build()
+        def messageHandlers = MessageHandlers.create()
 
         and: "node ID is defined"
         def nodeId = UUID.randomUUID().toString()

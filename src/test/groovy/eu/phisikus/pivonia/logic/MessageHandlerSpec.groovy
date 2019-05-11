@@ -1,15 +1,16 @@
 package eu.phisikus.pivonia.logic
 
+
 import spock.lang.Specification
 
-import java.util.function.Consumer
+import java.util.function.BiConsumer
 
 class MessageHandlerSpec extends Specification {
 
     def "Should create new MessageHandler for given type and message consumer"() {
         given: "message type and consuming function is defined"
         def type = Object
-        def consumer = Mock(Consumer)
+        def consumer = Mock(BiConsumer)
 
         when: "calling builder method of MessageHandler"
         def messageHandler = MessageHandler.create(type, consumer)
@@ -23,7 +24,7 @@ class MessageHandlerSpec extends Specification {
 
     def "Should not create MessageHandler for null messageType"() {
         when: "calling builder method of MessageHandler with null messageType"
-        MessageHandler.create(null, Mock(Consumer))
+        MessageHandler.create(null, Mock(BiConsumer))
 
         then: "exception should be thrown"
         thrown IllegalArgumentException

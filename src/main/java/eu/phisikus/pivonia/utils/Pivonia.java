@@ -41,7 +41,7 @@ public class Pivonia<K> implements TCPComponent {
             Integer maxConnectionRetryAttempts,
             byte[] encryptionKey) {
         this.nodeId = nodeId;
-        this.messageHandlers = messageHandlers;
+        this.messageHandlers = messageHandlers.build(this);
         this.heartbeatDelay = heartbeatDelay == null ? 5000 : heartbeatDelay;
         this.timeoutDelay = timeoutDelay == null ? 20000 : timeoutDelay;
         this.maxConnectionRetryAttempts = maxConnectionRetryAttempts == null ? 10 : maxConnectionRetryAttempts;

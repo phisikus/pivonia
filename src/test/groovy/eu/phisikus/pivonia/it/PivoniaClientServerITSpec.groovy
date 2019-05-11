@@ -19,10 +19,9 @@ class PivoniaClientServerITSpec extends Specification {
 
         and: "defined algorithm that notifies about message coming in"
         def isMessageReceived = false
-        def handler = { it -> isMessageReceived = true }
+        def handler = { ctx, msg -> isMessageReceived = msg.equals(message) && ctx != null }
         def messageHandlers = MessageHandlers.create()
                 .withHandler(MessageHandler.create(EmptyEnvelope, handler))
-                .build()
 
         and: "framework is configured"
         def pivonia = Pivonia.builder()

@@ -1,23 +1,30 @@
 package eu.phisikus.pivonia.logic
 
 import eu.phisikus.pivonia.api.Client
+import eu.phisikus.pivonia.api.MessageWithTransmitter
 import eu.phisikus.pivonia.api.Server
+import eu.phisikus.pivonia.utils.Pivonia
 import io.reactivex.subjects.PublishSubject
 import spock.lang.Specification
+
+import java.util.function.BiConsumer
 
 class MessageHandlersSpec extends Specification {
 
     def "Should create message handler with multiple handlers and register them in client"() {
         given: "there are two Message Handler definitions"
         def messagesObserved = []
-        def firstConsumer = { FirstType message -> messagesObserved.add(message) }
-        def secondConsumer = { SecondType message -> messagesObserved.add(message) }
+        def context = Mock(Pivonia)
+        def firstConsumer = { Pivonia ctx, FirstType message -> messagesObserved.add(message) } as BiConsumer<Pivonia, FirstType>
+        def secondConsumer = { Pivonia ctx, SecondType message -> messagesObserved.add(message) } as BiConsumer<Pivonia, SecondType>
         def firstHandler = MessageHandler.create(FirstType, firstConsumer)
         def secondHandler = MessageHandler.create(SecondType, secondConsumer)
 
         and: "test messages for message handlers are defined"
-        def firstHandlerMessage = Mock(FirstType)
-        def secondHandlerMessage = Mock(SecondType)
+        def firstMessage = Mock(FirstType)
+        def secondMessage = Mock(SecondType)
+        def firstHandlerMessage = new MessageWithTransmitter(firstMessage, null)
+        def secondHandlerMessage = new MessageWithTransmitter(secondMessage, null)
 
         and: "configured client is prepared"
         def client = Mock(Client)
@@ -30,7 +37,7 @@ class MessageHandlersSpec extends Specification {
         def handlers = MessageHandlers.create()
                 .withHandler(firstHandler)
                 .withHandler(secondHandler)
-                .build()
+                .build(context)
 
         and: "calling for client registration"
         handlers.registerHandlers(client)
@@ -42,7 +49,7 @@ class MessageHandlersSpec extends Specification {
         and: "incoming messages are properly passed to handlers"
         firstHandlerSource.onNext(firstHandlerMessage)
         secondHandlerSource.onNext(secondHandlerMessage)
-        messagesObserved == [firstHandlerMessage, secondHandlerMessage]
+        messagesObserved == [firstMessage, secondMessage]
 
         cleanup: "Message Handlers is disposed"
         handlers.dispose()
@@ -52,14 +59,17 @@ class MessageHandlersSpec extends Specification {
     def "Should create message handler with multiple handlers and register them in server"() {
         given: "there are two Message Handler definitions"
         def messagesObserved = []
-        def firstConsumer = { FirstType message -> messagesObserved.add(message) }
-        def secondConsumer = { SecondType message -> messagesObserved.add(message) }
+        def context = Mock(Pivonia)
+        def firstConsumer = { Pivonia ctx, FirstType message -> messagesObserved.add(message) } as BiConsumer<Pivonia, FirstType>
+        def secondConsumer = { Pivonia ctx, SecondType message -> messagesObserved.add(message) } as BiConsumer<Pivonia, SecondType>
         def firstHandler = MessageHandler.create(FirstType, firstConsumer)
         def secondHandler = MessageHandler.create(SecondType, secondConsumer)
 
         and: "test messages for message handlers are defined"
-        def firstHandlerMessage = Mock(FirstType)
-        def secondHandlerMessage = Mock(SecondType)
+        def firstMessage = Mock(FirstType)
+        def secondMessage = Mock(SecondType)
+        def firstHandlerMessage = new MessageWithTransmitter(firstMessage, null)
+        def secondHandlerMessage = new MessageWithTransmitter(secondMessage, null)
 
         and: "configured server is prepared"
         def server = Mock(Server)
@@ -72,7 +82,7 @@ class MessageHandlersSpec extends Specification {
         def handlers = MessageHandlers.create()
                 .withHandler(firstHandler)
                 .withHandler(secondHandler)
-                .build()
+                .build(context)
 
         and: "calling for registration in server"
         handlers.registerHandlers(server)
@@ -84,7 +94,7 @@ class MessageHandlersSpec extends Specification {
         and: "incoming messages are properly passed to handlers"
         firstHandlerSource.onNext(firstHandlerMessage)
         secondHandlerSource.onNext(secondHandlerMessage)
-        messagesObserved == [firstHandlerMessage, secondHandlerMessage]
+        messagesObserved == [firstMessage, secondMessage]
 
         cleanup: "Message Handlers is disposed"
         handlers.dispose()
