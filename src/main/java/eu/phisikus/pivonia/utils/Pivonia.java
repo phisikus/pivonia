@@ -35,6 +35,7 @@ public class Pivonia<K, S> implements TCPComponent {
     private int maxConnectionRetryAttempts;
     private byte[] encryptionKey;
     private Lazy<TCPComponent> tcpComponent;
+    private Lazy<ConnectionManager> connectionManager;
 
     @Builder
     Pivonia(@NonNull K nodeId,
@@ -56,12 +57,15 @@ public class Pivonia<K, S> implements TCPComponent {
             ConverterComponent converterComponent = getConverterComponent(cryptoComponent);
             return getTcpComponent(converterComponent);
         });
+
+        this.connectionManager = Lazy.of(() -> {
+            Provider<Client> clientProvider = getClientProvider(tcpComponent.get());
+            return getPoolComponent(clientProvider).getConnectionManager();
+        });
     }
 
     public ConnectionManager getConnectionManager() {
-        Provider<Client> clientProvider = getClientProvider(tcpComponent.get());
-        return getPoolComponent(clientProvider)
-                .getConnectionManager();
+        return connectionManager.get();
     }
 
 
