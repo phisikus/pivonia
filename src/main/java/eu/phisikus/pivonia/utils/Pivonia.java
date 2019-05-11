@@ -18,13 +18,17 @@ import eu.phisikus.pivonia.tcp.DaggerTCPComponent;
 import eu.phisikus.pivonia.tcp.TCPComponent;
 import io.vavr.Lazy;
 import lombok.Builder;
+import lombok.Getter;
 import lombok.NonNull;
 
 import javax.inject.Provider;
 
-public class Pivonia<K> implements TCPComponent {
+public class Pivonia<K, S> implements TCPComponent {
 
+    @Getter
     private K nodeId;
+    @Getter
+    private S state;
     private MessageHandlers messageHandlers;
     private long heartbeatDelay;
     private long timeoutDelay;
@@ -32,15 +36,16 @@ public class Pivonia<K> implements TCPComponent {
     private byte[] encryptionKey;
     private Lazy<TCPComponent> tcpComponent;
 
-
     @Builder
     Pivonia(@NonNull K nodeId,
             @NonNull MessageHandlers messageHandlers,
+            S state,
             Long heartbeatDelay,
             Long timeoutDelay,
             Integer maxConnectionRetryAttempts,
             byte[] encryptionKey) {
         this.nodeId = nodeId;
+        this.state = state;
         this.messageHandlers = messageHandlers.build(this);
         this.heartbeatDelay = heartbeatDelay == null ? 5000 : heartbeatDelay;
         this.timeoutDelay = timeoutDelay == null ? 20000 : timeoutDelay;
