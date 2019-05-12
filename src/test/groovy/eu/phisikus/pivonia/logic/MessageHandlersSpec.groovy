@@ -3,7 +3,7 @@ package eu.phisikus.pivonia.logic
 import eu.phisikus.pivonia.api.Client
 import eu.phisikus.pivonia.api.MessageWithTransmitter
 import eu.phisikus.pivonia.api.Server
-import eu.phisikus.pivonia.utils.Pivonia
+import eu.phisikus.pivonia.utils.Node
 import io.reactivex.subjects.PublishSubject
 import spock.lang.Specification
 
@@ -14,9 +14,9 @@ class MessageHandlersSpec extends Specification {
     def "Should create message handler with multiple handlers and register them in client"() {
         given: "there are two Message Handler definitions"
         def messagesObserved = []
-        def context = Mock(Pivonia)
-        def firstConsumer = { Pivonia ctx, FirstType message -> messagesObserved.add(message) } as BiConsumer<Pivonia, FirstType>
-        def secondConsumer = { Pivonia ctx, SecondType message -> messagesObserved.add(message) } as BiConsumer<Pivonia, SecondType>
+        def context = Mock(Node)
+        def firstConsumer = { Node ctx, FirstType message -> messagesObserved.add(message) } as BiConsumer<Node, FirstType>
+        def secondConsumer = { Node ctx, SecondType message -> messagesObserved.add(message) } as BiConsumer<Node, SecondType>
         def firstHandler = MessageHandler.create(FirstType, firstConsumer)
         def secondHandler = MessageHandler.create(SecondType, secondConsumer)
 
@@ -59,9 +59,9 @@ class MessageHandlersSpec extends Specification {
     def "Should create message handler with multiple handlers and register them in server"() {
         given: "there are two Message Handler definitions"
         def messagesObserved = []
-        def context = Mock(Pivonia)
-        def firstConsumer = { Pivonia ctx, FirstType message -> messagesObserved.add(message) } as BiConsumer<Pivonia, FirstType>
-        def secondConsumer = { Pivonia ctx, SecondType message -> messagesObserved.add(message) } as BiConsumer<Pivonia, SecondType>
+        def context = Mock(Node)
+        def firstConsumer = { Node ctx, FirstType message -> messagesObserved.add(message) } as BiConsumer<Node, FirstType>
+        def secondConsumer = { Node ctx, SecondType message -> messagesObserved.add(message) } as BiConsumer<Node, SecondType>
         def firstHandler = MessageHandler.create(FirstType, firstConsumer)
         def secondHandler = MessageHandler.create(SecondType, secondConsumer)
 

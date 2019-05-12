@@ -4,11 +4,11 @@ import eu.phisikus.pivonia.api.EmptyEnvelope
 import eu.phisikus.pivonia.logic.MessageHandler
 import eu.phisikus.pivonia.logic.MessageHandlers
 import eu.phisikus.pivonia.test.ServerTestUtils
-import eu.phisikus.pivonia.utils.Pivonia
+import eu.phisikus.pivonia.utils.Node
 import spock.lang.Specification
 import spock.util.concurrent.PollingConditions
 
-class PivoniaClientServerITSpec extends Specification {
+class NodeClientServerITSpec extends Specification {
 
     def pollingConditions = new PollingConditions(delay: 1, timeout: 10)
 
@@ -24,19 +24,19 @@ class PivoniaClientServerITSpec extends Specification {
                 .withHandler(MessageHandler.create(EmptyEnvelope, handler))
 
         and: "framework is configured"
-        def pivonia = Pivonia.builder()
+        def node = Node.builder()
                 .id(nodeId)
                 .messageHandlers(messageHandlers)
                 .build()
 
         and: "server is created"
         def port = ServerTestUtils.getRandomPort()
-        def server = pivonia.getServer()
+        def server = node.getServer()
                 .bind(port)
                 .get()
 
         and: "client is connected"
-        def client = pivonia.getClient()
+        def client = node.getClient()
                 .connect("localhost", port)
                 .get()
 

@@ -6,7 +6,7 @@ import spock.lang.Specification
 import java.nio.file.Files
 import java.nio.file.Path
 
-class PivoniaSpec extends Specification {
+class NodeSpec extends Specification {
 
     def "Should provide default connection manager"() {
         given: "application algorithm is defined"
@@ -16,15 +16,14 @@ class PivoniaSpec extends Specification {
         def nodeId = UUID.randomUUID().toString()
 
         when: "helper instance is created"
-        def pivonia = Pivonia.builder()
+        def node = Node.builder()
                 .id(nodeId)
                 .messageHandlers(messageHandlers)
                 .build()
 
         then: "it can provide Connection Manager"
-        def connectionManager = pivonia.getConnectionManager()
+        def connectionManager = node.getConnectionManager()
         connectionManager != null
-
 
         cleanup: "dispose of Connection Manager"
         connectionManager.dispose()
@@ -32,7 +31,7 @@ class PivoniaSpec extends Specification {
 
     def "Should not build helper instance when field values are missing"() {
         when: "helper instance is created without required settings"
-        Pivonia.builder().build()
+        Node.builder().build()
 
         then: "exception should be thrown"
         thrown(IllegalArgumentException)
@@ -60,7 +59,7 @@ class PivoniaSpec extends Specification {
 
 
         when: "helper instance is created"
-        def pivonia = Pivonia.builder()
+        def node = Node.builder()
                 .id(nodeId)
                 .state(state)
                 .timeoutDelay(timeoutDelay)
@@ -71,22 +70,22 @@ class PivoniaSpec extends Specification {
                 .build()
 
         then: "it can provide Connection Manager"
-        def connectionManager = pivonia.getConnectionManager()
+        def connectionManager = node.getConnectionManager()
         connectionManager != null
 
         and: "it can provide Client instances"
-        pivonia.getClient() != null
-        pivonia.getClientWithEncryption() != null
+        node.getClient() != null
+        node.getClientWithEncryption() != null
 
         and: "it can provide Server instances"
-        pivonia.getServer() != null
-        pivonia.getServerWithEncryption() != null
+        node.getServer() != null
+        node.getServerWithEncryption() != null
 
         and: "it can provide state"
-        pivonia.getState() == state
+        node.getState() == state
 
         and: "return node ID"
-        pivonia.getId() == nodeId
+        node.getId() == nodeId
 
         cleanup: "dispose of Connection Manager and encryption key"
         connectionManager.dispose()

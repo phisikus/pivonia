@@ -23,7 +23,7 @@ import lombok.NonNull;
 
 import javax.inject.Provider;
 
-public class Pivonia<K, S> implements TCPComponent {
+public class Node<K, S> implements TCPComponent {
 
     @Getter
     private K id;
@@ -38,13 +38,13 @@ public class Pivonia<K, S> implements TCPComponent {
     private Lazy<ConnectionManager> connectionManager;
 
     @Builder
-    Pivonia(@NonNull K id,
-            @NonNull MessageHandlers messageHandlers,
-            S state,
-            Long heartbeatDelay,
-            Long timeoutDelay,
-            Integer maxConnectionRetryAttempts,
-            byte[] encryptionKey) {
+    Node(@NonNull K id,
+         @NonNull MessageHandlers messageHandlers,
+         S state,
+         Long heartbeatDelay,
+         Long timeoutDelay,
+         Integer maxConnectionRetryAttempts,
+         byte[] encryptionKey) {
         this.id = id;
         this.state = state;
         this.messageHandlers = messageHandlers.build(this);

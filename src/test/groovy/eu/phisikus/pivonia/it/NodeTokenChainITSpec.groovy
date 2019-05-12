@@ -3,7 +3,7 @@ package eu.phisikus.pivonia.it
 import eu.phisikus.pivonia.logic.MessageHandler
 import eu.phisikus.pivonia.logic.MessageHandlers
 import eu.phisikus.pivonia.test.ServerTestUtils
-import eu.phisikus.pivonia.utils.Pivonia
+import eu.phisikus.pivonia.utils.Node
 import org.awaitility.Duration
 import spock.lang.Specification
 
@@ -11,14 +11,14 @@ import java.util.function.BiConsumer
 
 import static org.awaitility.Awaitility.await
 
-class PivoniaTokenChainITSpec extends Specification {
+class NodeTokenChainITSpec extends Specification {
 
     static final ADDRESS = "localhost"
 
     def "Should perform mutual exclusion using token correctly"() {
         given: "there are multiple nodes listening on different ports"
         def count = 10
-        Map<Integer, Pivonia<Integer, NodeState>> nodes = buildNodes(count)
+        Map<Integer, Node<Integer, NodeState>> nodes = buildNodes(count)
 
         and: "the nodes have their right-hand neighbour address set up"
         def ports = nodes.keySet().toList()
@@ -40,7 +40,7 @@ class PivoniaTokenChainITSpec extends Specification {
         nodes.each { it.getValue().getConnectionManager().dispose() }
     }
 
-    private void sendFirstMessage(Pivonia firstNode, int firstNodePort) {
+    private void sendFirstMessage(Node firstNode, int firstNodePort) {
         def firstMessage = new TokenMessage(0, firstNode.getId(), 0)
         def client = firstNode.getClient()
                 .connect(ADDRESS, firstNodePort)
@@ -70,8 +70,8 @@ class PivoniaTokenChainITSpec extends Specification {
         nodes
     }
 
-    private Pivonia<Integer, NodeState> buildNode(int nodeId, int port) {
-        BiConsumer<Pivonia<Integer, NodeState>, TokenMessage> tokenHandler = {
+    private Node<Integer, NodeState> buildNode(int nodeId, int port) {
+        BiConsumer<Node<Integer, NodeState>, TokenMessage> tokenHandler = {
             context, message ->
                 def state = context.getState()
                 def transmitters = context.getConnectionManager().getTransmitterPool()
@@ -82,7 +82,7 @@ class PivoniaTokenChainITSpec extends Specification {
                 transmitters.get(nodeId + 1).get().send(newMessage)
         }
 
-        def pivonia = Pivonia.<Integer, NodeState> builder()
+        def node = Node.<Integer, NodeState> builder()
                 .id(nodeId)
                 .state(new NodeState())
                 .messageHandlers(MessageHandlers
@@ -91,14 +91,14 @@ class PivoniaTokenChainITSpec extends Specification {
                 )
                 .build()
 
-        connectServer(pivonia, port)
-        return pivonia
+        connectServer(node, port)
+        return node
     }
 
-    private connectServer(Pivonia<Integer, NodeState> pivonia, int port) {
-        pivonia.getConnectionManager()
+    private connectServer(Node<Integer, NodeState> node, int port) {
+        node.getConnectionManager()
                 .getServerPool()
-                .add(pivonia
+                .add(node
                         .getServer()
                         .bind(port)
                         .get()

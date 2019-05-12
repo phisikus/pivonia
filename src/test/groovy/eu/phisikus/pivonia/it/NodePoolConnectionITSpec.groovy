@@ -6,11 +6,11 @@ import eu.phisikus.pivonia.logic.MessageHandlers
 import eu.phisikus.pivonia.pool.heartbeat.HeartbeatServerVisitor
 import eu.phisikus.pivonia.pool.transmitter.events.AssignmentEvent
 import eu.phisikus.pivonia.test.ServerTestUtils
-import eu.phisikus.pivonia.utils.Pivonia
+import eu.phisikus.pivonia.utils.Node
 import spock.lang.Specification
 import spock.util.concurrent.PollingConditions
 
-class PivoniaPoolConnectionITSpec extends Specification {
+class NodePoolConnectionITSpec extends Specification {
 
     def pollingConditions = new PollingConditions(delay: 1, timeout: 10)
 
@@ -26,7 +26,7 @@ class PivoniaPoolConnectionITSpec extends Specification {
                 .withHandler(MessageHandler.create(EmptyEnvelope, handler))
 
         and: "framework is configured"
-        def pivonia = Pivonia.builder()
+        def node = Node.builder()
                 .id(nodeId)
                 .maxConnectionRetryAttempts(3)
                 .heartbeatDelay(100)
@@ -35,11 +35,11 @@ class PivoniaPoolConnectionITSpec extends Specification {
                 .build()
 
         and: "connection manager is created"
-        def connectionManager = pivonia.getConnectionManager()
+        def connectionManager = node.getConnectionManager()
 
         and: "server is created"
         def port = ServerTestUtils.getRandomPort()
-        def server = pivonia.getServer()
+        def server = node.getServer()
                 .bind(port)
                 .get()
         HeartbeatServerVisitor.registerHeartbeatListener(nodeId, server)
