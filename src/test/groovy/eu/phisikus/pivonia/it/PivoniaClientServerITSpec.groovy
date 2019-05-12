@@ -25,7 +25,7 @@ class PivoniaClientServerITSpec extends Specification {
 
         and: "framework is configured"
         def pivonia = Pivonia.builder()
-                .nodeId(nodeId)
+                .id(nodeId)
                 .messageHandlers(messageHandlers)
                 .build()
 

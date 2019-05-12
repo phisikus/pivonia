@@ -17,7 +17,7 @@ class PivoniaSpec extends Specification {
 
         when: "helper instance is created"
         def pivonia = Pivonia.builder()
-                .nodeId(nodeId)
+                .id(nodeId)
                 .messageHandlers(messageHandlers)
                 .build()
 
@@ -61,7 +61,7 @@ class PivoniaSpec extends Specification {
 
         when: "helper instance is created"
         def pivonia = Pivonia.builder()
-                .nodeId(nodeId)
+                .id(nodeId)
                 .state(state)
                 .timeoutDelay(timeoutDelay)
                 .heartbeatDelay(heartbeatDelay)
@@ -86,7 +86,7 @@ class PivoniaSpec extends Specification {
         pivonia.getState() == state
 
         and: "return node ID"
-        pivonia.getNodeId() == nodeId
+        pivonia.getId() == nodeId
 
         cleanup: "dispose of Connection Manager and encryption key"
         connectionManager.dispose()

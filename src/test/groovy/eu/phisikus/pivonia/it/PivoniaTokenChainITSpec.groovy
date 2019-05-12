@@ -41,7 +41,7 @@ class PivoniaTokenChainITSpec extends Specification {
     }
 
     private void sendFirstMessage(Pivonia firstNode, int firstNodePort) {
-        def firstMessage = new TokenMessage(0, firstNode.getNodeId(), 0)
+        def firstMessage = new TokenMessage(0, firstNode.getId(), 0)
         def client = firstNode.getClient()
                 .connect(ADDRESS, firstNodePort)
                 .get()
@@ -83,7 +83,7 @@ class PivoniaTokenChainITSpec extends Specification {
         }
 
         def pivonia = Pivonia.<Integer, NodeState> builder()
-                .nodeId(nodeId)
+                .id(nodeId)
                 .state(new NodeState())
                 .messageHandlers(MessageHandlers
                         .create()

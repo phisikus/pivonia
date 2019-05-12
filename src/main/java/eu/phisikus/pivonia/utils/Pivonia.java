@@ -26,7 +26,7 @@ import javax.inject.Provider;
 public class Pivonia<K, S> implements TCPComponent {
 
     @Getter
-    private K nodeId;
+    private K id;
     @Getter
     private S state;
     private MessageHandlers messageHandlers;
@@ -38,14 +38,14 @@ public class Pivonia<K, S> implements TCPComponent {
     private Lazy<ConnectionManager> connectionManager;
 
     @Builder
-    Pivonia(@NonNull K nodeId,
+    Pivonia(@NonNull K id,
             @NonNull MessageHandlers messageHandlers,
             S state,
             Long heartbeatDelay,
             Long timeoutDelay,
             Integer maxConnectionRetryAttempts,
             byte[] encryptionKey) {
-        this.nodeId = nodeId;
+        this.id = id;
         this.state = state;
         this.messageHandlers = messageHandlers.build(this);
         this.heartbeatDelay = heartbeatDelay == null ? 5000 : heartbeatDelay;
@@ -72,7 +72,7 @@ public class Pivonia<K, S> implements TCPComponent {
     private PoolComponent getPoolComponent(Provider<Client> clientProvider) {
         return DaggerPoolComponent.builder()
                 .poolModule(new PoolModule(clientProvider, maxConnectionRetryAttempts))
-                .heartbeatPoolModule(new HeartbeatPoolModule(heartbeatDelay, timeoutDelay, nodeId))
+                .heartbeatPoolModule(new HeartbeatPoolModule(heartbeatDelay, timeoutDelay, id))
                 .build();
     }
 

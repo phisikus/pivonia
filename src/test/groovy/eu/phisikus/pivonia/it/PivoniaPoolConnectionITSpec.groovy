@@ -27,7 +27,7 @@ class PivoniaPoolConnectionITSpec extends Specification {
 
         and: "framework is configured"
         def pivonia = Pivonia.builder()
-                .nodeId(nodeId)
+                .id(nodeId)
                 .maxConnectionRetryAttempts(3)
                 .heartbeatDelay(100)
                 .timeoutDelay(10000)
