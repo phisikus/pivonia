@@ -31,8 +31,8 @@ class PivoniaTokenChainITSpec extends Specification {
 
         then: "token is passed through all of the nodes"
         await().atMost(Duration.TEN_SECONDS).until {
-            nodes.inject(true) { result, node ->
-                result && node.getValue().getState().isMessageReceived
+            nodes.inject(true) {
+                result, node -> result && node.getValue().getState().isMessageReceived
             }
         }
 
@@ -56,7 +56,7 @@ class PivoniaTokenChainITSpec extends Specification {
                 nodes.get(port)
                         .getConnectionManager()
                         .getAddressPool()
-                        .add("localhost", nextPort)
+                        .add(ADDRESS, nextPort)
             }
         }
     }
