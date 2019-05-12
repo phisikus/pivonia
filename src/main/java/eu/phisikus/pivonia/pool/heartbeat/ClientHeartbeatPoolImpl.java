@@ -78,7 +78,7 @@ class ClientHeartbeatPoolImpl<K> implements ClientHeartbeatPool<K>, AutoCloseabl
 
     private void sendReceivedEvent(K senderId, Client client) {
         var event = new ReceivedEvent<>(senderId, client);
-        log.info("Emitting RECEIVED event: {}", event);
+        log.debug("Emitting RECEIVED event: {}", event);
         heartbeatChanges.onNext(event);
     }
 

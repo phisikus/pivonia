@@ -110,7 +110,7 @@ class ServerHeartbeatPoolImpl<K> implements ServerHeartbeatPool<K> {
 
     private void sendReceivedEvent(Transmitter transmitter, Object senderId) {
         var receivedEvent = new ReceivedEvent<>(senderId, transmitter);
-        log.info("Emitting RECEIVED event: {}", receivedEvent);
+        log.debug("Emitting RECEIVED event: {}", receivedEvent);
         poolChanges.onNext(receivedEvent);
     }
 
