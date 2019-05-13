@@ -30,7 +30,7 @@ Have a look at integrations tests and javadocs for more details.
 
 
 ## Basic Example
-```$java
+```java
   import eu.phisikus.pivonia.api.EmptyEnvelope;
   import eu.phisikus.pivonia.logic.MessageHandler;
   import eu.phisikus.pivonia.logic.MessageHandlers;
