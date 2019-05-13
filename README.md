@@ -80,8 +80,29 @@ Creation of _Node_ instance forces you to pass _MessageHandlers_ which is basica
 
 Basically if you add some host information to _Address Pool_ it will connect a client, put it _Transmitter Pool_ and this will trigger _Client Heartbeat Pool_ to send heartbeat messages. Responses will allow nodes to introduce themselves by ID. _Client_ instances are associated with node IDs and that information is stored in the _Transmitter Pool_. Similar situation appears when you add server to the _Server Pool_. Your server starts to respond with heartbeat messages sent by clients and it creates association by node ID in the _Transmitter Pool_. Any heartbeat timeouts force the ID association to be removed.
 
-Have a look at integrations tests and javadocs for more details.     
+Have a look at integrations tests and javadocs for more details.
 
+## Repository
+
+Repository:
+```xml
+    <repositories>
+        <repository>
+            <id>phisikus-repo</id>
+            <name>Phisikus' Maven Repository</name>
+            <url>http://phisikus.eu/maven2</url>
+        </repository>
+    </repositories>
+
+```     
+Current version:
+```xml
+    <dependency>
+            <groupId>eu.phisikus.pivonia</groupId>
+            <artifactId>pivonia</artifactId>
+            <version>0.0.9-44056df</version>
+    </dependency>
+```
 
 
 
