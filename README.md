@@ -13,23 +13,7 @@ Used technologies:
 - vavr (for functional features)
 - Lombok
 
-
-## Usage
-
-The easiest way to start is to create _Node_ instance using static builder. It acts as a factory for instances of objects like _Server_ or _Client_ that allow you to listen for connections and create them yourself.
-Creation of _Node_ instance forces you to pass _MessageHandlers_ which is basically a collection of lambda expressions that handle incoming messages of defined types. In a simple scenario you could also use _getMessages(type)_ on your _Client_ or _Server_ instance to get _Observable_ message source of certain type. In a more complex scenario you would keep the logic in previously defined _MessageHandlers_ and use _ConnectionManager_ which consists of following elements connected together:
-- _Address Pool_ - contains information about host + port pairs. It will be used to connect clients to other nodes
-- _Transmitter Pool_ - contains connected clients identified by some node ID of your choice
-- _Client Heartbeat Pool_ - it uses clients from the Transmitter Pool and sends periodical messages with node ID
-- _Server Pool_ - contains your node's listening server instances
-- _Server Heartbeat Pool_ - responsible for responding to client heartbeat messages in timely fashion.
-
-Basically if you add some host information to _Address Pool_ it will connect a client, put it _Transmitter Pool_ and this will trigger _Client Heartbeat Pool_ to send heartbeat messages. Responses will allow nodes to introduce themselves by ID. _Client_ instances are associated with node IDs and that information is stored in the _Transmitter Pool_. Similar situation appears when you add server to the _Server Pool_. Your server starts to respond with heartbeat messages sent by clients and it creates association by node ID in the _Transmitter Pool_. Any heartbeat timeouts force the ID association to be removed.
-
-Have a look at integrations tests and javadocs for more details.     
-
-
-## Basic Example
+## Basic Usage
 ```java
   import eu.phisikus.pivonia.api.EmptyEnvelope;
   import eu.phisikus.pivonia.logic.MessageHandler;
@@ -82,6 +66,22 @@ Have a look at integrations tests and javadocs for more details.
   }
 
 ```
+
+
+## Architecture
+
+The easiest way to start is to create _Node_ instance using static builder. It acts as a factory for instances of objects like _Server_ or _Client_ that allow you to listen for connections and create them yourself.
+Creation of _Node_ instance forces you to pass _MessageHandlers_ which is basically a collection of lambda expressions that handle incoming messages of defined types. In a simple scenario you could also use _getMessages(type)_ on your _Client_ or _Server_ instance to get _Observable_ message source of certain type. In a more complex scenario you would keep the logic in previously defined _MessageHandlers_ and use _ConnectionManager_ which consists of following elements connected together:
+- _Address Pool_ - contains information about host + port pairs. It will be used to connect clients to other nodes
+- _Transmitter Pool_ - contains connected clients identified by some node ID of your choice
+- _Client Heartbeat Pool_ - it uses clients from the Transmitter Pool and sends periodical messages with node ID
+- _Server Pool_ - contains your node's listening server instances
+- _Server Heartbeat Pool_ - responsible for responding to client heartbeat messages in timely fashion.
+
+Basically if you add some host information to _Address Pool_ it will connect a client, put it _Transmitter Pool_ and this will trigger _Client Heartbeat Pool_ to send heartbeat messages. Responses will allow nodes to introduce themselves by ID. _Client_ instances are associated with node IDs and that information is stored in the _Transmitter Pool_. Similar situation appears when you add server to the _Server Pool_. Your server starts to respond with heartbeat messages sent by clients and it creates association by node ID in the _Transmitter Pool_. Any heartbeat timeouts force the ID association to be removed.
+
+Have a look at integrations tests and javadocs for more details.     
+
 
 
 
