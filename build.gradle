@@ -78,7 +78,7 @@ dependencies {
     /**
      * Publishing
      */
-    deployerJars 'org.apache.maven.wagon:wagon-ssh:3.1.0'
+    deployerJars 'org.apache.maven.wagon:wagon-ssh:3.3.2'
 }
 
 /**
