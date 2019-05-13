@@ -1,5 +1,7 @@
 package eu.phisikus.pivonia.utils
 
+
+import eu.phisikus.pivonia.api.Receiver
 import eu.phisikus.pivonia.logic.MessageHandlers
 import spock.lang.Specification
 
@@ -39,7 +41,8 @@ class NodeSpec extends Specification {
 
     def "Should provide configured connection manager, clients and servers"() {
         given: "application algorithm is defined"
-        def messageHandlers = MessageHandlers.create()
+        def messageHandlers = Mock(MessageHandlers)
+        _ * messageHandlers.registerHandlers(_ as Receiver)
 
         and: "node ID is defined"
         def nodeId = UUID.randomUUID().toString()
@@ -72,6 +75,9 @@ class NodeSpec extends Specification {
         then: "it can provide Connection Manager"
         def connectionManager = node.getConnectionManager()
         connectionManager != null
+
+        and: "message handlers have context set up"
+        1 * messageHandlers.build(_ as Node) >> messageHandlers
 
         and: "it can provide Client instances"
         node.getClient() != null

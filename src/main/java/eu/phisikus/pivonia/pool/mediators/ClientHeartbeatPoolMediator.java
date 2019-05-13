@@ -62,7 +62,7 @@ class ClientHeartbeatPoolMediator<K> implements Disposable {
 
     private void closeClient(Transmitter transmitter) {
         try {
-            if(transmitter instanceof Client) {
+            if (transmitter instanceof Client) {
                 var client = (Client) transmitter;
                 client.close();
             }

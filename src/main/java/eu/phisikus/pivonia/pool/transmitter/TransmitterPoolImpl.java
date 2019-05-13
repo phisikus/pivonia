@@ -2,11 +2,7 @@ package eu.phisikus.pivonia.pool.transmitter;
 
 import eu.phisikus.pivonia.api.Transmitter;
 import eu.phisikus.pivonia.pool.TransmitterPool;
-import eu.phisikus.pivonia.pool.transmitter.events.AdditionEvent;
-import eu.phisikus.pivonia.pool.transmitter.events.AssignmentEvent;
-import eu.phisikus.pivonia.pool.transmitter.events.RemovalEvent;
-import eu.phisikus.pivonia.pool.transmitter.events.TransmitterPoolEvent;
-import eu.phisikus.pivonia.pool.transmitter.events.UnassignmentEvent;
+import eu.phisikus.pivonia.pool.transmitter.events.*;
 import io.reactivex.Observable;
 import io.reactivex.subjects.PublishSubject;
 import io.reactivex.subjects.Subject;
