@@ -3,6 +3,7 @@ package eu.phisikus.pivonia.pool;
 import eu.phisikus.pivonia.api.Client;
 import eu.phisikus.pivonia.pool.heartbeat.events.HeartbeatPoolEvent;
 import io.reactivex.Observable;
+import io.reactivex.disposables.Disposable;
 
 /**
  * Each client added to the pool will be asked to send greeting messages to connected nodes.
@@ -11,7 +12,7 @@ import io.reactivex.Observable;
  *
  * @param <K> type of node ID
  */
-public interface ClientHeartbeatPool<K> {
+public interface ClientHeartbeatPool<K> extends Disposable {
 
     /**
      * Add client to heartbeat pool.

@@ -11,6 +11,7 @@ import io.reactivex.Observable;
 import io.reactivex.functions.Consumer;
 import io.reactivex.subjects.PublishSubject;
 import io.reactivex.subjects.Subject;
+import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
 
 import java.time.Instant;
@@ -24,13 +25,15 @@ import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 @Log4j2
-class ClientHeartbeatPoolImpl<K> implements ClientHeartbeatPool<K>, AutoCloseable {
+class ClientHeartbeatPoolImpl<K> implements ClientHeartbeatPool<K> {
     private final ScheduledExecutorService heartbeatSender = Executors.newSingleThreadScheduledExecutor();
     private final List<ClientHeartbeatEntry> clients = Collections.synchronizedList(new LinkedList<>());
     private final Subject<HeartbeatPoolEvent> heartbeatChanges = PublishSubject.create();
     private final K nodeId;
     private final long neverSeen = 0L;
     private final long timeoutDelay;
+    @Getter
+    private boolean isDisposed = false;
 
     public ClientHeartbeatPoolImpl(long heartbeatDelay, long timeoutDelay, K nodeId) {
         this.nodeId = nodeId;
@@ -145,9 +148,12 @@ class ClientHeartbeatPoolImpl<K> implements ClientHeartbeatPool<K>, AutoCloseabl
     }
 
     @Override
-    public void close() {
-        log.info("Closing client heartbeat pool.");
-        heartbeatSender.shutdownNow();
-        clients.clear();
+    public void dispose() {
+        if (!isDisposed) {
+            log.info("Closing client heartbeat pool.");
+            heartbeatSender.shutdownNow();
+            clients.clear();
+        }
+        isDisposed = true;
     }
 }

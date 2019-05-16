@@ -35,4 +35,9 @@ class ClientConnectedToServer implements Transmitter {
             clientChannel.write(serializedMessage);
         }
     }
+
+    @Override
+    public void close() throws Exception {
+        clientChannel.close();
+    }
 }

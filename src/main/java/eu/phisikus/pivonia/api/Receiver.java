@@ -2,7 +2,7 @@ package eu.phisikus.pivonia.api;
 
 import io.reactivex.Observable;
 
-public interface Receiver {
+public interface Receiver extends AutoCloseable {
     /**
      * Returns messages received by this receiver that match provided type.
      * The receiver will not cache messages received prior to this method call.

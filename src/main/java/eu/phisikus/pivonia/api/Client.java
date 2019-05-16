@@ -2,7 +2,7 @@ package eu.phisikus.pivonia.api;
 
 import io.vavr.control.Try;
 
-public interface Client extends Transmitter, Receiver, AutoCloseable {
+public interface Client extends Transmitter, Receiver {
 
     /**
      * Connect the client using provided address.

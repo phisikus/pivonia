@@ -30,7 +30,7 @@ class ClientHeartbeatPoolImplSpec extends Specification {
         messageReceived.await(5L, TimeUnit.SECONDS)
 
         cleanup: "close heartbeat pool"
-        pool.close()
+        pool.dispose()
     }
 
     def "Should perform heartbeat protocol and register timeout"() {
@@ -54,7 +54,7 @@ class ClientHeartbeatPoolImplSpec extends Specification {
         messageReceived.await(500L, TimeUnit.SECONDS)
 
         cleanup: "close heartbeat pool"
-        pool.close()
+        pool.dispose()
     }
 
     def "Should remove client from heartbeat pool"() {
@@ -72,6 +72,6 @@ class ClientHeartbeatPoolImplSpec extends Specification {
         pool.remove(client)
 
         cleanup: "close heartbeat pool"
-        pool.close()
+        pool.dispose()
     }
 }

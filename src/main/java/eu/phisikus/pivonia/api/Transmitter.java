@@ -2,7 +2,7 @@ package eu.phisikus.pivonia.api;
 
 import io.vavr.control.Try;
 
-public interface Transmitter {
+public interface Transmitter extends AutoCloseable {
     /**
      * Send message to connected node.
      *

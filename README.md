@@ -43,8 +43,8 @@ Used technologies:
                   .messageHandlers(messageHandlers)
                   .build();
   
-          // here we retreive TCP Server instance and bind it on port 9999
-          int port = 9999;
+          // here we retrieve TCP Server instance and bind it on port 8888
+          int port = 8888;
           var server = node.getServer().bind(port).get();
   
           // here we are creating client and making a connection
@@ -82,6 +82,61 @@ Basically if you add some host information to _Address Pool_ it will connect a c
 
 Have a look at integrations tests and javadocs for more details.
 
+## More advanced usage
+
+```java
+public class Main {
+    public static void main(String[] args) throws Exception {
+
+        // generate ID of some type for node that we are creating
+        var nodeId = UUID.randomUUID();
+
+        // we are going to save a stream of received messages
+        var messages = PublishSubject.create();
+
+        // you can register message handlers for different types of messages
+        var messageHandlers = MessageHandlers.create()
+                .withHandler(
+                        MessageHandler.create(EmptyEnvelope.class, (node, message) -> messages.onNext(message))
+                );
+        // now we create instance of the framework by setting ID and message handlers
+        var node = Node.builder()
+                .id(nodeId)
+                .messageHandlers(messageHandlers)
+                .build();
+
+        var connectionManager = node.getConnectionManager();
+
+        // here we retrieve TCP Server instance and bind it on port 9999
+        int port = 9999;
+        var server = node.getServer().bind(port).get();
+
+        // and we add it to the server pool
+        connectionManager.getServerPool().add(server);
+
+        // let's prepare test message
+        var newMessage = new EmptyEnvelope<>(nodeId, nodeId);
+        var clientHeartbeatPool = (ClientHeartbeatPool<UUID>) connectionManager.getClientHeartbeatPool();
+
+        // ... and send that message once heartbeat message is returned to the client
+        var subscription = clientHeartbeatPool.getHeartbeatChanges()
+                .filter(event -> event instanceof ReceivedEvent)
+                .subscribe(event -> event.getTransmitter().send(newMessage));
+
+        // here we are adding address to the pool so a client is created
+        connectionManager.getAddressPool().add("localhost", port);
+
+        // here we wait for message that should be saved in the stream by message handler above
+        assert messages.blockingFirst() == newMessage;
+
+        // let's clean up the resources
+        connectionManager.dispose();
+        subscription.dispose();
+    }
+}
+
+```
+
 ## Repository
 
 Repository:
@@ -100,7 +155,7 @@ Current version:
     <dependency>
             <groupId>eu.phisikus.pivonia</groupId>
             <artifactId>pivonia</artifactId>
-            <version>0.0.9-44056df</version>
+            <version>0.0.10-09b58e7</version>
     </dependency>
 ```
 
