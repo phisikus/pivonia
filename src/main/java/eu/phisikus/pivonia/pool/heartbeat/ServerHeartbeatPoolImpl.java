@@ -139,7 +139,14 @@ class ServerHeartbeatPoolImpl<K> implements ServerHeartbeatPool<K> {
         if (!isDisposed) {
             log.info("Closing server heartbeat pool.");
             timeoutSender.shutdownNow();
+            servers.clear();
             clients.clear();
+            listeners.values()
+                    .forEach(listener -> {
+                        if (!listener.isDisposed()) {
+                            listener.dispose();
+                        }
+                    });
         }
         isDisposed = true;
     }

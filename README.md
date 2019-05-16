@@ -68,6 +68,29 @@ Used technologies:
 ```
 
 
+## Repository
+
+Repository:
+```xml
+    <repositories>
+        <repository>
+            <id>phisikus-repo</id>
+            <name>Phisikus' Maven Repository</name>
+            <url>http://phisikus.eu/maven2</url>
+        </repository>
+    </repositories>
+
+```     
+Current version:
+```xml
+    <dependency>
+            <groupId>eu.phisikus.pivonia</groupId>
+            <artifactId>pivonia</artifactId>
+            <version>0.0.10-2b01546</version>
+    </dependency>
+```
+
+
 ## Architecture
 
 The easiest way to start is to create _Node_ instance using static builder. It acts as a factory for instances of objects like _Server_ or _Client_ that allow you to listen for connections and create them yourself.
@@ -82,7 +105,7 @@ Basically if you add some host information to _Address Pool_ it will connect a c
 
 Have a look at integrations tests and javadocs for more details.
 
-## More advanced usage
+## Pool usage example
 
 ```java
 public class Main {
@@ -136,30 +159,6 @@ public class Main {
 }
 
 ```
-
-## Repository
-
-Repository:
-```xml
-    <repositories>
-        <repository>
-            <id>phisikus-repo</id>
-            <name>Phisikus' Maven Repository</name>
-            <url>http://phisikus.eu/maven2</url>
-        </repository>
-    </repositories>
-
-```     
-Current version:
-```xml
-    <dependency>
-            <groupId>eu.phisikus.pivonia</groupId>
-            <artifactId>pivonia</artifactId>
-            <version>0.0.10-09b58e7</version>
-    </dependency>
-```
-
-
 
 
   

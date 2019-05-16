@@ -190,7 +190,7 @@ class TransmitterPoolImplSpec extends Specification {
         when: "calling for disposal"
         transmitterPool.dispose()
 
-        then: "client is closed"
+        then: "clients are closed"
         1 * firstTransmitter.close()
         1 * secondTransmitter.close()
 

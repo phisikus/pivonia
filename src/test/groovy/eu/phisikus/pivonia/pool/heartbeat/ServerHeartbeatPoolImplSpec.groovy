@@ -139,7 +139,7 @@ class ServerHeartbeatPoolImplSpec extends Specification {
 
     def "Should dispose of server heartbeat pool properly"() {
         given: "there is a heartbeat pool"
-        def disposablePool = new ServerHeartbeatPoolImpl(10,10,0)
+        def disposablePool = new ServerHeartbeatPoolImpl(10, 10, 0)
 
         when: "calling for pool disposal"
         disposablePool.dispose()
