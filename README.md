@@ -14,6 +14,7 @@ Used technologies:
 - Lombok
 
 ## Basic Usage
+In this example an instance of the framework is created. Factory functions are used to provide server and client instances. The two are connected and predefined message handler is used to notify if message is sent.
 ```java
   import eu.phisikus.pivonia.api.EmptyEnvelope;
   import eu.phisikus.pivonia.logic.MessageHandler;
@@ -106,7 +107,7 @@ Basically if you add some host information to _Address Pool_ it will connect a c
 Have a look at integrations tests and javadocs for more details.
 
 ## Pool usage example
-
+In this example server is created and added to the pool which causes it to respond to heartbeat messages properly. That server's address is added to the pool which causes client to be connected, heartbeat message to be sent, response to be returned by the server and as a result of that handshake dummy application message is sent.
 ```java
 public class Main {
     public static void main(String[] args) {
@@ -147,9 +148,12 @@ public class Main {
                 .subscribe(event -> event.getTransmitter().send(newMessage));
 
         // here we are adding address to the pool so a client is created
+        // this will cause the client to be added to heartbeat pool
+        // heartbeat message will be sent and server will reply
+        // appropriate event will be emitted and test message will be sent
         connectionManager.getAddressPool().add("localhost", port);
 
-        // here we wait for message that should be saved in the stream by message handler above
+        // here we wait for message that should reach the server
         assert messages.blockingFirst() == newMessage;
 
         // let's clean up the resources
