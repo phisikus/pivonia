@@ -175,4 +175,27 @@ class TransmitterPoolImplSpec extends Specification {
         1 * changeListener.onNext(firstEvent)
     }
 
+    def "Should close transmitters on pool disposal"() {
+        given: "there are two transmitters"
+        def firstTransmitter = Mock(Client)
+        def secondTransmitter = Mock(Client)
+
+        and: "an empty pool"
+        def transmitterPool = new TransmitterPoolImpl()
+
+        and: "transmitters are added to it"
+        transmitterPool.add(firstTransmitter)
+        transmitterPool.add(secondTransmitter)
+
+        when: "calling for disposal"
+        transmitterPool.dispose()
+
+        then: "client is closed"
+        1 * firstTransmitter.close()
+        1 * secondTransmitter.close()
+
+        and: "pool is disposed"
+        transmitterPool.isDisposed()
+    }
+
 }

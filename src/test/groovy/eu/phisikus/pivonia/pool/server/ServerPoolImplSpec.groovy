@@ -53,4 +53,25 @@ class ServerPoolImplSpec extends Specification {
         cleanup:
         eventSubscription.dispose()
     }
+
+    def "Should close all servers on pool disposal"() {
+        given: "servers are defined"
+        def firstServer = Mock(Server)
+        def secondServer = Mock(Server)
+
+        and: "addition is performed"
+        serverPool.add(firstServer)
+        serverPool.add(secondServer)
+
+        when: "calling for pool disposal"
+        serverPool.dispose()
+
+        then: "servers are closed"
+        1 * firstServer.close()
+        1 * secondServer.close()
+
+        and: "pool is disposed"
+        serverPool.isDisposed()
+    }
+
 }

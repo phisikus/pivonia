@@ -3,13 +3,14 @@ package eu.phisikus.pivonia.pool;
 import eu.phisikus.pivonia.api.Server;
 import eu.phisikus.pivonia.pool.server.ServerPoolEvent;
 import io.reactivex.Observable;
+import io.reactivex.disposables.Disposable;
 
 import java.util.List;
 
 /**
  * Represents resource pool containing servers that represent entrypoints for a single node of application.
  */
-public interface ServerPool {
+public interface ServerPool extends Disposable {
 
     /**
      * Add running server to the Server Pool

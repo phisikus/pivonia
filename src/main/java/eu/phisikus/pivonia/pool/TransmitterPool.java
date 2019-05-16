@@ -3,6 +3,7 @@ package eu.phisikus.pivonia.pool;
 import eu.phisikus.pivonia.api.Transmitter;
 import eu.phisikus.pivonia.pool.transmitter.events.TransmitterPoolEvent;
 import io.reactivex.Observable;
+import io.reactivex.disposables.Disposable;
 
 import java.util.List;
 import java.util.Optional;
@@ -13,7 +14,7 @@ import java.util.Optional;
  *
  * @param <K> type of node ID
  */
-public interface TransmitterPool<K> {
+public interface TransmitterPool<K> extends Disposable {
 
     /**
      * Get all transmitters from the pool.
