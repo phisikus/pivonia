@@ -137,4 +137,15 @@ class ServerHeartbeatPoolImplSpec extends Specification {
         pool.remove(server)
     }
 
+    def "Should dispose of server heartbeat pool properly"() {
+        given: "there is a heartbeat pool"
+        def disposablePool = new ServerHeartbeatPoolImpl(10,10,0)
+
+        when: "calling for pool disposal"
+        disposablePool.dispose()
+
+        then: "pool is marked as disposed"
+        disposablePool.isDisposed()
+    }
+
 }

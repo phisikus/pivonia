@@ -3,6 +3,7 @@ package eu.phisikus.pivonia.pool;
 import eu.phisikus.pivonia.api.Server;
 import eu.phisikus.pivonia.pool.heartbeat.events.HeartbeatPoolEvent;
 import io.reactivex.Observable;
+import io.reactivex.disposables.Disposable;
 
 import java.util.List;
 
@@ -12,7 +13,7 @@ import java.util.List;
  *
  * @param <K> type of node ID
  */
-public interface ServerHeartbeatPool<K> {
+public interface ServerHeartbeatPool<K> extends Disposable {
     /**
      * Adds server to the pool.
      * After addition server will start to participate in heartbeat protocol.

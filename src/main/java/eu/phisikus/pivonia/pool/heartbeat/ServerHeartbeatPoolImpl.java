@@ -31,6 +31,8 @@ class ServerHeartbeatPoolImpl<K> implements ServerHeartbeatPool<K> {
     private final Subject<HeartbeatPoolEvent> poolChanges = PublishSubject.create();
     private final K nodeId;
     private long timeoutDelay;
+    @Getter
+    private boolean isDisposed = false;
 
     public ServerHeartbeatPoolImpl(long heartbeatDelay, long timeoutDelay, K nodeId) {
         this.timeoutDelay = timeoutDelay;
@@ -132,4 +134,13 @@ class ServerHeartbeatPoolImpl<K> implements ServerHeartbeatPool<K> {
         }
     }
 
+    @Override
+    public void dispose() {
+        if (!isDisposed) {
+            log.info("Closing server heartbeat pool.");
+            timeoutSender.shutdownNow();
+            clients.clear();
+        }
+        isDisposed = true;
+    }
 }
