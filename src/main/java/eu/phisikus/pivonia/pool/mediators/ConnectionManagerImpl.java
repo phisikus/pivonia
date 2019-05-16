@@ -44,12 +44,20 @@ public class ConnectionManagerImpl<K> implements ConnectionManager<K> {
         addressTransmitterPoolMediator.dispose();
         clientHeartbeatPoolMediator.dispose();
         serverHeartbeatPoolMediator.dispose();
+        clientHeartbeatPool.dispose();
+        serverHeartbeatPool.dispose();
+        serverPool.dispose();
+        transmitterPool.dispose();
     }
 
     @Override
     public boolean isDisposed() {
         return addressTransmitterPoolMediator.isDisposed() &&
                 clientHeartbeatPoolMediator.isDisposed() &&
-                serverHeartbeatPoolMediator.isDisposed();
+                serverHeartbeatPoolMediator.isDisposed() &&
+                clientHeartbeatPool.isDisposed() &&
+                serverHeartbeatPool.isDisposed() &&
+                serverPool.isDisposed() &&
+                transmitterPool.isDisposed();
     }
 }

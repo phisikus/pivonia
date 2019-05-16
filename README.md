@@ -24,7 +24,7 @@ Used technologies:
   import java.util.UUID;
   
   public class Main {
-      public static void main(String[] args) throws Exception {
+      public static void main(String[] args) {
       
           // generate ID of some type for node that we are creating
           var nodeId = UUID.randomUUID();        
@@ -86,7 +86,7 @@ Have a look at integrations tests and javadocs for more details.
 
 ```java
 public class Main {
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args) {
 
         // generate ID of some type for node that we are creating
         var nodeId = UUID.randomUUID();
