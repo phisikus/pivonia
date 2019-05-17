@@ -133,26 +133,26 @@ uploadArchives {
     }
 }
 
+def getGitHash = {
+    final stdout = new ByteArrayOutputStream()
+    exec {
+        commandLine 'git', 'rev-parse', '--short', 'HEAD'
+        standardOutput = stdout
+    }
+    return stdout.toString().trim()
+}
+
+
 /**
  * Custom task for CI
  */
-task release(dependsOn: ['clean', 'build', 'uploadArchives'])
-uploadArchives.mustRunAfter(build)
-
-/**
- * Custom task for publishing snapshot versions
- */
-task setSnapshotVersion(type: Task) {
-    def getGitHash = { ->
-        final stdout = new ByteArrayOutputStream()
-        exec {
-            commandLine 'git', 'rev-parse', '--short', 'HEAD'
-            standardOutput = stdout
-        }
-        return stdout.toString().trim()
-    }
-    rootProject.version = rootProject.version + "-" + getGitHash()
+tasks.register('release') {
+    description = 'Releases new library version'
+    dependsOn = ['clean', 'build', 'uploadArchives']
 }
 
-task releaseSnapshot(dependsOn: ['clean', 'build', 'setSnapshotVersion', 'uploadArchives'])
-(build as Task).mustRunAfter(setSnapshotVersion)
+tasks.register('releaseSnapshot') {
+    description = 'Releases snapshot version'
+    rootProject.version = rootProject.version + "-" + getGitHash()
+    dependsOn = ['clean', 'build', 'uploadArchives']
+}
