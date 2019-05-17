@@ -3,4 +3,4 @@ install: true
 jdk:
   - openjdk11
 script:
-  - ./gradlew releaseSnapshot
+  - ./gradlew build
