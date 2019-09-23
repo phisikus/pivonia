@@ -1,4 +1,4 @@
-# Pivonia
+# Pivonia [![Build Status](https://travis-ci.org/phisikus/pivonia.svg?branch=master)](https://travis-ci.org/phisikus/pivonia)
 It is a small communication framework that gives you the ability to connect nodes over TCP with optional encryption and manage pools of connections with different nodes identified by ID and managed with heartbeat protocol.
 
 Used technologies:
