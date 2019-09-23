@@ -18,7 +18,7 @@ class SymmetricalEncryptor implements Encryptor {
             AeadConfig.register();
             var keysetReader = JsonKeysetReader.withBytes(keyContent);
             var keysetHandle = CleartextKeysetHandle.read(keysetReader);
-            this.encoder = AeadFactory.getPrimitive(keysetHandle);
+            this.encoder = keysetHandle.getPrimitive(Aead.class);
         } catch (GeneralSecurityException | IOException exception) {
             throw new RuntimeException(exception);
         }

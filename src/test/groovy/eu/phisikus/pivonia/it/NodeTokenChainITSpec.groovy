@@ -4,9 +4,9 @@ import eu.phisikus.pivonia.logic.MessageHandler
 import eu.phisikus.pivonia.logic.MessageHandlers
 import eu.phisikus.pivonia.test.ServerTestUtils
 import eu.phisikus.pivonia.utils.Node
-import org.awaitility.Duration
 import spock.lang.Specification
 
+import java.time.Duration
 import java.util.function.BiConsumer
 
 import static org.awaitility.Awaitility.await
@@ -30,7 +30,7 @@ class NodeTokenChainITSpec extends Specification {
         sendFirstMessage(firstNode, firstNodePort)
 
         then: "token is passed through all of the nodes"
-        await().atMost(Duration.TEN_SECONDS).until {
+        await().atMost(Duration.ofSeconds(10L)).until {
             nodes.inject(true) {
                 result, node -> result && node.getValue().getState().isMessageReceived
             }
