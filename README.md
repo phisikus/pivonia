@@ -87,7 +87,7 @@ Current version:
     <dependency>
             <groupId>eu.phisikus.pivonia</groupId>
             <artifactId>pivonia</artifactId>
-            <version>0.0.10</version>
+            <version>0.0.11</version>
     </dependency>
 ```
 
