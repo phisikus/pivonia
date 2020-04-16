@@ -5,7 +5,7 @@ import eu.phisikus.pivonia.pool.AddressPool;
 import eu.phisikus.pivonia.pool.TransmitterPool;
 import eu.phisikus.pivonia.pool.address.Address;
 import eu.phisikus.pivonia.pool.address.AddressPoolEvent;
-import io.github.resilience4j.retry.IntervalFunction;
+import io.github.resilience4j.core.IntervalFunction;
 import io.github.resilience4j.retry.Retry;
 import io.github.resilience4j.retry.RetryConfig;
 import io.reactivex.disposables.Disposable;
