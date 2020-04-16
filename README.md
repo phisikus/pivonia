@@ -102,7 +102,7 @@ Creation of _Node_ instance forces you to pass _MessageHandlers_ which is basica
 - _Server Pool_ - contains your node's listening server instances
 - _Server Heartbeat Pool_ - responsible for responding to client heartbeat messages in timely fashion.
 
-Basically if you add some host information to _Address Pool_ it will connect a client, put it _Transmitter Pool_ and this will trigger _Client Heartbeat Pool_ to send heartbeat messages. Responses will allow nodes to introduce themselves by ID. _Client_ instances are associated with node IDs and that information is stored in the _Transmitter Pool_. Similar situation appears when you add server to the _Server Pool_. Your server starts to respond with heartbeat messages sent by clients and it creates association by node ID in the _Transmitter Pool_. Any heartbeat timeouts force the ID association to be removed.
+Basically if you add some host information to _Address Pool_ it will connect a client, put it in _Transmitter Pool_ and this will trigger _Client Heartbeat Pool_ to send heartbeat messages. Responses will allow nodes to introduce themselves by ID. _Client_ instances are associated with node IDs and that information is stored in the _Transmitter Pool_. Similar situation appears when you add server to the _Server Pool_. Your server starts to respond with heartbeat messages sent by clients and it creates association by node ID in the _Transmitter Pool_. Any heartbeat timeouts force the ID association to be removed.
 
 Have a look at integrations tests and javadocs for more details.
 
