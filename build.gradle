@@ -132,15 +132,6 @@ publishing {
     }
 }
 
-def getGitHash = {
-    final stdout = new ByteArrayOutputStream()
-    exec {
-        commandLine "git", "rev-parse", "--short", "HEAD"
-        standardOutput = stdout
-    }
-    return stdout.toString().trim()
-}
-
 
 /**
  * Custom task for CI
