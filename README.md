@@ -72,10 +72,9 @@ In this example an instance of the framework is created. Factory functions are u
 ## Repository
 
 Packages are published in a GitHub artifactory which requires authentication.
-To generate key/token go to "Settings -> Developer settings -> Personal access token"
+To generate key/token go to _Settings -> Developer settings -> Personal access token_
 ```groovy
 repositories {
-    mavenCentral()
     maven {
         name = "GitHubPackages"
         url = uri("https://maven.pkg.github.com/phisikus/pivonia")
