@@ -71,24 +71,24 @@ In this example an instance of the framework is created. Factory functions are u
 
 ## Repository
 
-Repository:
-```xml
-    <repositories>
-        <repository>
-            <id>phisikus-repo</id>
-            <name>Phisikus' Maven Repository</name>
-            <url>http://phisikus.eu/maven2</url>
-        </repository>
-    </repositories>
-
+Packages are published in a GitHub artifactory which requires authentication.
+To generate key/token go to "Settings -> Developer settings -> Personal access token"
+```groovy
+repositories {
+    mavenCentral()
+    maven {
+        name = "GitHubPackages"
+        url = uri("https://maven.pkg.github.com/phisikus/pivonia")
+        credentials {
+            username = project.findProperty("gpr.user") ?: System.getenv("USERNAME")
+            password = project.findProperty("gpr.key") ?: System.getenv("TOKEN")
+        }
+    }
+}
 ```     
 Current version:
-```xml
-    <dependency>
-            <groupId>eu.phisikus.pivonia</groupId>
-            <artifactId>pivonia</artifactId>
-            <version>0.0.13</version>
-    </dependency>
+```groovy
+      implementation "eu.phisikus.pivonia:pivonia:0.0.16"
 ```
 
 
