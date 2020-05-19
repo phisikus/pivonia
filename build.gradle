@@ -143,7 +143,7 @@ def getGitHash = {
  */
 tasks.register("release") {
     description = "Releases new library version"
-    dependsOn = ["clean", "build", "generateJavadocs", "uploadArchives"]
+    dependsOn = ["clean", "build", "uploadArchives"]
 }
 
 tasks.register("releaseSnapshot") {
