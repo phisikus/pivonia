@@ -149,9 +149,3 @@ tasks.register("release") {
     description = "Releases new library version"
     dependsOn = ["clean", "build", "publish"]
 }
-
-tasks.register("releaseSnapshot") {
-    description = "Releases snapshot version"
-    rootProject.version = rootProject.version + "-" + getGitHash()
-    dependsOn = ["clean", "build", "publish"]
-}
