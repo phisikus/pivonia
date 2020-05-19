@@ -85,10 +85,12 @@ repositories {
     }
 }
 ```     
-Current version:
+Current version dependency:
 ```groovy
-      implementation "eu.phisikus.pivonia:pivonia:0.0.16"
+implementation "eu.phisikus.pivonia:pivonia:0.0.16"
 ```
+
+If you have issues with configuration you can read more in the [GitHub Packages official documentation](https://help.github.com/en/packages/using-github-packages-with-your-projects-ecosystem) 
 
 
 ## Architecture
