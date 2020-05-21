@@ -14,7 +14,7 @@ public interface Middleware<K, S> {
     /**
      * Provides message handlers important to the algorithm implemented by the Middleware
      *
-     * @return custom MessageHandlers
+     * @return algorithm specific MessageHandlers
      */
     MessageHandlers<Node<K, S>> getMessageHandlers();
 
