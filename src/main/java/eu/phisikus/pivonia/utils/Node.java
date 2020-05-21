@@ -20,8 +20,10 @@ import io.vavr.Lazy;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NonNull;
+import lombok.Singular;
 
 import javax.inject.Provider;
+import java.util.List;
 
 /**
  * Node represents configured facade for this framework.
@@ -44,10 +46,12 @@ public class Node<K, S> implements TCPComponent {
     private byte[] encryptionKey;
     private Lazy<TCPComponent> tcpComponent;
     private Lazy<ConnectionManager> connectionManager;
+    private List<Middleware<K, S>> middlewares;
 
     @Builder
     Node(@NonNull K id,
          @NonNull MessageHandlers messageHandlers,
+         @Singular("middleware") List<Middleware<K, S>> middlewares,
          S state,
          Long heartbeatDelay,
          Long timeoutDelay,
@@ -55,7 +59,8 @@ public class Node<K, S> implements TCPComponent {
          byte[] encryptionKey) {
         this.id = id;
         this.state = state;
-        this.messageHandlers = messageHandlers.build(this);
+        this.middlewares = middlewares;
+        this.messageHandlers = buildHandlers(messageHandlers, middlewares);
         this.heartbeatDelay = heartbeatDelay == null ? 5000 : heartbeatDelay;
         this.timeoutDelay = timeoutDelay == null ? 20000 : timeoutDelay;
         this.maxConnectionRetryAttempts = maxConnectionRetryAttempts == null ? 10 : maxConnectionRetryAttempts;
@@ -70,6 +75,14 @@ public class Node<K, S> implements TCPComponent {
             Provider<Client> clientProvider = getClientProvider(tcpComponent.get());
             return getPoolComponent(clientProvider).getConnectionManager();
         });
+        middlewares.forEach(middleware -> middleware.init(this));
+    }
+
+    private MessageHandlers buildHandlers(MessageHandlers<Node<K,S>> messageHandlers, List<Middleware<K, S>> middlewares) {
+        return middlewares.stream()
+                .map(Middleware::getMessageHandlers)
+                .reduce(messageHandlers, MessageHandlers::withHandlers)
+                .build(this);
     }
 
     public ConnectionManager getConnectionManager() {
