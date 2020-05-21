@@ -26,7 +26,7 @@ import javax.inject.Provider;
 /**
  * Node represents configured facade for this framework.
  * It provides standalone instances of encrypted and cleartext TCP Clients and Servers.
- * It also provides much complex ConnectionManager which contains connection pools with heartbeat protocol capability.
+ * It also provides more complex ConnectionManager which contains connection pools with heartbeat protocol capability.
  *
  * @param <K> type of node ID
  * @param <S> type of state object

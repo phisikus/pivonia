@@ -11,7 +11,7 @@ import java.util.function.BiConsumer
 
 class MessageHandlersSpec extends Specification {
 
-    def "Should create message handler with multiple handlers and register them in client"() {
+    def "Should create MessageHandlers with multiple handlers and register them in client"() {
         given: "there are two Message Handler definitions"
         def messagesObserved = []
         def context = Mock(Node)
@@ -56,7 +56,7 @@ class MessageHandlersSpec extends Specification {
     }
 
 
-    def "Should create message handler with multiple handlers and register them in server"() {
+    def "Should create MessageHandlers with multiple handlers and register them in server"() {
         given: "there are two Message Handler definitions"
         def messagesObserved = []
         def context = Mock(Node)
@@ -98,6 +98,35 @@ class MessageHandlersSpec extends Specification {
 
         cleanup: "Message Handlers is disposed"
         handlers.dispose()
+    }
+
+    def "Should combine two MessageHandlers properly"() {
+        given: "first MessageHandlers is defined"
+        def firstHandler = createTestHandler()
+        def secondHandler = createTestHandler()
+        def context = Mock(Object)
+        def firstMessageHandlers = MessageHandlers.create()
+                .withHandler(firstHandler)
+                .withHandler(secondHandler)
+                .build(context)
+
+        and: "second MessageHandlers is defined"
+        def thirdHandler = createTestHandler()
+        def fourthHandler = createTestHandler()
+        def secondMessageHandlers = MessageHandlers.create()
+                .withHandler(thirdHandler)
+                .withHandler(fourthHandler)
+                .build(context)
+
+        when: "merge function is called"
+        def mergedMessageHandlers = firstMessageHandlers.withHandlers(secondMessageHandlers)
+
+        then: "all of the original MessageHandler instances are included"
+        mergedMessageHandlers.messageHandlers == [firstHandler, secondHandler, thirdHandler, fourthHandler]
+    }
+
+    private MessageHandler<Object, Object> createTestHandler() {
+        MessageHandler.create(Object, {})
     }
 
     private class FirstType {}

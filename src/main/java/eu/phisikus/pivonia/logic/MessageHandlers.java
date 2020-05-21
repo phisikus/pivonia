@@ -23,10 +23,24 @@ public class MessageHandlers<C> implements Disposable {
     private final List<MessageHandler> messageHandlers;
     private final List<Disposable> subscriptions;
 
+    /**
+     * Create empty instance of MessageHandlers.
+     *
+     * @param <C> type of context
+     * @return new MessageHandlers instance
+     */
     public static <C> MessageHandlers<C> create() {
         return new MessageHandlers<>(null, new LinkedList<>(), new LinkedList<>());
     }
 
+    /**
+     * Add given MessageHandler to the aggregate.
+     * Returned new MessageHandlers instance will contain all of the previously added handlers plus the given MessageHandler.
+     *
+     * @param messageHandler single MessageHandler that should be added to existing handlers
+     * @param <T>            type of message
+     * @return new MessageHandlers instance
+     */
     public <T> MessageHandlers<C> withHandler(@NonNull MessageHandler<C, T> messageHandler) {
         var newHandlersList = new LinkedList<>(this.messageHandlers);
         var newSubscriptionList = new LinkedList<>(this.subscriptions);
@@ -34,10 +48,36 @@ public class MessageHandlers<C> implements Disposable {
         return new MessageHandlers<>(context, newHandlersList, newSubscriptionList);
     }
 
+    /**
+     * Combine existing handlers with handlers from provided instance and create new MessageHandlers.
+     *
+     * @param messageHandlers handlers that should be added
+     * @return new MessageHandlers instance with combined handlers inside
+     */
+    public MessageHandlers<C> withHandlers(@NonNull MessageHandlers<C> messageHandlers) {
+        var newHandlersList = new LinkedList<>(this.messageHandlers);
+        var newSubscriptionList = new LinkedList<>(this.subscriptions);
+        newHandlersList.addAll(messageHandlers.messageHandlers);
+        newSubscriptionList.addAll(messageHandlers.subscriptions);
+        return new MessageHandlers<C>(context, newHandlersList, newSubscriptionList);
+    }
+
+    /**
+     * Prepare MessageHandlers for usage by providing context object that will be provided with every handler call.
+     *
+     * @param context object that will be passed as context
+     * @return new ready-to-use MessageHandlers instance
+     */
     public MessageHandlers build(C context) {
         return new MessageHandlers<>(context, messageHandlers, subscriptions);
     }
 
+    /**
+     * Register message subscriptions.
+     * For each message handler within this MessageHandlers instance, subscription will be made using provided Receiver.
+     *
+     * @param receiver instance of Receiver that should be visited
+     */
     public void registerHandlers(@NonNull Receiver receiver) {
         messageHandlers.forEach(handler -> {
             var subscription = receiver
