@@ -63,7 +63,7 @@ public class MessageHandlers<C> implements Disposable {
     }
 
     /**
-     * Prepare MessageHandlers for usage by providing context object that will be provided with every handler call.
+     * Prepare MessageHandlers for usage by providing context object that will be passed with every handler call.
      *
      * @param context object that will be passed as context
      * @return new ready-to-use MessageHandlers instance
