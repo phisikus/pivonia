@@ -49,8 +49,18 @@ class NodeClientServerITSpec extends Specification {
         }
 
         cleanup: "free up resources"
-        server.close()
-        client.close()
-        node.dispose()
+        ignoringException {
+            server.close()
+            client.close()
+            node.dispose()
+        }
+    }
+
+    private static def ignoringException(Runnable runnable) {
+        try {
+            runnable.run()
+        } finally {
+            // do nothing
+        }
     }
 }
