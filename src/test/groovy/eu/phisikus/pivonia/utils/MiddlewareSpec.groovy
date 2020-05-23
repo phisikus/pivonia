@@ -13,8 +13,8 @@ class MiddlewareSpec extends Specification {
 
         and: "second middleware instance exists"
         def secondMiddleware = Mock(Middleware)
-        def secondMiddlwareMessageHandler = GroovyMock(MessageHandler)
-        def secondMiddlewareMessageHandlers = MessageHandlers.create().withHandler(secondMiddlwareMessageHandler)
+        def secondMiddlewareMessageHandler = GroovyMock(MessageHandler)
+        def secondMiddlewareMessageHandlers = MessageHandlers.create().withHandler(secondMiddlewareMessageHandler)
 
         and: "node ID is defined"
         def nodeId = UUID.randomUUID()
@@ -36,7 +36,7 @@ class MiddlewareSpec extends Specification {
         1 * secondMiddleware.getMessageHandlers() >> secondMiddlewareMessageHandlers
 
         and: "all of the handlers are combined properly"
-        node.messageHandlers.messageHandlers == [baseMessageHandler, firstMiddlewareMessageHandler, secondMiddlwareMessageHandler]
+        node.messageHandlers.messageHandlers == [baseMessageHandler, firstMiddlewareMessageHandler, secondMiddlewareMessageHandler]
 
         and: "middlewares are initialized"
         1 * firstMiddleware.init(_)
