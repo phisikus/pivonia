@@ -81,7 +81,7 @@ class TransmitterPoolImpl<K> implements TransmitterPool<K> {
 
     @Override
     public void dispose() {
-        if(!isDisposed) {
+        if (!isDisposed) {
             transmitters.forEach(transmitter -> {
                 try {
                     transmitter.close();

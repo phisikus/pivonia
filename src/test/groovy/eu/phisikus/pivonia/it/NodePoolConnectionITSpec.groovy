@@ -3,10 +3,10 @@ package eu.phisikus.pivonia.it
 import eu.phisikus.pivonia.api.EmptyEnvelope
 import eu.phisikus.pivonia.logic.MessageHandler
 import eu.phisikus.pivonia.logic.MessageHandlers
+import eu.phisikus.pivonia.node.Node
 import eu.phisikus.pivonia.pool.heartbeat.HeartbeatServerVisitor
 import eu.phisikus.pivonia.pool.transmitter.events.AssignmentEvent
 import eu.phisikus.pivonia.test.ServerTestUtils
-import eu.phisikus.pivonia.node.Node
 import spock.lang.Specification
 import spock.util.concurrent.PollingConditions
 

@@ -6,7 +6,7 @@ public interface Transmitter extends AutoCloseable {
     /**
      * Send message to connected node.
      *
-     * @param <T> type of sent message
+     * @param <T>     type of sent message
      * @param message message that will be sent to the connected node
      * @return if successful return itself, otherwise exception that occurred
      */

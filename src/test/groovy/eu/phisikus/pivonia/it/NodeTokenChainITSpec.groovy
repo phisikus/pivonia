@@ -2,8 +2,8 @@ package eu.phisikus.pivonia.it
 
 import eu.phisikus.pivonia.logic.MessageHandler
 import eu.phisikus.pivonia.logic.MessageHandlers
-import eu.phisikus.pivonia.test.ServerTestUtils
 import eu.phisikus.pivonia.node.Node
+import eu.phisikus.pivonia.test.ServerTestUtils
 import spock.lang.Specification
 
 import java.time.Duration
