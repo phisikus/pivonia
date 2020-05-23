@@ -62,6 +62,7 @@ In this example an instance of the framework is created. Factory functions are u
           // we can dispose their resources
           client.close();
           server.close();
+          node.dispose();
   
       }
   }
@@ -158,7 +159,7 @@ public class Main {
         assert messages.blockingFirst() == newMessage;
 
         // let's clean up the resources
-        connectionManager.dispose();
+        node.dispose();
         subscription.dispose();
     }
 }
