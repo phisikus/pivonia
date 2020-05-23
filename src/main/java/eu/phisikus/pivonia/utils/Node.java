@@ -16,6 +16,7 @@ import eu.phisikus.pivonia.pool.PoolModule;
 import eu.phisikus.pivonia.pool.heartbeat.HeartbeatPoolModule;
 import eu.phisikus.pivonia.tcp.DaggerTCPComponent;
 import eu.phisikus.pivonia.tcp.TCPComponent;
+import io.reactivex.disposables.Disposable;
 import io.vavr.Lazy;
 import lombok.Builder;
 import lombok.Getter;
@@ -33,7 +34,7 @@ import java.util.List;
  * @param <K> type of node ID
  * @param <S> type of state object
  */
-public class Node<K, S> implements TCPComponent {
+public class Node<K, S> implements TCPComponent, Disposable {
 
     @Getter
     private K id;
@@ -78,7 +79,7 @@ public class Node<K, S> implements TCPComponent {
         middlewares.forEach(middleware -> middleware.init(this));
     }
 
-    private MessageHandlers buildHandlers(MessageHandlers<Node<K,S>> messageHandlers, List<Middleware<K, S>> middlewares) {
+    private MessageHandlers buildHandlers(MessageHandlers<Node<K, S>> messageHandlers, List<Middleware<K, S>> middlewares) {
         return middlewares.stream()
                 .map(Middleware::getMessageHandlers)
                 .reduce(messageHandlers, MessageHandlers::withHandlers)
@@ -143,5 +144,19 @@ public class Node<K, S> implements TCPComponent {
     public Server getServerWithEncryption() {
         Provider<Server> encryptedServerProvider = () -> tcpComponent.get().getServerWithEncryption();
         return new LogicProviderDecorator<>(encryptedServerProvider, messageHandlers).get();
+    }
+
+    @Override
+    public void dispose() {
+        middlewares.forEach(Disposable::dispose);
+        getConnectionManager().dispose();
+    }
+
+    @Override
+    public boolean isDisposed() {
+        var isMiddlewaresDisposed = middlewares.stream()
+                .map(Disposable::isDisposed)
+                .reduce(true, (previous, isMiddlewareDisposed) -> previous && isMiddlewareDisposed);
+        return isMiddlewaresDisposed && getConnectionManager().isDisposed();
     }
 }

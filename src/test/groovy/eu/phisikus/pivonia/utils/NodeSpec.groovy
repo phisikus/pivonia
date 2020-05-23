@@ -27,8 +27,8 @@ class NodeSpec extends Specification {
         def connectionManager = node.getConnectionManager()
         connectionManager != null
 
-        cleanup: "dispose of Connection Manager"
-        connectionManager.dispose()
+        cleanup: "free up resources"
+        node.dispose()
     }
 
     def "Should not build helper instance when field values are missing"() {
@@ -93,8 +93,8 @@ class NodeSpec extends Specification {
         and: "return node ID"
         node.getId() == nodeId
 
-        cleanup: "dispose of Connection Manager and encryption key"
-        connectionManager.dispose()
+        cleanup: "free up the resources and delete encryption key"
+        node.dispose()
         Files.delete(Path.of(keyFilename))
     }
 }

@@ -48,8 +48,9 @@ class NodeClientServerITSpec extends Specification {
             isMessageReceived
         }
 
-        cleanup:
+        cleanup: "free up resources"
         server.close()
         client.close()
+        node.dispose()
     }
 }

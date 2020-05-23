@@ -1,6 +1,7 @@
 package eu.phisikus.pivonia.utils;
 
 import eu.phisikus.pivonia.logic.MessageHandlers;
+import io.reactivex.disposables.Disposable;
 
 /**
  * Middleware extends Node with new capabilities.
@@ -9,7 +10,7 @@ import eu.phisikus.pivonia.logic.MessageHandlers;
  * @param <K> type of node ID
  * @param <S> type of state object
  */
-public interface Middleware<K, S> {
+public interface Middleware<K, S> extends Disposable {
 
     /**
      * Provides message handlers important to the algorithm implemented by the Middleware

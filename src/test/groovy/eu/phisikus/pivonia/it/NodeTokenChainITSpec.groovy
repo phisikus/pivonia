@@ -36,8 +36,8 @@ class NodeTokenChainITSpec extends Specification {
             }
         }
 
-        cleanup:
-        nodes.each { it.getValue().getConnectionManager().dispose() }
+        cleanup: "free up resources"
+        nodes.each { it.getValue().dispose() }
     }
 
     private void sendFirstMessage(Node firstNode, int firstNodePort) {

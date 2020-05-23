@@ -61,8 +61,7 @@ class NodePoolConnectionITSpec extends Specification {
             isMessageReceived
         }
 
-        cleanup:
-        connectionManager.dispose()
-        server.close()
+        cleanup: "free up resources"
+        node.dispose()
     }
 }
