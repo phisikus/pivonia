@@ -4,7 +4,7 @@ import eu.phisikus.pivonia.logic.MessageHandler
 import eu.phisikus.pivonia.logic.MessageHandlers
 import spock.lang.Specification
 
-class MiddlewareSpec extends Specification {
+class NodeMiddlewareSpec extends Specification {
     def "Should register Middleware properly"() {
         given: "first middleware instance exists"
         def firstMiddleware = Mock(Middleware)
