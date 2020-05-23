@@ -97,4 +97,43 @@ class NodeSpec extends Specification {
         node.dispose()
         Files.delete(Path.of(keyFilename))
     }
+
+    def "Should dispose of all created resources"() {
+        given: "application algorithm is defined"
+        def messageHandlers = MessageHandlers.create()
+
+        and: "node ID is defined"
+        def nodeId = UUID.randomUUID().toString()
+
+        and: "test middleware is defined"
+        def middleware = Mock(Middleware)
+        def middlewareMessageHandlers = MessageHandlers.create()
+        1 * middleware.getMessageHandlers() >> middlewareMessageHandlers
+        1 * middleware.init(_)
+        1 * middleware.dispose()
+        1 * middleware.isDisposed() >> true
+
+        when: "Node instance is created"
+        def node = Node.builder()
+                .id(nodeId)
+                .middleware(middleware)
+                .messageHandlers(messageHandlers)
+                .build()
+        def connectionManager = node.getConnectionManager()
+
+        and: "disposal function is called"
+        node.dispose()
+
+        then: "middleware message handlers are disposed of"
+        middlewareMessageHandlers.isDisposed()
+
+        and: "application algorithms message handlers are disposed of"
+        messageHandlers.isDisposed()
+
+        and: "networking components are disposed of as well"
+        connectionManager.isDisposed()
+
+        and: "Node instance itself identifies as disposed"
+        node.isDisposed()
+    }
 }

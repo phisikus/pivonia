@@ -155,7 +155,7 @@ public class Node<K, S> implements TCPComponent, Disposable {
     @Override
     public boolean isDisposed() {
         var isMiddlewaresDisposed = middlewares.stream()
-                .map(Disposable::isDisposed)
+                .map(Middleware::isDisposed)
                 .reduce(true, (previous, isMiddlewareDisposed) -> previous && isMiddlewareDisposed);
         return isMiddlewaresDisposed && getConnectionManager().isDisposed();
     }
