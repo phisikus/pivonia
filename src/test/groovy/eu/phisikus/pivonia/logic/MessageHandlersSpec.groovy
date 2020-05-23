@@ -3,7 +3,7 @@ package eu.phisikus.pivonia.logic
 import eu.phisikus.pivonia.api.Client
 import eu.phisikus.pivonia.api.MessageWithTransmitter
 import eu.phisikus.pivonia.api.Server
-import eu.phisikus.pivonia.utils.Node
+import eu.phisikus.pivonia.node.Node
 import io.reactivex.subjects.PublishSubject
 import spock.lang.Specification
 

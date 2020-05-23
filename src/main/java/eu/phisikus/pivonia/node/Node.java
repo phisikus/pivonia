@@ -1,4 +1,4 @@
-package eu.phisikus.pivonia.utils;
+package eu.phisikus.pivonia.node;
 
 import eu.phisikus.pivonia.api.Client;
 import eu.phisikus.pivonia.api.Server;

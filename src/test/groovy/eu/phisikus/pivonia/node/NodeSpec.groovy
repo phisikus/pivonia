@@ -1,8 +1,11 @@
-package eu.phisikus.pivonia.utils
+package eu.phisikus.pivonia.node
 
 
 import eu.phisikus.pivonia.api.Receiver
 import eu.phisikus.pivonia.logic.MessageHandlers
+import eu.phisikus.pivonia.node.Middleware
+import eu.phisikus.pivonia.node.Node
+import eu.phisikus.pivonia.utils.CryptoUtils
 import spock.lang.Specification
 
 import java.nio.file.Files

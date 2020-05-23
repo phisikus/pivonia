@@ -1,7 +1,9 @@
-package eu.phisikus.pivonia.utils
+package eu.phisikus.pivonia.node
 
 import eu.phisikus.pivonia.logic.MessageHandler
 import eu.phisikus.pivonia.logic.MessageHandlers
+import eu.phisikus.pivonia.node.Middleware
+import eu.phisikus.pivonia.node.Node
 import spock.lang.Specification
 
 class NodeMiddlewareSpec extends Specification {

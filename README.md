@@ -19,7 +19,7 @@ In this example an instance of the framework is created. Factory functions are u
   import eu.phisikus.pivonia.api.EmptyEnvelope;
   import eu.phisikus.pivonia.logic.MessageHandler;
   import eu.phisikus.pivonia.logic.MessageHandlers;
-  import eu.phisikus.pivonia.utils.Node;
+  import eu.phisikus.pivonia.node.Node;
   import io.reactivex.subjects.PublishSubject;
   
   import java.util.UUID;
