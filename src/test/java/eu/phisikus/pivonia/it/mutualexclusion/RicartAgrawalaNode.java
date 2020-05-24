@@ -8,6 +8,7 @@ import eu.phisikus.pivonia.test.ServerTestUtils;
 import io.github.resilience4j.core.IntervalFunction;
 import io.github.resilience4j.retry.Retry;
 import io.github.resilience4j.retry.RetryConfig;
+import io.reactivex.disposables.Disposable;
 import io.vavr.control.Try;
 import lombok.NonNull;
 import org.apache.logging.log4j.LogManager;
@@ -25,7 +26,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
-public class RicartAgrawalaNode {
+public class RicartAgrawalaNode implements Disposable {
     private static final Logger log = LogManager.getLogger(RicartAgrawalaNode.class);
     private final Integer nodeId;
     private final List<Integer> otherNodeIds;
@@ -138,4 +139,14 @@ public class RicartAgrawalaNode {
     }
 
 
+    @Override
+    public void dispose() {
+        senderThread.shutdown();
+        node.dispose();
+    }
+
+    @Override
+    public boolean isDisposed() {
+        return node.isDisposed() && senderThread.isShutdown();
+    }
 }

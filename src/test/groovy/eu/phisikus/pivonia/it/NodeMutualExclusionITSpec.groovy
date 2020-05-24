@@ -37,5 +37,7 @@ class NodeMutualExclusionITSpec extends Specification {
             }
         }
 
+        cleanup:
+        nodes.forEach { node -> node.dispose()}
     }
 }
