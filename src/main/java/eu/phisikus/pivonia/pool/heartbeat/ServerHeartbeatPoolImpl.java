@@ -25,7 +25,7 @@ import java.util.concurrent.*;
 class ServerHeartbeatPoolImpl<K> implements ServerHeartbeatPool<K> {
     @Getter
     private final List<Server> servers = new CopyOnWriteArrayList<>();
-    private final List<ServerHeartbeatEntry> clients = Collections.synchronizedList(new LinkedList<>());
+    private final List<ServerHeartbeatEntry> clients = new CopyOnWriteArrayList<>();
     private final ScheduledExecutorService timeoutSender = Executors.newSingleThreadScheduledExecutor();
     private final Map<Server, Disposable> listeners = new ConcurrentHashMap<>();
     private final Subject<HeartbeatPoolEvent> poolChanges = PublishSubject.create();
