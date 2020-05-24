@@ -95,19 +95,19 @@ class AddressTransmitterPoolMediatorSpec extends Specification {
         def addressChanges = PublishSubject.create()
         addressPool.getChanges() >> addressChanges
 
-        when: "mediator is created between Address Pool and Transmitter Pool"
+        and: "mediator is created between Address Pool and Transmitter Pool"
         def mediator = new AddressTransmitterPoolMediator(transmitterPool, addressPool, provider, 3)
 
-        and: "new Address is added to the Address Pool"
+        and: "Client provider will return a broken client that can never connect"
+        def failureResult = Try.failure(new IOException())
+        3 * client.connect("localhost", 7070) >> failureResult
+
+        when: "new Address is added to the Address Pool"
         def newAddress = new Address("localhost", 7070)
         addressChanges.onNext(new AddressPoolEvent(AddressPoolEvent.Operation.ADD, newAddress))
 
-        then: "Client provider should be called multiple times"
+        then: "Client provider should be called multiple times in attempt to make a connection"
         3 * provider.get() >> client
-
-        and: "there should be multiple unsuccessful connection attempts"
-        def failureResult = Try.failure(new IOException())
-        3 * client.connect("localhost", 7070) >> failureResult
 
         and: "client should not be added to the Transmitter Pool"
         0 * transmitterPool.add(client)
