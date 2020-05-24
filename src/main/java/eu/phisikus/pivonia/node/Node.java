@@ -86,7 +86,7 @@ public class Node<K, S> implements TCPComponent, Disposable {
                 .build(this);
     }
 
-    public ConnectionManager getConnectionManager() {
+    public ConnectionManager<K> getConnectionManager() {
         return connectionManager.get();
     }
 
