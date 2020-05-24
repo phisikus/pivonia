@@ -1,18 +1,18 @@
 package eu.phisikus.pivonia.it
 
 import eu.phisikus.pivonia.it.mutualexclusion.RicartAgrawalaNode
-import spock.lang.Ignore
 import spock.lang.Specification
+import spock.util.concurrent.PollingConditions
 
 import java.util.stream.Collectors
 
 class NodeMutualExclusionITSpec extends Specification {
 
+    def polling = new PollingConditions(delay: 1, timeout: 10)
 
-    @Ignore
     def "Should spawn multiple nodes that execute critical section"() {
         given: "there are multiple nodes"
-        def idList = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+        def idList = [0, 1, 2, 3, 4]
         def nodes = idList.stream()
                 .map { new RicartAgrawalaNode(it, idList) }
                 .collect(Collectors.toList())
@@ -30,10 +30,12 @@ class NodeMutualExclusionITSpec extends Specification {
         when: "all of them request access to critical section"
         nodes.forEach { it.requestAccess() }
 
-        then:
-        1 == 1 // TODO implement
-        Thread.sleep(2_000)
-
+        then: "eventually all of the nodes will enter the critical section"
+        polling.eventually {
+            nodes.forEach {
+                node -> assert node.isSuccess()
+            }
+        }
 
     }
 }

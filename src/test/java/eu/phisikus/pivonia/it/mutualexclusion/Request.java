@@ -8,7 +8,7 @@ import lombok.ToString;
 import lombok.Value;
 
 
-@ToString
+@ToString(callSuper = true)
 @EqualsAndHashCode(callSuper = true)
 @Value
 public class Request extends EmptyEnvelope<Integer> {

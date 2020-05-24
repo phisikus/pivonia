@@ -13,12 +13,16 @@ import lombok.NonNull;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.UUID;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiConsumer;
-import java.util.function.Predicate;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 public class RicartAgrawalaNode {
@@ -32,13 +36,15 @@ public class RicartAgrawalaNode {
     private final List<Accept> approvals = Collections.synchronizedList(new LinkedList<>());
     private final Node<Integer, RicartAgrawalaNode> node;
     private final RetryConfig retryConfiguration;
-    private final Predicate<Try> ifFailureButNotExitCode = result -> result.isFailure() &&
-            !NoSuchElementException.class
-                    .equals(result.getCause().getClass());
+    private final ExecutorService senderThread = Executors.newSingleThreadExecutor();
+    private final AtomicBoolean isSuccess = new AtomicBoolean(false);
 
     public RicartAgrawalaNode(Integer nodeId, List<Integer> allNodeIds) {
         this.nodeId = nodeId;
-        this.otherNodeIds = allNodeIds.stream().filter(otherNodeId -> !otherNodeId.equals(nodeId)).collect(Collectors.toList());
+        this.otherNodeIds = allNodeIds
+                .stream()
+                .filter(otherNodeId -> !otherNodeId.equals(nodeId))
+                .collect(Collectors.toList());
         this.serverPort = ServerTestUtils.getRandomPort();
         this.currentRequest = new AtomicReference<>(new Request(nodeId, null, clock.get()));
         this.node = Node.<Integer, RicartAgrawalaNode>builder()
@@ -52,17 +58,16 @@ public class RicartAgrawalaNode {
                 )
                 .build();
 
-
         retryConfiguration = RetryConfig.<Try>custom()
                 .maxAttempts(10)
                 .intervalFunction(IntervalFunction.ofExponentialBackoff())
-                .retryOnResult(ifFailureButNotExitCode)
                 .build();
 
         startServer();
     }
 
     private void startServer() {
+        log.info("Node is starting server (nodeId={}, port={})", nodeId, serverPort);
         var server = node.getServer().bind(serverPort).get();
         node.getConnectionManager().getServerPool().add(server);
     }
@@ -74,17 +79,23 @@ public class RicartAgrawalaNode {
                 .forEach(id -> sendMessage(new Request(nodeId, id, currentClockValue)));
     }
 
+    public boolean isSuccess() {
+        return isSuccess.get();
+    }
+
     private void sendMessage(EmptyEnvelope<Integer> message) {
         var retryId = UUID.randomUUID().toString();
         var transmitterPool = node.getConnectionManager()
                 .getTransmitterPool();
-        Retry.of(retryId, retryConfiguration)
-                .executeSupplier(() -> transmitterPool.get(message.getRecipientId()))
-                .map(transmitter -> {
+        var transmitter = Retry
+                .of(retryId, retryConfiguration)
+                .executeSupplier(() -> transmitterPool.get(message.getRecipientId()).orElseThrow(RuntimeException::new));
 
-                    return transmitter.send(message).getOrElseThrow((Supplier<RuntimeException>) RuntimeException::new);
-                })
-                .orElseThrow(RuntimeException::new);
+        senderThread.submit(() -> transmitter.send(message)
+                .onSuccess(ignored -> log.info("[{}] sendMessage({}) OK!", nodeId, message))
+                .onFailure(ignored -> log.error("[{}] sendMessage({}) FAILED!", nodeId, message))
+        );
+
     }
 
     @NonNull
@@ -116,11 +127,11 @@ public class RicartAgrawalaNode {
                     .collect(Collectors.toSet())
                     .containsAll(otherNodeIds);
             if (isCriticalSectionAvailable) {
-                log.info("Entering criticalSection! (nodeId={}, clock={}, waitingRequests={})", state.nodeId, state.clock, state.waitingRequests);
-                waitingRequests.forEach(request -> {
-                    sendMessage(new Request(nodeId, request.getSenderId(), currentClock));
-                });
+                log.info("[{}] Entering criticalSection! (clock={}, waitingRequests={})", state.nodeId, state.clock, state.waitingRequests);
+                waitingRequests.forEach(request -> sendMessage(new Accept(nodeId, request.getSenderId(), currentClock)));
                 waitingRequests.clear();
+                currentRequest.set(null);
+                isSuccess.set(true);
             }
 
         };
