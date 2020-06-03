@@ -47,7 +47,7 @@ public class RicartAgrawalaNode implements Disposable {
                 .filter(otherNodeId -> !otherNodeId.equals(nodeId))
                 .collect(Collectors.toList());
         this.serverPort = ServerTestUtils.getRandomPort();
-        this.currentRequest = new AtomicReference<>(new Request(nodeId, null, clock.get()));
+        this.currentRequest = new AtomicReference<>(null);
         this.node = Node.<Integer, RicartAgrawalaNode>builder()
                 .id(nodeId)
                 .state(this)
