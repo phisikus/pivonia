@@ -12,7 +12,7 @@ class NodeMutualExclusionITSpec extends Specification {
 
     def "Should spawn multiple nodes that execute critical section"() {
         given: "there are multiple nodes"
-        def idList = [0, 1, 2, 3, 4]
+        def idList = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
         def nodes = idList.stream()
                 .map { new RicartAgrawalaNode(it, idList) }
                 .collect(Collectors.toList())

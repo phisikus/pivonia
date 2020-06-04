@@ -18,6 +18,7 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -34,7 +35,7 @@ public class RicartAgrawalaNode implements Disposable {
     private final AtomicInteger clock = new AtomicInteger(0);
     private final AtomicReference<Request> currentRequest;
     private final List<Request> waitingRequests = Collections.synchronizedList(new LinkedList<>());
-    private final List<Accept> approvals = Collections.synchronizedList(new LinkedList<>());
+    private final List<Accept> approvals = new CopyOnWriteArrayList<>();
     private final Node<Integer, RicartAgrawalaNode> node;
     private final RetryConfig retryConfiguration;
     private final ExecutorService senderThread = Executors.newSingleThreadExecutor();
