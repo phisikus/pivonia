@@ -2,7 +2,7 @@ package eu.phisikus.pivonia.utils;
 
 import io.vavr.control.Try;
 
-import java.net.Inet4Address;
+
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.URI;
@@ -13,11 +13,17 @@ import java.time.Duration;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 public class NetworkAddressResolver {
 
     private static final String LOCAL_FALLBACK_ADDRESS = "127.0.0.1";
+
+    private Predicate<HttpResponse<String>> isPositiveResponse = response -> {
+        var statusCode = response.statusCode();
+        return statusCode >= 200 && statusCode < 300;
+    };
 
     private List<String> ipProviderUrls = Arrays.asList(
             "http://checkip.amazonaws.com/",
@@ -28,8 +34,8 @@ public class NetworkAddressResolver {
 
     private HttpClient httpClient = HttpClient.newBuilder()
             .version(HttpClient.Version.HTTP_1_1)
-            .followRedirects(HttpClient.Redirect.NORMAL)
-            .connectTimeout(Duration.ofSeconds(20))
+            .followRedirects(HttpClient.Redirect.NEVER)
+            .connectTimeout(Duration.ofSeconds(10))
             .build();
 
     public NetworkAddressResolver() {
@@ -51,6 +57,7 @@ public class NetworkAddressResolver {
 
     /**
      * Discover public IP address of executing machine using external services.
+     *
      * @return IP address or empty value if no address could be determined
      */
     public Optional<String> getPublicIp() {
@@ -59,13 +66,16 @@ public class NetworkAddressResolver {
                 .map(httpRequest -> Try.of(() -> httpClient.send(httpRequest, HttpResponse.BodyHandlers.ofString())))
                 .filter(Try::isSuccess)
                 .map(Try::get)
+                .filter(isPositiveResponse)
                 .map(HttpResponse::body)
-                .filter(String::isBlank)
+                .map(String::strip)
+                .filter(address -> !address.isBlank())
                 .findFirst();
     }
 
     /**
      * Discover local interface IP address of executing machine.
+     *
      * @return IP address, local in worst case
      */
     public String getLocalInterfaceAddress() {
