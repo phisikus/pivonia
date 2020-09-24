@@ -79,6 +79,9 @@ class NodeSpec extends Specification {
         def connectionManager = node.getConnectionManager()
         connectionManager != null
 
+        and: "configured util for resolving local machine address"
+        node.getNetworkAddressResolver() != null
+
         and: "message handlers have context set up"
         1 * messageHandlers.build(_ as Node) >> messageHandlers
 

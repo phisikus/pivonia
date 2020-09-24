@@ -16,6 +16,7 @@ import eu.phisikus.pivonia.pool.PoolModule;
 import eu.phisikus.pivonia.pool.heartbeat.HeartbeatPoolModule;
 import eu.phisikus.pivonia.tcp.DaggerTCPComponent;
 import eu.phisikus.pivonia.tcp.TCPComponent;
+import eu.phisikus.pivonia.utils.NetworkAddressResolver;
 import io.reactivex.disposables.Disposable;
 import io.vavr.Lazy;
 import lombok.Builder;
@@ -24,6 +25,8 @@ import lombok.NonNull;
 import lombok.Singular;
 
 import javax.inject.Provider;
+import java.net.http.HttpClient;
+import java.time.Duration;
 import java.util.List;
 
 /**
@@ -45,6 +48,7 @@ public class Node<K, S> implements TCPComponent, Disposable {
     private long timeoutDelay;
     private int maxConnectionRetryAttempts;
     private byte[] encryptionKey;
+    private NetworkAddressResolver networkAddressResolver;
     private Lazy<TCPComponent> tcpComponent;
     private Lazy<ConnectionManager> connectionManager;
     private List<Middleware<K, S>> middlewares;
@@ -66,6 +70,12 @@ public class Node<K, S> implements TCPComponent, Disposable {
         this.timeoutDelay = timeoutDelay == null ? 20000 : timeoutDelay;
         this.maxConnectionRetryAttempts = maxConnectionRetryAttempts == null ? 10 : maxConnectionRetryAttempts;
         this.encryptionKey = encryptionKey;
+        this.networkAddressResolver = new NetworkAddressResolver(
+                HttpClient.newBuilder()
+                        .connectTimeout(Duration.ofMillis(this.timeoutDelay))
+                        .followRedirects(HttpClient.Redirect.NEVER)
+                        .build()
+        );
         this.tcpComponent = Lazy.of(() -> {
             CryptoComponent cryptoComponent = getCryptoComponent();
             ConverterComponent converterComponent = getConverterComponent(cryptoComponent);
@@ -90,6 +100,9 @@ public class Node<K, S> implements TCPComponent, Disposable {
         return connectionManager.get();
     }
 
+    public NetworkAddressResolver getNetworkAddressResolver() {
+        return networkAddressResolver;
+    }
 
     private PoolComponent getPoolComponent(Provider<Client> clientProvider) {
         return DaggerPoolComponent.builder()
