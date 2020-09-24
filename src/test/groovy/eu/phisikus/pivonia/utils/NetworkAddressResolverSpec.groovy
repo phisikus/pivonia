@@ -63,7 +63,7 @@ class NetworkAddressResolverSpec extends Specification {
         when: "calling for public address retrieval"
         def actualAddress = networkAddressResolver.getPublicIp()
 
-        then: "client is calls the first provider"
+        then: "client calls the first provider"
         1 * client.send({
             def request = it as HttpRequest
             request.method() == "GET"
@@ -98,14 +98,14 @@ class NetworkAddressResolverSpec extends Specification {
         when: "calling for public address retrieval"
         def actualAddress = networkAddressResolver.getPublicIp()
 
-        then: "client is calls the first provider"
+        then: "client calls the first provider"
         1 * client.send({
             def request = it as HttpRequest
             request.method() == "GET"
             request.uri() == URI.create(failingProviderAddress)
         }, HttpResponse.BodyHandlers.ofString()) >> { throw new IOException() }
 
-        and: "empty result was returned"
+        and: "empty result is returned"
         actualAddress.isEmpty()
     }
 }
