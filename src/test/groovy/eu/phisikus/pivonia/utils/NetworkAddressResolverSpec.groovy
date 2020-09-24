@@ -4,7 +4,7 @@ import spock.lang.Specification
 
 import java.net.http.HttpClient
 
-class NetworkAddressResolverTest extends Specification {
+class NetworkAddressResolverSpec extends Specification {
 
     def "Should determine local address properly"() {
         given: "resolver instance is created"
