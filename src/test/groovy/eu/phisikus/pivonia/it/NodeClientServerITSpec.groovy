@@ -30,14 +30,16 @@ class NodeClientServerITSpec extends Specification {
                 .build()
 
         and: "server is created"
-        def port = ServerTestUtils.getRandomPort()
+        def serverAddress = node.getNetworkAddressResolver()
+                .getAddress()
+                .get()
         def server = node.getServer()
-                .bind(port)
+                .bind(serverAddress.port)
                 .get()
 
         and: "client is connected"
         def client = node.getClient()
-                .connect("localhost", port)
+                .connect(serverAddress.hostname, serverAddress.port)
                 .get()
 
         when: "message is sent"

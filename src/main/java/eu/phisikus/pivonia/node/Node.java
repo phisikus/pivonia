@@ -16,7 +16,8 @@ import eu.phisikus.pivonia.pool.PoolModule;
 import eu.phisikus.pivonia.pool.heartbeat.HeartbeatPoolModule;
 import eu.phisikus.pivonia.tcp.DaggerTCPComponent;
 import eu.phisikus.pivonia.tcp.TCPComponent;
-import eu.phisikus.pivonia.utils.NetworkAddressResolver;
+import eu.phisikus.pivonia.tcp.utils.LocalAddressResolver;
+import eu.phisikus.pivonia.tcp.utils.NetworkAddressResolver;
 import io.reactivex.disposables.Disposable;
 import io.vavr.Lazy;
 import lombok.Builder;
@@ -25,8 +26,6 @@ import lombok.NonNull;
 import lombok.Singular;
 
 import javax.inject.Provider;
-import java.net.http.HttpClient;
-import java.time.Duration;
 import java.util.List;
 
 /**
@@ -48,6 +47,7 @@ public class Node<K, S> implements TCPComponent, Disposable {
     private long timeoutDelay;
     private int maxConnectionRetryAttempts;
     private byte[] encryptionKey;
+    @Getter
     private NetworkAddressResolver networkAddressResolver;
     private Lazy<TCPComponent> tcpComponent;
     private Lazy<ConnectionManager> connectionManager;
@@ -61,7 +61,8 @@ public class Node<K, S> implements TCPComponent, Disposable {
          Long heartbeatDelay,
          Long timeoutDelay,
          Integer maxConnectionRetryAttempts,
-         byte[] encryptionKey) {
+         byte[] encryptionKey,
+         NetworkAddressResolver networkAddressResolver) {
         this.id = id;
         this.state = state;
         this.middlewares = middlewares;
@@ -70,18 +71,12 @@ public class Node<K, S> implements TCPComponent, Disposable {
         this.timeoutDelay = timeoutDelay == null ? 20000 : timeoutDelay;
         this.maxConnectionRetryAttempts = maxConnectionRetryAttempts == null ? 10 : maxConnectionRetryAttempts;
         this.encryptionKey = encryptionKey;
-        this.networkAddressResolver = new NetworkAddressResolver(
-                HttpClient.newBuilder()
-                        .connectTimeout(Duration.ofMillis(this.timeoutDelay))
-                        .followRedirects(HttpClient.Redirect.NEVER)
-                        .build()
-        );
+        this.networkAddressResolver = networkAddressResolver == null ? new LocalAddressResolver() : networkAddressResolver;
         this.tcpComponent = Lazy.of(() -> {
             CryptoComponent cryptoComponent = getCryptoComponent();
             ConverterComponent converterComponent = getConverterComponent(cryptoComponent);
             return getTcpComponent(converterComponent);
         });
-
         this.connectionManager = Lazy.of(() -> {
             Provider<Client> clientProvider = getClientProvider(tcpComponent.get());
             return getPoolComponent(clientProvider).getConnectionManager();
@@ -98,10 +93,6 @@ public class Node<K, S> implements TCPComponent, Disposable {
 
     public ConnectionManager<K> getConnectionManager() {
         return connectionManager.get();
-    }
-
-    public NetworkAddressResolver getNetworkAddressResolver() {
-        return networkAddressResolver;
     }
 
     private PoolComponent getPoolComponent(Provider<Client> clientProvider) {

@@ -38,9 +38,11 @@ class NodePoolConnectionITSpec extends Specification {
         def connectionManager = node.getConnectionManager()
 
         and: "server is created"
-        def port = ServerTestUtils.getRandomPort()
+        def serverAddress = node.getNetworkAddressResolver()
+                .getAddress()
+                .get()
         def server = node.getServer()
-                .bind(port)
+                .bind(serverAddress.port)
                 .get()
         HeartbeatServerVisitor.registerHeartbeatListener(nodeId, server)
 
@@ -54,7 +56,7 @@ class NodePoolConnectionITSpec extends Specification {
 
         when: "address is added to the pool"
         def addressPool = connectionManager.getAddressPool()
-        addressPool.add("localhost", port)
+        addressPool.add(serverAddress.hostname, serverAddress.port)
 
         then: "message is sent and received by the server"
         pollingConditions.eventually {

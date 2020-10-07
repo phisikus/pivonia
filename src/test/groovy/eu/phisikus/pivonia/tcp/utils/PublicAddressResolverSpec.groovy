@@ -1,4 +1,4 @@
-package eu.phisikus.pivonia.utils
+package eu.phisikus.pivonia.tcp.utils
 
 import spock.lang.Specification
 
@@ -6,18 +6,7 @@ import java.net.http.HttpClient
 import java.net.http.HttpRequest
 import java.net.http.HttpResponse
 
-class NetworkAddressResolverSpec extends Specification {
-
-    def "Should determine local address properly"() {
-        given: "resolver instance is created"
-        def networkAddressResolver = new NetworkAddressResolver(Mock(HttpClient) as HttpClient, [])
-
-        when: "calling for local address retrieval"
-        def actualAddress = networkAddressResolver.getLocalInterfaceAddress()
-
-        then: "returned address is correct"
-        InetAddress.getByName(actualAddress) != null
-    }
+class PublicAddressResolverSpec extends Specification {
 
     def "Should determine public address properly"() {
         given: "client is mocked"
@@ -27,10 +16,10 @@ class NetworkAddressResolverSpec extends Specification {
 
         and: "resolver instance is created"
         def providerAddress = "http://localhost"
-        def networkAddressResolver = new NetworkAddressResolver(client, [providerAddress])
+        def networkAddressResolver = new PublicAddressResolver(client, [providerAddress])
 
         when: "calling for public address retrieval"
-        def actualAddress = networkAddressResolver.getPublicIp()
+        def actualAddress = networkAddressResolver.getAddress()
 
         then: "client is called for the address"
         1 * client.send({
@@ -43,8 +32,12 @@ class NetworkAddressResolverSpec extends Specification {
 
         and: "actual address was determined correctly"
         verifyAll(actualAddress) {
-            isPresent()
-            get() == expectedAddress
+            isSuccess()
+            verifyAll(get()) {
+                hostname == expectedAddress
+                port != null
+                port > 0
+            }
         }
     }
 
@@ -58,10 +51,10 @@ class NetworkAddressResolverSpec extends Specification {
         and: "resolver instance is created"
         def providerAddress = "http://localhost"
         def failingProviderAddress = "http://externalhost"
-        def networkAddressResolver = new NetworkAddressResolver(client, [failingProviderAddress, providerAddress])
+        def networkAddressResolver = new PublicAddressResolver(client, [failingProviderAddress, providerAddress])
 
         when: "calling for public address retrieval"
-        def actualAddress = networkAddressResolver.getPublicIp()
+        def actualAddress = networkAddressResolver.getAddress()
 
         then: "client calls the first provider"
         1 * client.send({
@@ -82,21 +75,25 @@ class NetworkAddressResolverSpec extends Specification {
 
         and: "actual address was determined correctly"
         verifyAll(actualAddress) {
-            isPresent()
-            get() == expectedAddress
+            isSuccess()
+            verifyAll(get()) {
+                hostname == expectedAddress
+                port != null
+                port > 0
+            }
         }
     }
 
-    def "Should provide empty result if all providers fail"() {
+    def "Should provide failure result if all providers fail"() {
         given: "client is mocked"
         def client = Mock(HttpClient)
         def failingProviderAddress = "http://externalhost"
 
         and: "resolver instance is created"
-        def networkAddressResolver = new NetworkAddressResolver(client, [failingProviderAddress])
+        def networkAddressResolver = new PublicAddressResolver(client, [failingProviderAddress])
 
         when: "calling for public address retrieval"
-        def actualAddress = networkAddressResolver.getPublicIp()
+        def actualAddress = networkAddressResolver.getAddress()
 
         then: "client calls the first provider"
         1 * client.send({
@@ -105,7 +102,10 @@ class NetworkAddressResolverSpec extends Specification {
             request.uri() == URI.create(failingProviderAddress)
         }, HttpResponse.BodyHandlers.ofString()) >> { throw new IOException() }
 
-        and: "empty result is returned"
-        actualAddress.isEmpty()
+        and: "failure result is returned"
+        verifyAll(actualAddress) {
+            isFailure()
+            getCause().getClass() == NetworkAddressResolver.AddressNotResolvedException.class
+        }
     }
 }

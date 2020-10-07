@@ -3,6 +3,7 @@ package eu.phisikus.pivonia.it
 import eu.phisikus.pivonia.logic.MessageHandler
 import eu.phisikus.pivonia.logic.MessageHandlers
 import eu.phisikus.pivonia.node.Node
+import eu.phisikus.pivonia.tcp.utils.AvailablePortProvider
 import eu.phisikus.pivonia.test.ServerTestUtils
 import spock.lang.Specification
 
@@ -64,7 +65,7 @@ class NodeTokenChainITSpec extends Specification {
     private def buildNodes(int count) {
         def nodes = [:]
         (0..count).forEach({
-            def port = ServerTestUtils.getRandomPort()
+            def port = AvailablePortProvider.getRandomPort().get()
             nodes.put(port, buildNode(it, port))
         })
         nodes

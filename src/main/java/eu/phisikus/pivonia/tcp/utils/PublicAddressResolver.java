@@ -1,10 +1,8 @@
-package eu.phisikus.pivonia.utils;
+package eu.phisikus.pivonia.tcp.utils;
 
+import eu.phisikus.pivonia.pool.address.Address;
 import io.vavr.control.Try;
 
-
-import java.net.InetAddress;
-import java.net.NetworkInterface;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -12,15 +10,15 @@ import java.net.http.HttpResponse;
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 import java.util.function.Predicate;
-import java.util.stream.Stream;
 
-public class NetworkAddressResolver {
+/**
+ * Provides public network address using external service.
+ * Available port is chosen from local opened ports.
+ */
+public class PublicAddressResolver implements NetworkAddressResolver {
 
-    private static final String LOCAL_FALLBACK_ADDRESS = "127.0.0.1";
-
-    private Predicate<HttpResponse<String>> isPositiveResponse = response -> {
+    private final Predicate<HttpResponse<String>> isPositiveResponse = response -> {
         var statusCode = response.statusCode();
         return statusCode >= 200 && statusCode < 300;
     };
@@ -38,29 +36,32 @@ public class NetworkAddressResolver {
             .connectTimeout(Duration.ofSeconds(10))
             .build();
 
-    public NetworkAddressResolver() {
+    public PublicAddressResolver() {
     }
 
-    public NetworkAddressResolver(List<String> ipProviderUrls) {
+    public PublicAddressResolver(List<String> ipProviderUrls) {
         this.ipProviderUrls = ipProviderUrls;
     }
 
-
-    public NetworkAddressResolver(HttpClient httpClient) {
+    public PublicAddressResolver(HttpClient httpClient) {
         this.httpClient = httpClient;
     }
 
-    public NetworkAddressResolver(HttpClient httpClient, List<String> ipProviderUrls) {
+    public PublicAddressResolver(HttpClient httpClient, List<String> ipProviderUrls) {
         this.httpClient = httpClient;
         this.ipProviderUrls = ipProviderUrls;
     }
 
-    /**
-     * Discover public IP address of executing machine using external services.
-     *
-     * @return IP address or empty value if no address could be determined
-     */
-    public Optional<String> getPublicIp() {
+    @Override
+    public Try<Address> getAddress() {
+        return getHost()
+                .flatMap(address -> AvailablePortProvider
+                        .getRandomPort()
+                        .map(port -> new Address(address, port))
+                ).recoverWith(throwable -> Try.failure(new AddressNotResolvedException(throwable)));
+    }
+
+    private Try<String> getHost() {
         return ipProviderUrls.stream()
                 .map(url -> HttpRequest.newBuilder(URI.create(url)).build())
                 .map(httpRequest -> Try.of(() -> httpClient.send(httpRequest, HttpResponse.BodyHandlers.ofString())))
@@ -70,21 +71,8 @@ public class NetworkAddressResolver {
                 .map(HttpResponse::body)
                 .map(String::strip)
                 .filter(address -> !address.isBlank())
-                .findFirst();
-    }
-
-    /**
-     * Discover local interface IP address of executing machine.
-     *
-     * @return IP address, local in worst case
-     */
-    public String getLocalInterfaceAddress() {
-        return Try.of(NetworkInterface::networkInterfaces)
-                .getOrElse(Stream.empty())
-                .filter(nic -> Try.of(() -> !nic.isLoopback() && nic.isUp()).getOrElse(true))
-                .flatMap(NetworkInterface::inetAddresses)
-                .map(InetAddress::getHostAddress)
                 .findFirst()
-                .orElse(LOCAL_FALLBACK_ADDRESS);
+                .map(Try::success)
+                .orElseGet(() -> Try.failure(new AddressNotResolvedException()));
     }
 }
