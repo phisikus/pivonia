@@ -27,18 +27,18 @@ public class PublicAddressResolver implements NetworkAddressResolver {
         return statusCode >= 200 && statusCode < 300;
     };
 
+    private HttpClient httpClient = HttpClient.newBuilder()
+            .version(HttpClient.Version.HTTP_1_1)
+            .followRedirects(HttpClient.Redirect.NEVER)
+            .connectTimeout(Duration.ofSeconds(10))
+            .build();
+
     private List<String> ipProviderUrls = Arrays.asList(
             "http://checkip.amazonaws.com/",
             "https://ipv4.icanhazip.com/",
             "https://myexternalip.com/raw",
             "https://bot.whatismyipaddress.com/"
     );
-
-    private HttpClient httpClient = HttpClient.newBuilder()
-            .version(HttpClient.Version.HTTP_1_1)
-            .followRedirects(HttpClient.Redirect.NEVER)
-            .connectTimeout(Duration.ofSeconds(10))
-            .build();
 
     public PublicAddressResolver(List<String> ipProviderUrls) {
         this.ipProviderUrls = ipProviderUrls;
