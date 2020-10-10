@@ -2,6 +2,8 @@ package eu.phisikus.pivonia.tcp.utils;
 
 import eu.phisikus.pivonia.pool.address.Address;
 import io.vavr.control.Try;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -16,6 +18,8 @@ import java.util.function.Predicate;
  * Provides public network address using external service.
  * Available port is chosen from local opened ports.
  */
+@NoArgsConstructor
+@AllArgsConstructor
 public class PublicAddressResolver implements NetworkAddressResolver {
 
     private final Predicate<HttpResponse<String>> isPositiveResponse = response -> {
@@ -36,20 +40,12 @@ public class PublicAddressResolver implements NetworkAddressResolver {
             .connectTimeout(Duration.ofSeconds(10))
             .build();
 
-    public PublicAddressResolver() {
-    }
-
     public PublicAddressResolver(List<String> ipProviderUrls) {
         this.ipProviderUrls = ipProviderUrls;
     }
 
     public PublicAddressResolver(HttpClient httpClient) {
         this.httpClient = httpClient;
-    }
-
-    public PublicAddressResolver(HttpClient httpClient, List<String> ipProviderUrls) {
-        this.httpClient = httpClient;
-        this.ipProviderUrls = ipProviderUrls;
     }
 
     @Override
