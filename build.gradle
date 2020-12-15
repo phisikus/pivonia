@@ -16,7 +16,7 @@ configurations {
  * Settings
  */
 rootProject.group = "eu.phisikus.pivonia"
-rootProject.version = "0.0.25"
+rootProject.version = "0.0.26"
 
 
 /**

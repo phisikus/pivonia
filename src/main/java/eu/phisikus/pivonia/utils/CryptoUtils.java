@@ -4,7 +4,7 @@ import com.google.crypto.tink.CleartextKeysetHandle;
 import com.google.crypto.tink.JsonKeysetWriter;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.aead.AeadConfig;
-import com.google.crypto.tink.aead.AeadKeyTemplates;
+import com.google.crypto.tink.aead.AesGcmKeyManager;
 import com.google.crypto.tink.subtle.Random;
 
 import java.io.IOException;
@@ -26,7 +26,7 @@ public class CryptoUtils {
 
     public static void buildKeyset(String testKeyFilename) throws GeneralSecurityException, IOException {
         AeadConfig.register();
-        var keysetHandle = KeysetHandle.generateNew(AeadKeyTemplates.AES128_GCM);
+        var keysetHandle = KeysetHandle.generateNew(AesGcmKeyManager.aes128GcmTemplate());
         var keysetWriter = JsonKeysetWriter.withPath(testKeyFilename);
         CleartextKeysetHandle.write(keysetHandle, keysetWriter);
     }
