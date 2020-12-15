@@ -88,9 +88,8 @@ public class MessageHandlers<C> implements Disposable {
     }
 
     private void handleMessageEvent(MessageWithTransmitter messageEvent, MessageHandler handler) {
-        var message = messageEvent.getMessage();
         var messageHandler = handler.getMessageHandler();
-        messageHandler.accept(context, message);
+        messageHandler.accept(context, messageEvent);
     }
 
     @Override

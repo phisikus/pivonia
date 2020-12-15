@@ -4,7 +4,6 @@ import eu.phisikus.pivonia.api.EmptyEnvelope
 import eu.phisikus.pivonia.logic.MessageHandler
 import eu.phisikus.pivonia.logic.MessageHandlers
 import eu.phisikus.pivonia.node.Node
-import eu.phisikus.pivonia.test.ServerTestUtils
 import spock.lang.Specification
 import spock.util.concurrent.PollingConditions
 
@@ -19,7 +18,7 @@ class NodeClientServerITSpec extends Specification {
 
         and: "defined algorithm that notifies about message coming in"
         def isMessageReceived = false
-        def handler = { ctx, msg -> isMessageReceived = msg.equals(message) && ctx != null }
+        def handler = { ctx, event -> isMessageReceived = event.getMessage().equals(message) && ctx != null }
         def messageHandlers = MessageHandlers.create()
                 .withHandler(MessageHandler.create(EmptyEnvelope, handler))
 
@@ -47,7 +46,7 @@ class NodeClientServerITSpec extends Specification {
 
         then: "message is received"
         pollingConditions.eventually {
-            isMessageReceived
+            assert isMessageReceived
         }
 
         cleanup: "free up resources"

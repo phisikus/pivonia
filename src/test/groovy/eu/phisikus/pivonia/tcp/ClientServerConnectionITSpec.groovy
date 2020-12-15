@@ -30,10 +30,8 @@ class ClientServerConnectionITSpec extends Specification {
         def server = startServer(port, actualMessageHolder)
         def connectedClient = client.connect("localhost", port).get()
 
-
         and: "message is sent using client"
         def messageSent = connectedClient.send(testMessage)
-
 
         then: "result is successful and message is received by the server"
         messageSent.isSuccess()

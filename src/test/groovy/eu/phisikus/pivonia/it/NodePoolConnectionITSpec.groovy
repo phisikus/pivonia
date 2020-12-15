@@ -21,7 +21,7 @@ class NodePoolConnectionITSpec extends Specification {
 
         and: "defined algorithm that notifies about message coming in"
         def isMessageReceived = false
-        def handler = { ctx, msg -> isMessageReceived = msg == message && ctx != null }
+        def handler = { ctx, event -> isMessageReceived = (event.getMessage() == message) && ctx != null }
         def messageHandlers = MessageHandlers.create()
                 .withHandler(MessageHandler.create(EmptyEnvelope, handler))
 
@@ -60,7 +60,7 @@ class NodePoolConnectionITSpec extends Specification {
 
         then: "message is sent and received by the server"
         pollingConditions.eventually {
-            isMessageReceived
+            assert isMessageReceived
         }
 
         cleanup: "free up resources"

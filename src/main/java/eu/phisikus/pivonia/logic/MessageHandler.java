@@ -1,5 +1,6 @@
 package eu.phisikus.pivonia.logic;
 
+import eu.phisikus.pivonia.api.MessageWithTransmitter;
 import lombok.NonNull;
 import lombok.Value;
 
@@ -16,7 +17,7 @@ import java.util.function.BiConsumer;
 @Value
 public class MessageHandler<C, T> {
     private final Class<T> messageType;
-    private final BiConsumer<C, T> messageHandler;
+    private final BiConsumer<C, MessageWithTransmitter<T>> messageHandler;
 
     /**
      * Create message handler for given type and message consuming function.
@@ -27,7 +28,7 @@ public class MessageHandler<C, T> {
      * @param <T>            generic type of message handled by this MessageHandler
      * @return new and ready to use MessageHandler
      */
-    public static <C, T> MessageHandler<C, T> create(@NonNull Class<T> messageType, @NonNull BiConsumer<C, T> messageHandler) {
+    public static <C, T> MessageHandler<C, T> create(@NonNull Class<T> messageType, @NonNull BiConsumer<C, MessageWithTransmitter<T>> messageHandler) {
         return new MessageHandler<>(messageType, messageHandler);
     }
 }

@@ -15,8 +15,12 @@ class MessageHandlersSpec extends Specification {
         given: "there are two Message Handler definitions"
         def messagesObserved = []
         def context = Mock(Node)
-        def firstConsumer = { Node ctx, FirstType message -> messagesObserved.add(message) } as BiConsumer<Node, FirstType>
-        def secondConsumer = { Node ctx, SecondType message -> messagesObserved.add(message) } as BiConsumer<Node, SecondType>
+        def firstConsumer = {
+            Node ctx, MessageWithTransmitter<FirstType> event -> messagesObserved.add(event.getMessage())
+        } as BiConsumer<Node, FirstType>
+        def secondConsumer = {
+            Node ctx, MessageWithTransmitter<SecondType> event -> messagesObserved.add(event.getMessage())
+        } as BiConsumer<Node, SecondType>
         def firstHandler = MessageHandler.create(FirstType, firstConsumer)
         def secondHandler = MessageHandler.create(SecondType, secondConsumer)
 
@@ -60,8 +64,12 @@ class MessageHandlersSpec extends Specification {
         given: "there are two Message Handler definitions"
         def messagesObserved = []
         def context = Mock(Node)
-        def firstConsumer = { Node ctx, FirstType message -> messagesObserved.add(message) } as BiConsumer<Node, FirstType>
-        def secondConsumer = { Node ctx, SecondType message -> messagesObserved.add(message) } as BiConsumer<Node, SecondType>
+        def firstConsumer = {
+            Node ctx, MessageWithTransmitter<FirstType> event -> messagesObserved.add(event.getMessage())
+        } as BiConsumer<Node, FirstType>
+        def secondConsumer = {
+            Node ctx, MessageWithTransmitter<SecondType> event -> messagesObserved.add(event.getMessage())
+        } as BiConsumer<Node, SecondType>
         def firstHandler = MessageHandler.create(FirstType, firstConsumer)
         def secondHandler = MessageHandler.create(SecondType, secondConsumer)
 

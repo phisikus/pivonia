@@ -1,6 +1,7 @@
 package eu.phisikus.pivonia.it.mutualexclusion;
 
 import eu.phisikus.pivonia.api.EmptyEnvelope;
+import eu.phisikus.pivonia.api.MessageWithTransmitter;
 import eu.phisikus.pivonia.logic.MessageHandler;
 import eu.phisikus.pivonia.logic.MessageHandlers;
 import eu.phisikus.pivonia.node.Node;
@@ -101,8 +102,9 @@ public class RicartAgrawalaNode implements Disposable {
     }
 
     @NonNull
-    private BiConsumer<Node<Integer, RicartAgrawalaNode>, Request> onRequest() {
-        return (node, request) -> {
+    private BiConsumer<Node<Integer, RicartAgrawalaNode>, MessageWithTransmitter<Request>> onRequest() {
+        return (node, messageWithTransmitter) -> {
+            var request = messageWithTransmitter.getMessage();
             var state = node.getState();
             var currentNodeRequest = state.currentRequest.get();
             if (request.isBetterThan(currentNodeRequest)) {
@@ -118,8 +120,9 @@ public class RicartAgrawalaNode implements Disposable {
 
 
     @NonNull
-    private BiConsumer<Node<Integer, RicartAgrawalaNode>, Accept> onAccept() {
-        return (node, accept) -> {
+    private BiConsumer<Node<Integer, RicartAgrawalaNode>, MessageWithTransmitter<Accept>> onAccept() {
+        return (node, messageWithTransmitter) -> {
+            var accept = messageWithTransmitter.getMessage();
             var state = node.getState();
             var currentClock = state.clock.incrementAndGet();
             state.approvals.add(accept);

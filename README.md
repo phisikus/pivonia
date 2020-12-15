@@ -25,7 +25,7 @@ In this example an instance of the framework is created. Factory functions are u
   import java.util.UUID;
   
   public class Main {
-      public static void main(String[] args) {
+      public static void main(String[] args) throws Exception {
       
           // generate ID of some type for node that we are creating
           var nodeId = UUID.randomUUID();        
@@ -36,7 +36,7 @@ In this example an instance of the framework is created. Factory functions are u
           // you can register message handlers for different types of messages
           var messageHandlers = MessageHandlers.create()
                   .withHandler(
-                          MessageHandler.create(EmptyEnvelope.class, (node, message) -> messages.onNext(message))
+                          MessageHandler.create(EmptyEnvelope.class, (node, event) -> messages.onNext(event.getMessage()))
                   );
           // now we create instance of the framework by setting ID and message handlers
           var node = Node.builder()
@@ -88,7 +88,7 @@ repositories {
 ```     
 Current version dependency:
 ```groovy
-implementation "eu.phisikus.pivonia:pivonia:0.0.23"
+implementation "eu.phisikus.pivonia:pivonia:0.0.25"
 ```
 
 If you have issues with configuration you can read more in the [GitHub Packages official documentation](https://help.github.com/en/packages/using-github-packages-with-your-projects-ecosystem) 
@@ -112,7 +112,7 @@ Have a look at integrations tests and javadocs for more details.
 In this example server is created and added to the pool which causes it to respond to heartbeat messages properly. That server's address is added to the pool which causes client to be connected, heartbeat message to be sent, response to be returned by the server and as a result of that handshake dummy application message is sent.
 ```java
 public class Main {
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
 
         // generate ID of some type for node that we are creating
         var nodeId = UUID.randomUUID();
@@ -123,7 +123,7 @@ public class Main {
         // you can register message handlers for different types of messages
         var messageHandlers = MessageHandlers.create()
                 .withHandler(
-                        MessageHandler.create(EmptyEnvelope.class, (node, message) -> messages.onNext(message))
+                        MessageHandler.create(EmptyEnvelope.class, (node, event) -> messages.onNext(event.getMessage()))
                 );
         // now we create instance of the framework by setting ID and message handlers
         var node = Node.builder()
@@ -142,7 +142,7 @@ public class Main {
 
         // let's prepare test message
         var newMessage = new EmptyEnvelope<>(nodeId, nodeId);
-        var clientHeartbeatPool = (ClientHeartbeatPool<UUID>) connectionManager.getClientHeartbeatPool();
+        var clientHeartbeatPool = connectionManager.getClientHeartbeatPool();
 
         // ... and send that message once heartbeat message is returned to the client
         var subscription = clientHeartbeatPool.getHeartbeatChanges()

@@ -1,5 +1,6 @@
 package eu.phisikus.pivonia.it
 
+import eu.phisikus.pivonia.api.MessageWithTransmitter
 import eu.phisikus.pivonia.logic.MessageHandler
 import eu.phisikus.pivonia.logic.MessageHandlers
 import eu.phisikus.pivonia.node.Node
@@ -72,8 +73,9 @@ class NodeTokenChainITSpec extends Specification {
     }
 
     private Node<Integer, NodeState> buildNode(int nodeId, int port) {
-        BiConsumer<Node<Integer, NodeState>, TokenMessage> tokenHandler = {
-            context, message ->
+        BiConsumer<Node<Integer, NodeState>, MessageWithTransmitter<TokenMessage>> tokenHandler = {
+            context, event ->
+                def message = event.getMessage()
                 def state = context.getState()
                 def transmitters = context.getConnectionManager().getTransmitterPool()
                 def newMessage = new TokenMessage(nodeId, nodeId + 1, state.clock)
