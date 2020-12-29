@@ -16,7 +16,7 @@ configurations {
  * Settings
  */
 rootProject.group = "eu.phisikus.pivonia"
-rootProject.version = "0.0.26"
+rootProject.version = "0.0.27"
 
 
 /**
@@ -100,6 +100,7 @@ test {
     testLogging {
         events "PASSED", "FAILED", "SKIPPED"
     }
+    useJUnitPlatform()
 }
 
 /**
