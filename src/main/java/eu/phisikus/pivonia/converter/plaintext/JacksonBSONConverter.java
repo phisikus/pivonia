@@ -1,6 +1,7 @@
 package eu.phisikus.pivonia.converter.plaintext;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.module.kotlin.KotlinModule;
 import de.undercouch.bson4jackson.BsonFactory;
 import eu.phisikus.pivonia.converter.BSONConverter;
 
@@ -15,6 +16,7 @@ class JacksonBSONConverter implements BSONConverter {
 
     public JacksonBSONConverter() {
         mapper = new ObjectMapper(new BsonFactory());
+        mapper.registerModule(new KotlinModule());
         supportedTypes = new HashSet<>();
     }
 

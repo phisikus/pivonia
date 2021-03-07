@@ -16,7 +16,7 @@ configurations {
  * Settings
  */
 rootProject.group = "eu.phisikus.pivonia"
-rootProject.version = "0.0.27"
+rootProject.version = "0.0.28"
 
 
 /**
@@ -60,21 +60,22 @@ dependencies {
     /**
      * Serialization
      */
-    compile "de.undercouch:bson4jackson:2.11.0"
+    implementation "de.undercouch:bson4jackson:2.11.0"
+    implementation "com.fasterxml.jackson.module:jackson-module-kotlin:2.12.+"
 
     /**
      * Encryption
      */
-    compile "com.google.crypto.tink:tink:1.5.0"
+    implementation "com.google.crypto.tink:tink:1.5.0"
 
     /**
      * Utils
      */
-    compile "io.vavr:vavr:0.10.3"
-    compile "io.github.resilience4j:resilience4j-retry:1.6.1"
-    compile "org.apache.logging.log4j:log4j-api:2.14.0"
-    compile "org.apache.logging.log4j:log4j-core:2.14.0"
-    compile "io.reactivex.rxjava2:rxjava:2.2.19"
+    implementation "io.vavr:vavr:0.10.3"
+    implementation "io.github.resilience4j:resilience4j-retry:1.6.1"
+    implementation "org.apache.logging.log4j:log4j-api:2.14.0"
+    implementation "org.apache.logging.log4j:log4j-core:2.14.0"
+    implementation "io.reactivex.rxjava2:rxjava:2.2.19"
 
     /**
      * Testing
