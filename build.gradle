@@ -47,50 +47,45 @@ dependencies {
     /**
      * Lombok
      */
-    annotationProcessor "org.projectlombok:lombok:1.18.16"
-    testAnnotationProcessor "org.projectlombok:lombok:1.18.16"
-    implementation "org.projectlombok:lombok:1.18.12"
+    annotationProcessor "org.projectlombok:lombok:1.18.22"
+    testAnnotationProcessor "org.projectlombok:lombok:1.18.22"
+    implementation "org.projectlombok:lombok:1.18.22"
 
     /**
      * Dependency Injection
      */
-    annotationProcessor "com.google.dagger:dagger-compiler:2.30.1"
-    implementation "com.google.dagger:dagger:2.30.1"
+    annotationProcessor "com.google.dagger:dagger-compiler:2.40.1"
+    implementation "com.google.dagger:dagger:2.40.1"
 
     /**
      * Serialization
      */
-    implementation "de.undercouch:bson4jackson:2.11.0"
-    implementation "com.fasterxml.jackson.module:jackson-module-kotlin:2.12.0"
+    implementation "de.undercouch:bson4jackson:2.13.0"
+    implementation "com.fasterxml.jackson.module:jackson-module-kotlin:2.13.0"
 
     /**
      * Encryption
      */
-    implementation "com.google.crypto.tink:tink:1.5.0"
+    implementation "com.google.crypto.tink:tink:1.6.1"
 
     /**
      * Utils
      */
-    implementation "io.vavr:vavr:0.10.3"
+    implementation "io.vavr:vavr:0.10.4"
     implementation "io.github.resilience4j:resilience4j-retry:1.6.1"
-    implementation "org.apache.logging.log4j:log4j-api:2.14.0"
-    implementation "org.apache.logging.log4j:log4j-core:2.14.0"
-    implementation "io.reactivex.rxjava2:rxjava:2.2.19"
+    implementation "org.apache.logging.log4j:log4j-api:2.14.1"
+    implementation "org.apache.logging.log4j:log4j-core:2.14.1"
+    implementation "io.reactivex.rxjava2:rxjava:2.2.21"
 
     /**
      * Testing
      */
-    testCompile "org.codehaus.groovy:groovy-all:3.0.7"
-    testCompile "org.spockframework:spock-core:2.0-M4-groovy-3.0"
-    testCompile "cglib:cglib-nodep:3.3.0"
-    testCompile "org.objenesis:objenesis:3.1"
-    testCompile "org.awaitility:awaitility:4.0.1"
+    testImplementation "org.codehaus.groovy:groovy-all:3.0.9"
+    testImplementation "org.spockframework:spock-core:2.0-groovy-3.0"
+    testImplementation "cglib:cglib-nodep:3.3.0"
+    testImplementation "org.objenesis:objenesis:3.1"
+    testImplementation "org.awaitility:awaitility:4.1.1"
 
-
-    /**
-     * Publishing
-     */
-    deployerJars "org.apache.maven.wagon:wagon-ssh:3.4.2"
 }
 
 
