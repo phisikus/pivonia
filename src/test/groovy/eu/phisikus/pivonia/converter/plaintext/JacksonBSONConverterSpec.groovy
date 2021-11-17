@@ -1,6 +1,6 @@
 package eu.phisikus.pivonia.converter.plaintext
 
-import eu.phisikus.pivonia.api.TestMessage
+import eu.phisikus.pivonia.test.TestMessage
 import spock.lang.Specification
 import spock.lang.Subject
 

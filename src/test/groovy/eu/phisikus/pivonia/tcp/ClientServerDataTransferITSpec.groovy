@@ -1,14 +1,17 @@
 package eu.phisikus.pivonia.tcp
 
-import eu.phisikus.pivonia.api.TestMessage
+import eu.phisikus.pivonia.api.MessageWithTransmitter
 import eu.phisikus.pivonia.converter.plaintext.JacksonBSONConverter
 import eu.phisikus.pivonia.test.ServerTestUtils
+import eu.phisikus.pivonia.test.TestMessage
 import spock.lang.Shared
 import spock.lang.Specification
 import spock.lang.Timeout
 
 import java.util.concurrent.CompletableFuture
+import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
+import java.util.stream.IntStream
 
 class ClientServerDataTransferITSpec extends Specification {
 
@@ -77,6 +80,48 @@ class ClientServerDataTransferITSpec extends Specification {
         cleanup: "close the server and transmitter"
         server.close()
         client.close()
+    }
+
+    def "Should transfer data using multiple messages in the same connection"() {
+        given: "the server is running"
+        def port = ServerTestUtils.getRandomPort()
+        def server = new TCPServer(bsonConverter)
+                .bind(port)
+                .get()
+
+        and: "it is set up to echo back incoming messages"
+        def echoHandler = {
+            def messageWithTransmitter = it as MessageWithTransmitter<TestMessage>
+            def transmitter = messageWithTransmitter.getTransmitter()
+            transmitter.send(messageWithTransmitter.getMessage())
+        }
+        server.getMessages(TestMessage).subscribe(echoHandler)
+
+        and: "transmitter is connected to the server"
+        def client = new TCPClient(bsonConverter)
+                .connect("localhost", port)
+                .get()
+
+        and: "it is ready to count returning messages"
+        def expectedCount = 10
+        def actualResult = new CountDownLatch(expectedCount)
+        def returningEchoHandler = { actualResult.countDown() }
+        client.getMessages(TestMessage).subscribe(returningEchoHandler)
+
+        when: "expected number of messages is sent"
+        IntStream.range(0, expectedCount).forEach {
+            assert client.send(new TestMessage(it, "bigTopic", getBigMessage())).isSuccess()
+        }
+
+        then: "all messages are received"
+        actualResult.await(10, TimeUnit.SECONDS)
+
+        and: "no exception is thrown"
+        noExceptionThrown()
+
+        cleanup: "close the server and transmitter"
+        client.close()
+        server.close()
     }
 
     private String getBigMessage() {

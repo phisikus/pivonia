@@ -1,6 +1,6 @@
 package eu.phisikus.pivonia.converter.encrypted
 
-import eu.phisikus.pivonia.api.TestMessage
+import eu.phisikus.pivonia.test.TestMessage
 import eu.phisikus.pivonia.converter.BSONConverter
 import eu.phisikus.pivonia.crypto.Encryptor
 import spock.lang.Specification

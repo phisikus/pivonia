@@ -1,6 +1,6 @@
 package eu.phisikus.pivonia.tcp
 
-import eu.phisikus.pivonia.api.TestMessage
+import eu.phisikus.pivonia.test.TestMessage
 import eu.phisikus.pivonia.converter.plaintext.JacksonBSONConverter
 import eu.phisikus.pivonia.test.ServerTestUtils
 import spock.lang.Shared
@@ -18,7 +18,7 @@ class ClientFailureITSpec extends Specification {
     @Timeout(value = 10, unit = TimeUnit.SECONDS)
     def "Client should report failure to send message when unconnected"() {
         given: "test message and unconnected transmitter are defined"
-        def testMessage = new TestMessage()
+        def testMessage = new TestMessage(1L, "", "")
         def client = new TCPClient(bsonConverter)
 
         when: "sending the message using transmitter"
@@ -43,7 +43,7 @@ class ClientFailureITSpec extends Specification {
     @Timeout(value = 5, unit = TimeUnit.SECONDS)
     def "Client should fail to send message when it was closed"() {
         given: "server and transmitter are created"
-        def testMessage = new TestMessage()
+        def testMessage = new TestMessage(1L, "", "")
         def port = ServerTestUtils.getRandomPort()
         def server = new TCPServer(bsonConverter).bind(port).get()
         def client = new TCPClient(bsonConverter).connect("localhost", port).get()

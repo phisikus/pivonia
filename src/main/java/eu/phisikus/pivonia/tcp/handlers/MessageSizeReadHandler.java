@@ -36,10 +36,10 @@ class MessageSizeReadHandler implements CompletionHandler<Integer, Map<Class, Su
     }
 
     private void readMessageContent(Map<Class, Subject> listeners) {
-        int messageSize = BufferUtils.readMessageSizeFromBuffer(communicationBuffer);
-        if (messageSize > 0) {
-            var messageBuffer = ByteBuffer.allocate(messageSize);
-            var contentReadHandler = new MessageContentReadHandler(clientConnectedToServer, messageBuffer, messageSize);
+        int contentSize = BufferUtils.readMessageSizeFromBuffer(communicationBuffer) - BufferUtils.INT_SIZE;
+        if (contentSize > 0) {
+            var messageBuffer = ByteBuffer.allocate(contentSize);
+            var contentReadHandler = new MessageContentReadHandler(clientConnectedToServer, messageBuffer, contentSize);
             clientChannel.read(messageBuffer, listeners, contentReadHandler);
         } else {
             closeCommunication();
