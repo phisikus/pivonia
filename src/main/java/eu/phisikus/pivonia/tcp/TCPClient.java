@@ -125,8 +125,8 @@ public class TCPClient implements Client {
     public <T> Try<Client> send(T message) {
         try {
             sendMessage(message);
-        } catch (Exception e) {
-            return Try.failure(e);
+        } catch (Throwable throwable) {
+            return Try.failure(throwable);
         }
         return Try.success(this);
     }

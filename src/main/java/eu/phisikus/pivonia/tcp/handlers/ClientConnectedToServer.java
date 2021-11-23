@@ -5,7 +5,6 @@ import eu.phisikus.pivonia.converter.BSONConverter;
 import io.vavr.control.Try;
 import lombok.Value;
 
-import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.AsynchronousSocketChannel;
 
@@ -25,8 +24,8 @@ class ClientConnectedToServer implements Transmitter {
             var serializedMessage = ByteBuffer.wrap(bsonConverter.serialize(message));
             writeMessage(serializedMessage);
             return Try.success(this);
-        } catch (IOException exception) {
-            return Try.failure(exception);
+        } catch (Throwable throwable) {
+            return Try.failure(throwable);
         }
     }
 
