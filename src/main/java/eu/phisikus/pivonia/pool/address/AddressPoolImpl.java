@@ -19,20 +19,26 @@ class AddressPoolImpl implements AddressPool {
     public Address add(String hostname, int port) {
         var newAddress = new Address(hostname, port);
         var changeEvent = new AddressPoolEvent(AddressPoolEvent.Operation.ADD, newAddress);
-        addresses.add(newAddress);
+        synchronized (addresses) {
+            addresses.add(newAddress);
+        }
         addressChanges.onNext(changeEvent);
         return newAddress;
     }
 
     public void remove(Address address) {
         var changeEvent = new AddressPoolEvent(AddressPoolEvent.Operation.REMOVE, address);
-        addresses.remove(address);
+        synchronized (addresses) {
+            addresses.remove(address);
+        }
         addressChanges.onNext(changeEvent);
     }
 
     @Override
     public List<Address> getAddresses() {
-        return new LinkedList<>(addresses);
+        synchronized (addresses) {
+            return new LinkedList<>(addresses);
+        }
     }
 
     @Override
